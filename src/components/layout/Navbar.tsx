@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ShoppingBag, User, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-clean.png";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
