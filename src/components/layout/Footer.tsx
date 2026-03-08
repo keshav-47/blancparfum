@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="md:col-span-1">
-            <img src={logo} alt="BLANC" className="h-16 w-auto mb-4" />
+            <img src={logo} alt="BLANC" className="h-16 w-auto mb-4 mix-blend-screen" />
             <p className="text-sm font-body text-muted-foreground leading-relaxed">
               Handmade parfum. Extrait de parfum.
             </p>
