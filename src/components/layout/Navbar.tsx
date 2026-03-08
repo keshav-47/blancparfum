@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ShoppingBag, User, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
-import logo from "@/assets/logo-clean.png";
+import logo from "@/assets/blanc-logo.png";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -17,7 +17,7 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
       <nav className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
         {/* Left nav */}
         <div className="hidden md:flex items-center gap-8">
@@ -43,7 +43,7 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-          <img src={logo} alt="BLANC" className="h-10 md:h-12 w-auto mix-blend-screen" />
+          <img src={logo} alt="BLANC" className="h-12 md:h-14 w-auto" />
         </Link>
 
         {/* Right icons */}
