@@ -42,8 +42,10 @@ const Navbar = () => {
         </button>
 
         {/* Logo */}
-        <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-          <img src={logo} alt="BLANC" className="h-10 md:h-12 w-auto mix-blend-screen" />
+        <Link to="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+          <div className="relative h-10 md:h-12 w-10 md:w-12 overflow-hidden rounded-sm">
+            <img src={logo} alt="BLANC" className="h-full w-full object-contain mix-blend-screen" />
+          </div>
         </Link>
 
         {/* Right icons */}
