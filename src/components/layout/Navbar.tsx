@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ShoppingBag, User, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-clean.png";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,7 +43,7 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-          <img src={logo} alt="BLANC" className="h-10 md:h-12 w-auto" />
+          <img src={logo} alt="BLANC" className="h-10 md:h-12 w-auto mix-blend-screen" />
         </Link>
 
         {/* Right icons */}
