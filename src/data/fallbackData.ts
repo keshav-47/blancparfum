@@ -104,7 +104,7 @@ export const fallbackProducts: Product[] = [
     price: 250,
     category: "unisex",
     images: [
-      "https://images.unsplash.com/photo-1594035910387-fbd1a485b12e?w=800",
+      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800",
       "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800",
     ],
     sizes: [
