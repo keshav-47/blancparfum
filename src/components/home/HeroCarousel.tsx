@@ -36,7 +36,7 @@ const HeroCarousel = () => {
   const next = () => setCurrent((c) => (c + 1) % slides.length);
 
   return (
-    <section className="relative h-[100vh] w-full overflow-hidden bg-foreground">
+    <section className="relative h-[100vh] w-full overflow-hidden bg-background">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
@@ -49,7 +49,7 @@ const HeroCarousel = () => {
           <img
             src={slides[current].image}
             alt={slides[current].title}
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover opacity-40"
           />
         </motion.div>
       </AnimatePresence>
@@ -63,17 +63,17 @@ const HeroCarousel = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-center text-primary-foreground px-4"
+            className="text-center text-foreground px-4"
           >
-            <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-light mb-4 tracking-wide">
+            <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-light mb-4 tracking-wide text-primary">
               {slides[current].title}
             </h2>
-            <p className="font-body text-sm md:text-base uppercase tracking-[0.3em] mb-8 text-primary-foreground/70">
+            <p className="font-body text-sm md:text-base uppercase tracking-[0.3em] mb-8 text-foreground/60">
               {slides[current].subtitle}
             </p>
             <Button
               variant="outline"
-              className="border-primary-foreground/40 text-primary-foreground bg-transparent hover:bg-primary-foreground hover:text-foreground uppercase tracking-[0.2em] text-xs px-8 py-3 h-auto rounded-none"
+              className="border-primary/40 text-primary bg-transparent hover:bg-primary hover:text-primary-foreground uppercase tracking-[0.2em] text-xs px-8 py-3 h-auto rounded-none"
             >
               {slides[current].cta}
             </Button>
@@ -82,10 +82,10 @@ const HeroCarousel = () => {
       </div>
 
       {/* Navigation arrows */}
-      <button onClick={prev} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-foreground/50 hover:text-primary-foreground transition-colors">
+      <button onClick={prev} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-primary transition-colors">
         <ChevronLeft size={32} />
       </button>
-      <button onClick={next} className="absolute right-4 top-1/2 -translate-y-1/2 text-primary-foreground/50 hover:text-primary-foreground transition-colors">
+      <button onClick={next} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-primary transition-colors">
         <ChevronRight size={32} />
       </button>
 
@@ -95,7 +95,7 @@ const HeroCarousel = () => {
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`w-8 h-0.5 transition-all ${i === current ? "bg-primary-foreground" : "bg-primary-foreground/30"}`}
+            className={`w-8 h-0.5 transition-all ${i === current ? "bg-primary" : "bg-foreground/20"}`}
           />
         ))}
       </div>

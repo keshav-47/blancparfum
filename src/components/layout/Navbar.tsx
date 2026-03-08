@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ShoppingBag, User, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
+import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -16,7 +17,7 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
       <nav className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
         {/* Left nav */}
         <div className="hidden md:flex items-center gap-8">
@@ -24,7 +25,7 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
-              className="text-xs font-body uppercase tracking-[0.2em] text-foreground/70 hover:text-foreground transition-colors"
+              className="text-xs font-body uppercase tracking-[0.2em] text-foreground/70 hover:text-primary transition-colors"
             >
               {link.label}
             </Link>
@@ -42,20 +43,18 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-          <h1 className="font-display text-2xl md:text-3xl font-semibold tracking-[0.3em] text-foreground">
-            BLANC
-          </h1>
+          <img src={logo} alt="BLANC" className="h-10 md:h-12 w-auto" />
         </Link>
 
         {/* Right icons */}
         <div className="flex items-center gap-5">
-          <Link to="/profile" className="text-foreground/70 hover:text-foreground transition-colors">
+          <Link to="/profile" className="text-foreground/70 hover:text-primary transition-colors">
             <User size={18} />
           </Link>
-          <Link to="/cart" className="relative text-foreground/70 hover:text-foreground transition-colors">
+          <Link to="/cart" className="relative text-foreground/70 hover:text-primary transition-colors">
             <ShoppingBag size={18} />
             {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-accent text-accent-foreground text-[10px] font-body font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-body font-semibold rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount}
               </span>
             )}
@@ -78,7 +77,7 @@ const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
-                  className="text-sm font-body uppercase tracking-[0.2em] text-foreground/70 hover:text-foreground transition-colors"
+                  className="text-sm font-body uppercase tracking-[0.2em] text-foreground/70 hover:text-primary transition-colors"
                 >
                   {link.label}
                 </Link>
