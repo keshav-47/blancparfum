@@ -49,7 +49,7 @@ const HeroCarousel = () => {
           <img
             src={slides[current].image}
             alt={slides[current].title}
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover opacity-80"
           />
         </motion.div>
       </AnimatePresence>
