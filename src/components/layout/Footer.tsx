@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="md:col-span-1">
             <img src={logo} alt="BLANC" className="h-20 w-auto mb-4" />
             <p className="text-sm font-body text-muted-foreground leading-relaxed">
-              Handmade parfum. Extrait de parfum.
+              BLANC PARFUM — Handmade Extrait de Parfum.
             </p>
           </div>
 
@@ -63,7 +63,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} BLANC. All rights reserved.
+            © {new Date().getFullYear()} BLANC PARFUM. All rights reserved.
           </p>
           <div className="flex gap-6">
             {["Privacy", "Terms", "Cookies"].map((item) => (
