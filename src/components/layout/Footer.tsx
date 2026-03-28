@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="md:col-span-1">
             <img src={logo} alt="BLANC" className="h-20 w-auto mb-4" />
             <p className="text-sm font-body text-muted-foreground leading-relaxed">
-              Handmade parfum. Extrait de parfum.
+              BLANC PARFUM — Handmade Extrait de Parfum.
             </p>
           </div>
 
