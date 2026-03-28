@@ -14,18 +14,20 @@ const HorizontalProductScroll = () => {
     offset: ["start start", "end end"],
   });
 
-  // Map vertical scroll to horizontal movement
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", `-${(featured.length - 1) * 33}%`]);
+  const cardCount = featured.length || 1;
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", `-${(cardCount - 1) * (100 / cardCount)}%`]);
 
   return (
-    <section ref={containerRef} style={{ height: `${featured.length * 80}vh` }} className="relative">
+    <section ref={containerRef} style={{ height: `${Math.max(cardCount * 80, 200)}vh` }} className="relative">
       <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden">
         {/* Header */}
-        <div className="container mx-auto px-4 lg:px-8 mb-10">
+        <div className="px-8 lg:px-16 mb-10">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-xs font-body uppercase tracking-[0.3em] text-accent mb-3">Featured</p>
-              <h2 className="font-display text-4xl md:text-5xl">Signature Scents</h2>
+              <p className="text-xs font-body uppercase tracking-[0.3em] text-muted-foreground mb-3">Featured</p>
+              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-light text-foreground">
+                Signature Scents
+              </h2>
             </div>
             <Link
               to="/"
@@ -39,12 +41,12 @@ const HorizontalProductScroll = () => {
         {/* Horizontal scroll track */}
         <motion.div
           style={{ x }}
-          className="flex gap-8 px-4 lg:px-8"
+          className="flex gap-6 lg:gap-8 px-8 lg:px-16"
         >
           {featured.map((product, i) => (
             <motion.div
               key={product.id}
-              className="flex-shrink-0 w-[80vw] sm:w-[50vw] md:w-[33vw]"
+              className="flex-shrink-0 w-[75vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw]"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ delay: i * 0.1 }}
@@ -55,10 +57,10 @@ const HorizontalProductScroll = () => {
         </motion.div>
 
         {/* Scroll progress indicator */}
-        <div className="container mx-auto px-4 lg:px-8 mt-10">
-          <div className="h-[1px] bg-border w-full max-w-xs">
+        <div className="px-8 lg:px-16 mt-10">
+          <div className="h-px bg-border w-full max-w-xs">
             <motion.div
-              className="h-full bg-accent origin-left"
+              className="h-full bg-foreground origin-left"
               style={{ scaleX: scrollYProgress }}
             />
           </div>
