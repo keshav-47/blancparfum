@@ -141,6 +141,7 @@ const CustomPerfume = () => {
 
   return (
     <Layout>
+      <SEO title="Custom Perfume" description="Create your bespoke fragrance with BLANC PARFUM. Choose scent families, occasions, and intensity for a perfume crafted just for you." canonical="/custom" />
       <div className="min-h-[80vh] container mx-auto px-4 lg:px-8 py-16 max-w-2xl">
         <div className="text-center mb-12">
           <h1 className="font-display text-4xl md:text-5xl mb-4">Create Your Scent</h1>
