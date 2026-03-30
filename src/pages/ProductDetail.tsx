@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import ProductCard from "@/components/product/ProductCard";
+import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
 import { toast } from "@/hooks/use-toast";
