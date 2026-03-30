@@ -24,7 +24,7 @@ const storyBlocks = [
 
 const BrandStory = () => {
   return (
-    <section>
+    <section aria-label="Brand Story">
       {storyBlocks.map((block, i) => (
         <StickyRevealBlock key={i} block={block} index={i} />
       ))}

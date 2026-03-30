@@ -3,6 +3,7 @@ import { Minus, Plus, X, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { removeFromCart, updateQuantity } from "@/store/slices/cartSlice";
 
@@ -29,6 +30,7 @@ const Cart = () => {
 
   return (
     <Layout>
+      <SEO title="Shopping Cart" description="Review your BLANC PARFUM selections and proceed to checkout." canonical="/cart" />
       <div className="container mx-auto px-4 lg:px-8 py-12 max-w-4xl">
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-8">
           <ArrowLeft size={16} /> Continue Shopping

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import ProductCard from "@/components/product/ProductCard";
+import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
 import { toast } from "@/hooks/use-toast";
@@ -48,6 +49,27 @@ const ProductDetail = () => {
 
   return (
     <Layout>
+      <SEO
+        title={product.name}
+        description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM. From $${product.sizes[0].price}.`}
+        canonical={`/product/${product.id}`}
+        type="product"
+        image={product.images[0]}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "description": product.tagline,
+          "image": product.images[0],
+          "brand": { "@type": "Brand", "name": "BLANC PARFUM" },
+          "offers": {
+            "@type": "Offer",
+            "price": product.sizes[0].price,
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+          },
+        }}
+      />
       <div className="container mx-auto px-4 lg:px-8 py-12">
         {/* Back */}
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-8">

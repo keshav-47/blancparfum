@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { submitCustomRequest, resetSubmitted } from "@/store/slices/customRequestsSlice";
 
@@ -140,6 +141,7 @@ const CustomPerfume = () => {
 
   return (
     <Layout>
+      <SEO title="Custom Perfume" description="Create your bespoke fragrance with BLANC PARFUM. Choose scent families, occasions, and intensity for a perfume crafted just for you." canonical="/custom" />
       <div className="min-h-[80vh] container mx-auto px-4 lg:px-8 py-16 max-w-2xl">
         <div className="text-center mb-12">
           <h1 className="font-display text-4xl md:text-5xl mb-4">Create Your Scent</h1>
