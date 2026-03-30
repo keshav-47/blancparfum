@@ -3,6 +3,7 @@ import { Minus, Plus, X, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { removeFromCart, updateQuantity } from "@/store/slices/cartSlice";
 

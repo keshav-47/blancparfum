@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { submitCustomRequest, resetSubmitted } from "@/store/slices/customRequestsSlice";
 
