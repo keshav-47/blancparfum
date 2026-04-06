@@ -105,7 +105,7 @@ const Cart = () => {
               )}
               <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
                 <span>Total</span>
-                <span>${total}</span>
+                <span>₹{total}</span>
               </div>
             </div>
             <Button className="w-full mt-6 h-12 rounded-none uppercase tracking-[0.15em] text-xs">
