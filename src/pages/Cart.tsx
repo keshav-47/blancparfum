@@ -101,7 +101,7 @@ const Cart = () => {
                 <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
               </div>
               {shipping > 0 && (
-                <p className="text-xs text-accent">Free shipping on orders over $200</p>
+                <p className="text-xs text-accent">Free shipping on orders over ₹200</p>
               )}
               <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
                 <span>Total</span>
