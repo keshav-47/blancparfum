@@ -199,7 +199,7 @@ const AdminProducts = () => {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs uppercase tracking-wider">Stock Quantity</Label>
-                <Input type="number" value={form.stockQuantity} onChange={(e) => setForm((f) => ({ ...f, stockQuantity: Number(e.target.value) }))} />
+                <Input type="number" value={form.stockQuantity || ""} onChange={(e) => setForm((f) => ({ ...f, stockQuantity: Number(e.target.value) || 0 }))} />
               </div>
             </div>
             <div className="space-y-1.5">

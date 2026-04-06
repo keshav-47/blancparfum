@@ -18,6 +18,7 @@ import AdminGuard from "./components/admin/AdminGuard";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
+import AdminCollections from "./pages/admin/Collections";
 import AdminOrders from "./pages/admin/Orders";
 import AdminCustomRequests from "./pages/admin/CustomRequests";
 
@@ -43,6 +44,7 @@ const App = () => (
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/products" element={<AdminProducts />} />
+                  <Route path="/admin/collections" element={<AdminCollections />} />
                   <Route path="/admin/orders" element={<AdminOrders />} />
                   <Route path="/admin/custom-requests" element={<AdminCustomRequests />} />
                 </Route>

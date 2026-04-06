@@ -1,10 +1,11 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, Sparkles, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Sparkles, ArrowLeft, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/collections", label: "Collections", icon: Layers },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { to: "/admin/custom-requests", label: "Custom Requests", icon: Sparkles },
 ];
@@ -15,11 +16,13 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-border bg-card flex flex-col">
-        <div className="p-6 border-b border-border">
-          <h2 className="font-display text-lg tracking-wider">ADMIN PANEL</h2>
+      <aside className="w-60 border-r border-border bg-card flex flex-col shrink-0">
+        <div className="px-6 py-5 border-b border-border">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body mb-0.5">Blanc Parfum</p>
+          <h2 className="font-display text-base tracking-wider">Admin Panel</h2>
         </div>
-        <nav className="flex-1 py-4">
+
+        <nav className="flex-1 py-3">
           {navItems.map((item) => {
             const isActive = item.exact ? pathname === item.to : pathname.startsWith(item.to);
             return (
@@ -27,24 +30,25 @@ const AdminLayout = () => {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex items-center gap-3 px-6 py-3 text-xs uppercase tracking-[0.15em] font-body transition-colors",
+                  "flex items-center gap-3 px-5 py-2.5 text-[11px] uppercase tracking-[0.12em] font-body transition-colors relative",
                   isActive
-                    ? "text-foreground bg-secondary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    ? "text-foreground bg-secondary before:absolute before:left-0 before:top-1 before:bottom-1 before:w-0.5 before:bg-foreground before:rounded-r"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
                 )}
               >
-                <item.icon size={16} />
+                <item.icon size={14} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="p-4 border-t border-border">
+
+        <div className="px-5 py-4 border-t border-border">
           <Link
             to="/"
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest font-body"
+            className="flex items-center gap-2 text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest font-body"
           >
-            <ArrowLeft size={14} /> Back to Store
+            <ArrowLeft size={12} /> Back to Store
           </Link>
         </div>
       </aside>
