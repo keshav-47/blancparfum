@@ -1,87 +1,104 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchAdminOrders, updateOrderStatus } from "@/store/slices/adminSlice";
-import { Order } from "@/types";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import type { Order } from "@/types";
 
-const statusOptions: Order["status"][] = ["pending", "processing", "shipped", "delivered", "cancelled"];
+const statuses: Order["status"][] = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
 const statusColor: Record<Order["status"], string> = {
-  pending: "bg-secondary text-muted-foreground",
-  processing: "bg-accent/10 text-accent",
-  shipped: "bg-blue-500/10 text-blue-600",
-  delivered: "bg-green-500/10 text-green-600",
-  cancelled: "bg-destructive/10 text-destructive",
+  pending: "bg-yellow-600/20 text-yellow-700 border-yellow-600/30",
+  processing: "bg-blue-600/20 text-blue-700 border-blue-600/30",
+  shipped: "bg-purple-600/20 text-purple-700 border-purple-600/30",
+  delivered: "bg-green-600/20 text-green-700 border-green-600/30",
+  cancelled: "bg-red-600/20 text-red-700 border-red-600/30",
 };
 
 const AdminOrders = () => {
   const dispatch = useAppDispatch();
   const { orders, loading } = useAppSelector((s) => s.admin);
+  const { toast } = useToast();
+  const [filter, setFilter] = useState<string>("all");
 
-  useEffect(() => {
-    dispatch(fetchAdminOrders());
-  }, [dispatch]);
+  useEffect(() => { dispatch(fetchAdminOrders()); }, [dispatch]);
+
+  const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
   const handleStatusChange = async (id: string, status: Order["status"]) => {
     try {
       await dispatch(updateOrderStatus({ id, status })).unwrap();
-      toast({ title: "Order updated" });
+      toast({ title: `Order status updated to ${status}` });
     } catch {
-      toast({ title: "Error", description: "Failed to update order", variant: "destructive" });
+      toast({ title: "Failed to update", variant: "destructive" });
     }
   };
 
   return (
     <div>
-      <h1 className="font-display text-3xl mb-8">Orders</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="font-display text-2xl tracking-wider">Orders</h1>
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="Filter status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            {statuses.map((s) => (
+              <SelectItem key={s} value={s} className="uppercase">{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      {loading ? (
-        <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}</div>
-      ) : orders.length === 0 ? (
-        <p className="text-muted-foreground">No orders found.</p>
-      ) : (
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <div key={order.id} className="border border-border p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Order {order.id}</p>
-                  <p className="text-sm text-muted-foreground">{order.date}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-[10px] uppercase tracking-wider px-3 py-1 ${statusColor[order.status]}`}>
-                    {order.status}
-                  </span>
-                  <Select value={order.status} onValueChange={(v) => handleStatusChange(order.id, v as Order["status"])}>
-                    <SelectTrigger className="w-36 h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
+      <div className="rounded-md border border-border overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs uppercase tracking-wider">Order ID</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Date</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Customer</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Items</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Total</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Update</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading && !orders.length ? (
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+            ) : filtered.length === 0 ? (
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No orders found</TableCell></TableRow>
+            ) : filtered.map((o) => (
+              <TableRow key={o.id}>
+                <TableCell className="font-mono text-xs">{o.id.substring(0, 8)}</TableCell>
+                <TableCell className="text-sm">{format(new Date(o.date), "dd MMM yyyy")}</TableCell>
+                <TableCell className="text-sm">{o.customerName || "—"}</TableCell>
+                <TableCell className="text-sm max-w-[200px] truncate">
+                  {o.items.map((i) => `${i.name} (${i.size}ml × ${i.quantity})`).join(", ")}
+                </TableCell>
+                <TableCell className="font-medium">₹{o.total.toLocaleString("en-IN")}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={`text-[10px] uppercase ${statusColor[o.status]}`}>
+                    {o.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Select value={o.status} onValueChange={(v) => handleStatusChange(o.id, v as Order["status"])}>
+                    <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {statusOptions.map((s) => (
-                        <SelectItem key={s} value={s} className="text-xs capitalize">{s}</SelectItem>
+                      {statuses.map((s) => (
+                        <SelectItem key={s} value={s} className="uppercase text-xs">{s}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-              </div>
-              <div className="space-y-1">
-                {order.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-sm font-body">
-                    <span>{item.name} ({item.size}ml) × {item.quantity}</span>
-                    <span>₹{item.price}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-border mt-3 pt-3 flex justify-between font-semibold text-sm">
-                <span>Total</span>
-                <span>₹{order.total}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
