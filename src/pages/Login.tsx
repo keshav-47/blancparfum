@@ -27,6 +27,12 @@ declare global {
   }
 }
 
+const navigateAfterLogin = (nav: ReturnType<typeof useNavigate>, u: { name?: string; role?: string }) => {
+  if (u.role === "ADMIN") nav("/admin");
+  else if (!u.name || u.name === "Parfum Lover") nav("/complete-profile");
+  else nav("/");
+};
+
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -36,31 +42,29 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const confirmationRef = useRef<ConfirmationResult | null>(null);
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
-  // Redirect on login
+  // Redirect already-logged-in users away from login page
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === "ADMIN") {
-        navigate("/admin");
-      } else if (!user.name || user.name === "Parfum Lover") {
-        navigate("/complete-profile");
-      } else {
-        navigate("/");
-      }
+      navigateAfterLogin(navigate, user);
     }
-  }, [isAuthenticated, user, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Setup invisible reCAPTCHA
+  // Setup invisible reCAPTCHA — pre-render for speed
   useEffect(() => {
     if (!recaptchaContainerRef.current) return;
     try {
-      window.recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerRef.current, {
+      const verifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerRef.current, {
         size: "invisible",
       });
+      verifier.render(); // pre-render so Send OTP is instant
+      window.recaptchaVerifier = verifier;
     } catch {
       // already initialized
     }
@@ -70,12 +74,15 @@ const Login = () => {
     };
   }, []);
 
-  // Google Sign-In
+  // Google Sign-In — navigate from thunk result
   const handleGoogleCallback = useCallback(
-    (response: { credential: string }) => {
-      dispatch(loginWithGoogle(response.credential));
+    async (response: { credential: string }) => {
+      try {
+        const result = await dispatch(loginWithGoogle(response.credential)).unwrap();
+        navigateAfterLogin(navigate, result.user);
+      } catch { /* error shown via Redux */ }
     },
-    [dispatch]
+    [dispatch, navigate]
   );
 
   useEffect(() => {
@@ -137,13 +144,15 @@ const Login = () => {
   };
 
   // Verify OTP via Firebase, then send ID token to our backend
-  const handleVerifyOtp = async () => {
-    if (otp.length < 6 || !confirmationRef.current) return;
+  const handleVerifyOtp = useCallback(async () => {
+    if (otp.length < 6 || !confirmationRef.current || verifying) return;
     setFirebaseError(null);
+    setVerifying(true);
     try {
       const credential = await confirmationRef.current.confirm(otp);
       const idToken = await credential.user.getIdToken();
-      dispatch(loginWithFirebase(idToken));
+      const result = await dispatch(loginWithFirebase(idToken)).unwrap();
+      navigateAfterLogin(navigate, result.user);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       if (code === "auth/invalid-verification-code") {
@@ -151,10 +160,20 @@ const Login = () => {
       } else {
         setFirebaseError((err as { message?: string })?.message ?? "Verification failed");
       }
+    } finally {
+      setVerifying(false);
     }
-  };
+  }, [otp, verifying, dispatch, navigate]);
+
+  // Auto-verify when all 6 digits entered
+  useEffect(() => {
+    if (otp.length === 6 && confirmationRef.current && !verifying) {
+      handleVerifyOtp();
+    }
+  }, [otp, verifying, handleVerifyOtp]);
 
   const displayError = firebaseError || error;
+  const isLoading = loading || verifying;
 
   return (
     <Layout>
@@ -210,7 +229,7 @@ const Login = () => {
             {!otpSent ? (
               <Button
                 onClick={handleSendOtp}
-                disabled={phone.length < 10 || sending || loading}
+                disabled={phone.length < 10 || sending || isLoading}
                 className="w-full font-body uppercase tracking-widest text-xs"
               >
                 <Phone size={14} />
@@ -236,10 +255,10 @@ const Login = () => {
                 </div>
                 <Button
                   onClick={handleVerifyOtp}
-                  disabled={otp.length < 6 || loading}
+                  disabled={otp.length < 6 || isLoading}
                   className="w-full font-body uppercase tracking-widest text-xs"
                 >
-                  {loading ? "Verifying..." : "Verify & Sign In"}
+                  {isLoading ? "Verifying..." : "Verify & Sign In"}
                 </Button>
                 <button
                   onClick={() => {
