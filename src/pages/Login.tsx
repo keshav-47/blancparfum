@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Phone } from "lucide-react";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
@@ -27,15 +27,17 @@ declare global {
   }
 }
 
-const navigateAfterLogin = (nav: ReturnType<typeof useNavigate>, u: { name?: string; role?: string }) => {
+const navigateAfterLogin = (nav: ReturnType<typeof useNavigate>, u: { name?: string; role?: string }, returnTo?: string | null) => {
   if (u.role === "ADMIN") nav("/admin");
   else if (!u.name || u.name === "Parfum Lover") nav("/complete-profile");
-  else nav("/");
+  else nav(returnTo || "/");
 };
 
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
   const { isAuthenticated, loading, error, user } = useAppSelector((s) => s.auth);
 
   const [phone, setPhone] = useState("");
@@ -51,7 +53,7 @@ const Login = () => {
   // Redirect already-logged-in users away from login page
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigateAfterLogin(navigate, user);
+      navigateAfterLogin(navigate, user, returnTo);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,7 +81,7 @@ const Login = () => {
     async (response: { credential: string }) => {
       try {
         const result = await dispatch(loginWithGoogle(response.credential)).unwrap();
-        navigateAfterLogin(navigate, result.user);
+        navigateAfterLogin(navigate, result.user, returnTo);
       } catch { /* error shown via Redux */ }
     },
     [dispatch, navigate]
@@ -152,7 +154,7 @@ const Login = () => {
       const credential = await confirmationRef.current.confirm(otp);
       const idToken = await credential.user.getIdToken();
       const result = await dispatch(loginWithFirebase(idToken)).unwrap();
-      navigateAfterLogin(navigate, result.user);
+      navigateAfterLogin(navigate, result.user, returnTo);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       if (code === "auth/invalid-verification-code") {

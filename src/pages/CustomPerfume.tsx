@@ -25,11 +25,20 @@ const CustomPerfume = () => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { loading, submitted } = useAppSelector((state) => state.customRequests);
 
-  const [step, setStep] = useState(0);
-  const [selectedFamilies, setSelectedFamilies] = useState<string[]>([]);
-  const [occasion, setOccasion] = useState("");
-  const [intensity, setIntensity] = useState<"light" | "moderate" | "strong">("moderate");
-  const [message, setMessage] = useState("");
+  // Restore saved form state after login redirect
+  const saved = (() => {
+    try {
+      const raw = localStorage.getItem("bp_custom_draft");
+      if (raw) { localStorage.removeItem("bp_custom_draft"); return JSON.parse(raw); }
+    } catch { /* ignore */ }
+    return null;
+  })();
+
+  const [step, setStep] = useState(saved ? 3 : 0);
+  const [selectedFamilies, setSelectedFamilies] = useState<string[]>(saved?.scentFamilies || []);
+  const [occasion, setOccasion] = useState(saved?.occasion || "");
+  const [intensity, setIntensity] = useState<"light" | "moderate" | "strong">(saved?.intensity || "moderate");
+  const [message, setMessage] = useState(saved?.message || "");
 
   const toggleFamily = (f: string) => {
     setSelectedFamilies((prev) =>
@@ -39,8 +48,15 @@ const CustomPerfume = () => {
 
   const handleSubmit = () => {
     if (!isAuthenticated) {
+      // Save selections so they persist across login
+      localStorage.setItem("bp_custom_draft", JSON.stringify({
+        scentFamilies: selectedFamilies,
+        occasion,
+        intensity,
+        message,
+      }));
       toast({ title: "Please sign in to submit your request" });
-      navigate("/login");
+      navigate("/login?returnTo=/custom");
       return;
     }
     dispatch(submitCustomRequest({

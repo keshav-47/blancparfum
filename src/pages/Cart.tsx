@@ -64,7 +64,7 @@ const Cart = () => {
   const addresses = profile?.addresses ?? [];
 
   const openCheckout = () => {
-    if (!isAuthenticated) { navigate("/login"); return; }
+    if (!isAuthenticated) { navigate("/login?returnTo=/cart"); return; }
     const def = addresses.find((a) => a.isDefault) ?? addresses[0];
     if (def) setSelectedAddressId(def.id);
     setCheckoutOpen(true);
