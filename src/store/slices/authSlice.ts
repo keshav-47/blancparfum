@@ -103,6 +103,7 @@ const authSlice = createSlice({
       state.otpSent = false;
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
+      localStorage.removeItem("bp_cart");
     },
     clearAuthError: (state) => {
       state.error = null;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus, X, ArrowLeft, MapPin, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { removeFromCart, updateQuantity, clearCart } from "@/store/slices/cartSlice";
+import { removeItemFromCart, updateItemQuantity, clearCart, fetchServerCart } from "@/store/slices/cartSlice";
 import { fetchUserProfile } from "@/store/slices/userSlice";
 import { useToast } from "@/hooks/use-toast";
 import apiClient from "@/api/apiClient";
@@ -36,7 +36,6 @@ const Cart = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const syncPromise = useRef<Promise<void> | null>(null);
 
   // Load Razorpay SDK once
   useEffect(() => {
@@ -48,9 +47,12 @@ const Cart = () => {
     document.body.appendChild(script);
   }, []);
 
-  // Fetch profile (for addresses) when authenticated
+  // Fetch profile (for addresses) and server cart when authenticated
   useEffect(() => {
-    if (isAuthenticated && !profile) dispatch(fetchUserProfile());
+    if (isAuthenticated) {
+      if (!profile) dispatch(fetchUserProfile());
+      dispatch(fetchServerCart());
+    }
   }, [isAuthenticated, profile, dispatch]);
 
   const addresses = profile?.addresses ?? [];
@@ -63,10 +65,6 @@ const Cart = () => {
     const def = addresses.find((a) => a.isDefault) ?? addresses[0];
     if (def) setSelectedAddressId(def.id);
     setCheckoutOpen(true);
-    // Start cart sync immediately while user selects address
-    syncPromise.current = apiClient.post("/cart/sync", {
-      items: items.map((i) => ({ productId: i.productId, sizeMl: i.size, quantity: i.quantity })),
-    }).then(() => { /* no-op */ }).catch(() => { /* handled in confirmCheckout */ });
   };
 
   const confirmCheckout = async () => {
@@ -76,10 +74,7 @@ const Cart = () => {
     }
     setCheckoutLoading(true);
     try {
-      // Step 1 – await the sync that started when the dialog opened
-      await syncPromise.current;
-
-      // Step 2 – create order & get Razorpay order
+      // Step 1 – create order & get Razorpay order
       const { data } = await apiClient.post<RazorpayOrderResponse>("/orders", {
         addressId: selectedAddressId,
       });
@@ -198,7 +193,7 @@ const Cart = () => {
                       <p className="text-xs text-muted-foreground uppercase tracking-wider">{item.size}ml</p>
                     </div>
                     <button
-                      onClick={() => dispatch(removeFromCart({ productId: item.productId, size: item.size }))}
+                      onClick={() => dispatch(removeItemFromCart({ productId: item.productId, size: item.size }))}
                       className="text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <X size={16} />
@@ -207,14 +202,14 @@ const Cart = () => {
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => dispatch(updateQuantity({ productId: item.productId, size: item.size, quantity: item.quantity - 1 }))}
+                        onClick={() => dispatch(updateItemQuantity({ productId: item.productId, size: item.size, quantity: item.quantity - 1 }))}
                         className="w-8 h-8 border border-border flex items-center justify-center hover:border-foreground transition-colors"
                       >
                         <Minus size={12} />
                       </button>
                       <span className="text-sm w-6 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => dispatch(updateQuantity({ productId: item.productId, size: item.size, quantity: item.quantity + 1 }))}
+                        onClick={() => dispatch(updateItemQuantity({ productId: item.productId, size: item.size, quantity: item.quantity + 1 }))}
                         className="w-8 h-8 border border-border flex items-center justify-center hover:border-foreground transition-colors"
                       >
                         <Plus size={12} />

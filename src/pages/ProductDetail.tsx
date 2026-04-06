@@ -8,7 +8,7 @@ import Layout from "@/components/layout/Layout";
 import ProductCard from "@/components/product/ProductCard";
 import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { addToCart } from "@/store/slices/cartSlice";
+import { addItemToCart } from "@/store/slices/cartSlice";
 import { toast } from "@/hooks/use-toast";
 
 const ProductDetail = () => {
@@ -36,7 +36,7 @@ const ProductDetail = () => {
   const currentSize = product.sizes[selectedSize];
 
   const handleAddToCart = () => {
-    dispatch(addToCart({
+    dispatch(addItemToCart({
       productId: product.id,
       name: product.name,
       image: product.images[0],
