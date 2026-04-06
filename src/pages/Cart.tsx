@@ -126,6 +126,18 @@ const Cart = () => {
           email: user?.email ?? "",
           ...(user?.phone ? { contact: user.phone } : {}),
         },
+        config: {
+          display: {
+            blocks: {
+              banks: {
+                name: "Pay using UPI",
+                instruments: [{ method: "upi" }],
+              },
+            },
+            sequence: ["block.banks"],
+            preferences: { show_default_blocks: true },
+          },
+        },
         theme: { color: "#0f0f0f" },
       });
 
