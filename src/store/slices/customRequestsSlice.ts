@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "@/api/apiClient";
 import { CustomRequest } from "@/types";
+import { logout } from "@/store/slices/authSlice";
 
 interface CustomRequestsState {
   requests: CustomRequest[];
@@ -65,7 +66,8 @@ const customRequestsSlice = createSlice({
       .addCase(fetchCustomRequests.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      .addCase(logout, () => initialState);
   },
 });
 
