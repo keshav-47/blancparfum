@@ -98,7 +98,7 @@ const Cart = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
-                <span>{shipping === 0 ? "Free" : `$${shipping}`}</span>
+                <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
               </div>
               {shipping > 0 && (
                 <p className="text-xs text-accent">Free shipping on orders over $200</p>
