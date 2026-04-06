@@ -143,7 +143,7 @@ const ProductDetail = () => {
               onClick={handleAddToCart}
               className="w-full h-14 rounded-none uppercase tracking-[0.2em] text-xs font-body"
             >
-              Add to Cart — ${currentSize.price * quantity}
+              Add to Cart — ₹{currentSize.price * quantity}
             </Button>
 
             {/* Tabs */}
