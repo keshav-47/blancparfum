@@ -21,7 +21,7 @@ interface SizeEntry { ml: number; price: number }
 
 const emptyForm = {
   name: "", tagline: "", category: "men" as Product["category"],
-  description: "", stockQuantity: 0, isNew: false, isFeatured: false,
+  description: "", stockQuantity: 0, isNew: false, isFeatured: false, isActive: true,
   sizes: [{ ml: 30, price: 0 }] as SizeEntry[],
   noteEntries: [{ type: "top" as NoteType, name: "" }] as NoteEntry[],
 };
@@ -51,7 +51,7 @@ const AdminProducts = () => {
     setForm({
       name: p.name, tagline: p.tagline, category: p.category,
       description: p.description, stockQuantity: p.stockQuantity ?? 0,
-      isNew: p.isNew, isFeatured: p.isFeatured,
+      isNew: p.isNew, isFeatured: p.isFeatured, isActive: p.isActive ?? true,
       sizes: p.sizes.length ? p.sizes : [{ ml: 30, price: 0 }],
       noteEntries: noteEntries.length ? noteEntries : [{ type: "top", name: "" }],
     });
@@ -65,7 +65,7 @@ const AdminProducts = () => {
     const payload = {
       name: form.name, tagline: form.tagline, category: form.category,
       description: form.description, stockQuantity: form.stockQuantity,
-      isNew: form.isNew, isFeatured: form.isFeatured,
+      isNew: form.isNew, isFeatured: form.isFeatured, isActive: form.isActive,
       sizes: form.sizes.filter((s) => s.ml > 0 && s.price > 0),
       notes, images: [], price: Math.min(...form.sizes.map((s) => s.price)),
     };
@@ -214,6 +214,10 @@ const AdminProducts = () => {
               <div className="flex items-center gap-2">
                 <Switch checked={form.isFeatured} onCheckedChange={(v) => setForm((f) => ({ ...f, isFeatured: v }))} />
                 <Label className="text-xs uppercase tracking-wider">Featured</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.isActive} onCheckedChange={(v) => setForm((f) => ({ ...f, isActive: v }))} />
+                <Label className="text-xs uppercase tracking-wider">Active</Label>
               </div>
             </div>
 
