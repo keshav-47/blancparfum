@@ -8,7 +8,6 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
-  otpSent: boolean;
   error: string | null;
 }
 
@@ -22,9 +21,10 @@ const initialState: AuthState = {
   token: localStorage.getItem("auth_token"),
   isAuthenticated: !!localStorage.getItem("auth_token"),
   loading: false,
-  otpSent: false,
   error: null,
 };
+
+// ──── Google OAuth ────
 
 export const loginWithGoogle = createAsyncThunk(
   "auth/loginWithGoogle",
@@ -53,23 +53,13 @@ export const loginWithGoogle = createAsyncThunk(
   }
 );
 
-export const sendOtp = createAsyncThunk(
-  "auth/sendOtp",
-  async (phone: string, { rejectWithValue }) => {
-    try {
-      await apiClient.post("/auth/otp/send", { phone });
-      return true;
-    } catch {
-      return rejectWithValue("Failed to send OTP");
-    }
-  }
-);
+// ──── Firebase Phone Auth ────
 
-export const verifyOtp = createAsyncThunk(
-  "auth/verifyOtp",
-  async ({ phone, otp }: { phone: string; otp: string }, { dispatch, getState, rejectWithValue }) => {
+export const loginWithFirebase = createAsyncThunk(
+  "auth/loginWithFirebase",
+  async (firebaseIdToken: string, { dispatch, getState, rejectWithValue }) => {
     try {
-      const res = await apiClient.post("/auth/otp/verify", { phone, otp });
+      const res = await apiClient.post("/auth/firebase", { idToken: firebaseIdToken });
       const { token, user } = res.data.data;
       localStorage.setItem("auth_token", token);
 
@@ -87,10 +77,12 @@ export const verifyOtp = createAsyncThunk(
 
       return { token, user };
     } catch {
-      return rejectWithValue("OTP verification failed");
+      return rejectWithValue("Phone login failed");
     }
   }
 );
+
+// ──── Slice ────
 
 const authSlice = createSlice({
   name: "auth",
@@ -100,7 +92,6 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      state.otpSent = false;
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
       localStorage.removeItem("bp_cart");
@@ -124,24 +115,16 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Send OTP
-      .addCase(sendOtp.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(sendOtp.fulfilled, (state) => { state.loading = false; state.otpSent = true; })
-      .addCase(sendOtp.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Verify OTP
-      .addCase(verifyOtp.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(verifyOtp.fulfilled, (state, action) => {
+      // Firebase Phone
+      .addCase(loginWithFirebase.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(loginWithFirebase.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = true;
-        state.otpSent = false;
         localStorage.setItem("auth_user", JSON.stringify(action.payload.user));
       })
-      .addCase(verifyOtp.rejected, (state, action) => {
+      .addCase(loginWithFirebase.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

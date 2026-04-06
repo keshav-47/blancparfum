@@ -2,11 +2,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Phone } from "lucide-react";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import { firebaseAuth } from "@/config/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { loginWithGoogle, sendOtp, verifyOtp, clearAuthError } from "@/store/slices/authSlice";
+import { loginWithGoogle, loginWithFirebase, clearAuthError } from "@/store/slices/authSlice";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import logo from "@/assets/blanc-logo.png";
@@ -21,23 +23,48 @@ declare global {
         };
       };
     };
+    recaptchaVerifier?: RecaptchaVerifier;
   }
 }
 
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading, otpSent, error, user } = useAppSelector((s) => s.auth);
+  const { isAuthenticated, loading, error, user } = useAppSelector((s) => s.auth);
+
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
+  const confirmationRef = useRef<ConfirmationResult | null>(null);
   const googleBtnRef = useRef<HTMLDivElement>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
+  // Redirect on login
   useEffect(() => {
     if (isAuthenticated && user) {
       navigate(user.role === "ADMIN" ? "/admin" : "/");
     }
   }, [isAuthenticated, user, navigate]);
 
+  // Setup invisible reCAPTCHA
+  useEffect(() => {
+    if (!recaptchaContainerRef.current) return;
+    try {
+      window.recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerRef.current, {
+        size: "invisible",
+      });
+    } catch {
+      // already initialized
+    }
+    return () => {
+      window.recaptchaVerifier?.clear();
+      window.recaptchaVerifier = undefined;
+    };
+  }, []);
+
+  // Google Sign-In
   const handleGoogleCallback = useCallback(
     (response: { credential: string }) => {
       dispatch(loginWithGoogle(response.credential));
@@ -48,7 +75,9 @@ const Login = () => {
   useEffect(() => {
     const initGoogle = () => {
       if (window.google && googleBtnRef.current) {
-        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "785552510309-hj18cn3tf1820ncd22a4usou7q7qrjmn.apps.googleusercontent.com";
+        const clientId =
+          import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+          "785552510309-hj18cn3tf1820ncd22a4usou7q7qrjmn.apps.googleusercontent.com";
         window.google.accounts.id.initialize({
           client_id: clientId,
           callback: handleGoogleCallback,
@@ -75,13 +104,51 @@ const Login = () => {
     }
   }, [handleGoogleCallback]);
 
-  const handleSendOtp = () => {
-    if (phone.length >= 10) dispatch(sendOtp(phone));
+  // Send OTP via Firebase
+  const handleSendOtp = async () => {
+    if (phone.length < 10) return;
+    setFirebaseError(null);
+    setSending(true);
+    try {
+      const verifier = window.recaptchaVerifier;
+      if (!verifier) throw new Error("reCAPTCHA not ready");
+      const result = await signInWithPhoneNumber(firebaseAuth, `+91${phone}`, verifier);
+      confirmationRef.current = result;
+      setOtpSent(true);
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message ?? "Failed to send OTP";
+      setFirebaseError(msg);
+      // Reset reCAPTCHA on failure
+      window.recaptchaVerifier?.clear();
+      if (recaptchaContainerRef.current) {
+        window.recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerRef.current, {
+          size: "invisible",
+        });
+      }
+    } finally {
+      setSending(false);
+    }
   };
 
-  const handleVerifyOtp = () => {
-    if (otp.length === 6) dispatch(verifyOtp({ phone, otp }));
+  // Verify OTP via Firebase, then send ID token to our backend
+  const handleVerifyOtp = async () => {
+    if (otp.length < 6 || !confirmationRef.current) return;
+    setFirebaseError(null);
+    try {
+      const credential = await confirmationRef.current.confirm(otp);
+      const idToken = await credential.user.getIdToken();
+      dispatch(loginWithFirebase(idToken));
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code === "auth/invalid-verification-code") {
+        setFirebaseError("Invalid OTP. Please try again.");
+      } else {
+        setFirebaseError((err as { message?: string })?.message ?? "Verification failed");
+      }
+    }
   };
+
+  const displayError = firebaseError || error;
 
   return (
     <Layout>
@@ -128,6 +195,7 @@ const Login = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                   maxLength={10}
+                  disabled={otpSent}
                   className="font-body"
                 />
               </div>
@@ -136,11 +204,11 @@ const Login = () => {
             {!otpSent ? (
               <Button
                 onClick={handleSendOtp}
-                disabled={phone.length < 10 || loading}
+                disabled={phone.length < 10 || sending || loading}
                 className="w-full font-body uppercase tracking-widest text-xs"
               >
                 <Phone size={14} />
-                {loading ? "Sending..." : "Send OTP"}
+                {sending ? "Sending..." : "Send OTP"}
               </Button>
             ) : (
               <motion.div
@@ -168,26 +236,32 @@ const Login = () => {
                   {loading ? "Verifying..." : "Verify & Sign In"}
                 </Button>
                 <button
-                  onClick={handleSendOtp}
-                  disabled={loading}
+                  onClick={() => {
+                    setOtpSent(false);
+                    setOtp("");
+                    confirmationRef.current = null;
+                  }}
                   className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors font-body"
                 >
-                  Resend OTP
+                  Change Number
                 </button>
               </motion.div>
             )}
           </div>
 
           {/* Error */}
-          {error && (
+          {displayError && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-center text-sm text-destructive font-body"
             >
-              {error}
+              {displayError}
             </motion.p>
           )}
+
+          {/* Invisible reCAPTCHA container */}
+          <div ref={recaptchaContainerRef} />
         </motion.div>
       </div>
     </Layout>
