@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Plus, Pencil, Trash2, Upload, X, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,12 +25,13 @@ const AdminCollections = () => {
   const dispatch = useAppDispatch();
   const { collections, products, loading } = useAppSelector((s) => s.admin);
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [productSearch, setProductSearch] = useState("");
 
   useEffect(() => {
@@ -38,24 +39,53 @@ const AdminCollections = () => {
     dispatch(fetchAdminProducts());
   }, [dispatch]);
 
-  const openCreate = () => { setEditingId(null); setForm(emptyForm); setProductSearch(""); setOpen(true); };
-
-  const openEdit = (c: Collection) => {
-    setEditingId(c.id);
-    setForm({ name: c.name, description: c.description ?? "", productIds: c.productIds });
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setImageFile(null);
+    setImagePreview(null);
     setProductSearch("");
     setOpen(true);
   };
 
+  const openEdit = (c: Collection) => {
+    setEditingId(c.id);
+    setForm({ name: c.name, description: c.description ?? "", productIds: c.productIds });
+    setImageFile(null);
+    setImagePreview(c.image || null);
+    setProductSearch("");
+    setOpen(true);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (imagePreview && !imagePreview.startsWith("http")) URL.revokeObjectURL(imagePreview);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    e.target.value = "";
+  };
+
+  const clearImage = () => {
+    if (imagePreview && !imagePreview.startsWith("http")) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   const handleSubmit = async () => {
     try {
+      let saved: Collection;
       if (editingId) {
-        await dispatch(updateCollection({ id: editingId, ...form })).unwrap();
-        toast({ title: "Collection updated" });
+        saved = await dispatch(updateCollection({ id: editingId, ...form })).unwrap();
       } else {
-        await dispatch(createCollection(form)).unwrap();
-        toast({ title: "Collection created" });
+        saved = await dispatch(createCollection(form)).unwrap();
       }
+
+      if (imageFile) {
+        await dispatch(uploadCollectionImage({ id: saved.id, file: imageFile })).unwrap();
+      }
+
+      toast({ title: editingId ? "Collection updated" : "Collection created" });
       setOpen(false);
     } catch {
       toast({ title: "Error", description: "Operation failed", variant: "destructive" });
@@ -66,19 +96,6 @@ const AdminCollections = () => {
     if (!confirm("Delete this collection?")) return;
     await dispatch(deleteCollection(id));
     toast({ title: "Collection deleted" });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !uploadingId) return;
-    try {
-      await dispatch(uploadCollectionImage({ id: uploadingId, file })).unwrap();
-      toast({ title: "Image uploaded" });
-    } catch {
-      toast({ title: "Upload failed", variant: "destructive" });
-    }
-    setUploadingId(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const toggleProduct = (id: string) =>
@@ -99,8 +116,6 @@ const AdminCollections = () => {
         <h1 className="font-display text-2xl tracking-wider">Collections</h1>
         <Button onClick={openCreate} className="gap-2"><Plus size={16} /> Create Collection</Button>
       </div>
-
-      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
       <div className="rounded-md border border-border overflow-x-auto">
         <Table>
@@ -125,7 +140,7 @@ const AdminCollections = () => {
                     <img src={c.image} alt={c.name} className="w-10 h-10 rounded object-cover" />
                   ) : (
                     <div className="w-10 h-10 rounded bg-secondary flex items-center justify-center">
-                      <Package size={16} className="text-muted-foreground" />
+                      <ImagePlus size={14} className="text-muted-foreground" />
                     </div>
                   )}
                 </TableCell>
@@ -136,9 +151,6 @@ const AdminCollections = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setUploadingId(c.id); fileInputRef.current?.click(); }}>
-                      <Upload size={14} />
-                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
                       <Pencil size={14} />
                     </Button>
@@ -159,6 +171,47 @@ const AdminCollections = () => {
             <DialogTitle className="font-display tracking-wider">{editingId ? "Edit Collection" : "Create Collection"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-5 pt-2">
+
+            {/* Image */}
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider">Image</Label>
+              {imagePreview ? (
+                <div className="relative w-full h-36 rounded-md overflow-hidden border border-border">
+                  <img src={imagePreview} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="absolute top-2 right-2 bg-background/80 hover:bg-background rounded-full p-1 transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="absolute bottom-2 right-2 bg-background/80 hover:bg-background rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors"
+                  >
+                    Replace
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="w-full h-28 rounded-md border border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                >
+                  <ImagePlus size={20} />
+                  <span className="text-xs uppercase tracking-wider">Click to upload image</span>
+                </button>
+              )}
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+            </div>
+
             <div className="space-y-1.5">
               <Label className="text-xs uppercase tracking-wider">Name</Label>
               <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />

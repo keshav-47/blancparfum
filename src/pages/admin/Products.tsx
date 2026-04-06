@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Plus, Pencil, Trash2, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +15,6 @@ import { Product } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
 type NoteType = "top" | "heart" | "base";
-
 interface NoteEntry { type: NoteType; name: string }
 interface SizeEntry { ml: number; price: number }
 
@@ -30,16 +29,25 @@ const AdminProducts = () => {
   const dispatch = useAppDispatch();
   const { products, loading } = useAppSelector((s) => s.admin);
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
 
   useEffect(() => { dispatch(fetchAdminProducts()); }, [dispatch]);
 
-  const openCreate = () => { setEditingId(null); setForm(emptyForm); setOpen(true); };
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setExistingImages([]);
+    setNewImageFiles([]);
+    setNewImagePreviews([]);
+    setOpen(true);
+  };
 
   const openEdit = (p: Product) => {
     setEditingId(p.id);
@@ -55,7 +63,24 @@ const AdminProducts = () => {
       sizes: p.sizes.length ? p.sizes : [{ ml: 30, price: 0 }],
       noteEntries: noteEntries.length ? noteEntries : [{ type: "top", name: "" }],
     });
+    setExistingImages(p.images ?? []);
+    setNewImageFiles([]);
+    setNewImagePreviews([]);
     setOpen(true);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setNewImageFiles((prev) => [...prev, ...files]);
+    setNewImagePreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
+    e.target.value = "";
+  };
+
+  const removeNewImage = (i: number) => {
+    URL.revokeObjectURL(newImagePreviews[i]);
+    setNewImageFiles((prev) => prev.filter((_, idx) => idx !== i));
+    setNewImagePreviews((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   const handleSubmit = async () => {
@@ -71,13 +96,18 @@ const AdminProducts = () => {
     };
 
     try {
+      let saved: Product;
       if (editingId) {
-        await dispatch(updateProduct({ ...payload, id: editingId } as Product)).unwrap();
-        toast({ title: "Product updated" });
+        saved = await dispatch(updateProduct({ ...payload, id: editingId } as Product)).unwrap();
       } else {
-        await dispatch(createProduct(payload as Omit<Product, "id">)).unwrap();
-        toast({ title: "Product created" });
+        saved = await dispatch(createProduct(payload as Omit<Product, "id">)).unwrap();
       }
+
+      for (const file of newImageFiles) {
+        await dispatch(uploadProductImage({ id: saved.id, file })).unwrap();
+      }
+
+      toast({ title: editingId ? "Product updated" : "Product created" });
       setOpen(false);
     } catch {
       toast({ title: "Error", description: "Operation failed", variant: "destructive" });
@@ -88,19 +118,6 @@ const AdminProducts = () => {
     if (!confirm("Delete this product?")) return;
     await dispatch(deleteProduct(id));
     toast({ title: "Product deleted" });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !uploadingId) return;
-    try {
-      await dispatch(uploadProductImage({ id: uploadingId, file })).unwrap();
-      toast({ title: "Image uploaded" });
-    } catch {
-      toast({ title: "Upload failed", variant: "destructive" });
-    }
-    setUploadingId(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const addSize = () => setForm((f) => ({ ...f, sizes: [...f.sizes, { ml: 0, price: 0 }] }));
@@ -120,12 +137,11 @@ const AdminProducts = () => {
         <Button onClick={openCreate} className="gap-2"><Plus size={16} /> Create Product</Button>
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-
       <div className="rounded-md border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-xs uppercase tracking-wider w-12">Image</TableHead>
               <TableHead className="text-xs uppercase tracking-wider">Name</TableHead>
               <TableHead className="text-xs uppercase tracking-wider">Category</TableHead>
               <TableHead className="text-xs uppercase tracking-wider">Price</TableHead>
@@ -138,11 +154,20 @@ const AdminProducts = () => {
           </TableHeader>
           <TableBody>
             {loading && !products.length ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
             ) : products.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No products yet</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No products yet</TableCell></TableRow>
             ) : products.map((p) => (
               <TableRow key={p.id}>
+                <TableCell>
+                  {p.images?.[0] ? (
+                    <img src={p.images[0]} alt={p.name} className="w-9 h-9 rounded object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded bg-secondary flex items-center justify-center">
+                      <ImagePlus size={13} className="text-muted-foreground" />
+                    </div>
+                  )}
+                </TableCell>
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell><Badge variant="outline" className="uppercase text-[10px]">{p.category}</Badge></TableCell>
                 <TableCell>₹{p.sizes.length ? Math.min(...p.sizes.map((s) => s.price)).toLocaleString("en-IN") : p.price.toLocaleString("en-IN")}</TableCell>
@@ -152,9 +177,6 @@ const AdminProducts = () => {
                 <TableCell>{p.isActive !== false ? <Badge className="bg-green-700 text-white text-[10px]">Active</Badge> : <Badge variant="outline" className="text-[10px]">Inactive</Badge>}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setUploadingId(p.id); fileInputRef.current?.click(); }}>
-                      <Upload size={14} />
-                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => openEdit(p)}>
                       <Pencil size={14} />
                     </Button>
@@ -175,6 +197,47 @@ const AdminProducts = () => {
             <DialogTitle className="font-display tracking-wider">{editingId ? "Edit Product" : "Create Product"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-5 pt-2">
+
+            {/* Images */}
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider">Images</Label>
+              <div className="flex flex-wrap gap-2">
+                {existingImages.map((url, i) => (
+                  <div key={i} className="relative w-16 h-16 rounded overflow-hidden border border-border">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+                {newImagePreviews.map((url, i) => (
+                  <div key={i} className="relative w-16 h-16 rounded overflow-hidden border border-primary/50">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(i)}
+                      className="absolute top-0.5 right-0.5 bg-background/80 rounded-full p-0.5 hover:bg-background"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="w-16 h-16 rounded border border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                >
+                  <ImagePlus size={16} />
+                  <span className="text-[9px] uppercase tracking-wide">Add</span>
+                </button>
+              </div>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs uppercase tracking-wider">Name</Label>
