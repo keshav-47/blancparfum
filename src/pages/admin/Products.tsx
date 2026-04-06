@@ -47,6 +47,8 @@ const AdminProducts = () => {
       name: p.name,
       tagline: p.tagline,
       price: p.price,
+      category: p.category as "men" | "women" | "unisex",
+      price: p.price,
       category: p.category,
       images: p.images.length ? p.images : [""],
       sizes: p.sizes,
