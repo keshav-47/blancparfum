@@ -39,6 +39,9 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
     },
+    replaceCart: (state, action: PayloadAction<CartItem[]>) => {
+      state.items = action.payload;
+    },
   },
 });
 
