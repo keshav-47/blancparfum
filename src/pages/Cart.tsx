@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus, X, ArrowLeft, MapPin, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -36,6 +36,7 @@ const Cart = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const syncPromise = useRef<Promise<void> | null>(null);
 
   // Load Razorpay SDK once
   useEffect(() => {
@@ -62,6 +63,10 @@ const Cart = () => {
     const def = addresses.find((a) => a.isDefault) ?? addresses[0];
     if (def) setSelectedAddressId(def.id);
     setCheckoutOpen(true);
+    // Start cart sync immediately while user selects address
+    syncPromise.current = apiClient.post("/cart/sync", {
+      items: items.map((i) => ({ productId: i.productId, sizeMl: i.size, quantity: i.quantity })),
+    }).then(() => { /* no-op */ }).catch(() => { /* handled in confirmCheckout */ });
   };
 
   const confirmCheckout = async () => {
@@ -71,14 +76,8 @@ const Cart = () => {
     }
     setCheckoutLoading(true);
     try {
-      // Step 1 – sync frontend cart to server
-      await apiClient.post("/cart/sync", {
-        items: items.map((i) => ({
-          productId: i.productId,
-          sizeMl: i.size,
-          quantity: i.quantity,
-        })),
-      });
+      // Step 1 – await the sync that started when the dialog opened
+      await syncPromise.current;
 
       // Step 2 – create order & get Razorpay order
       const { data } = await apiClient.post<RazorpayOrderResponse>("/orders", {
@@ -125,7 +124,7 @@ const Cart = () => {
         prefill: {
           name: user?.name ?? "",
           email: user?.email ?? "",
-          contact: user?.phone ?? "",
+          ...(user?.phone ? { contact: user.phone } : {}),
         },
         theme: { color: "#0f0f0f" },
       });
