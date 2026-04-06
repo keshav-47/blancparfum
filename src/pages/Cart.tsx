@@ -81,7 +81,7 @@ const Cart = () => {
                         <Plus size={12} />
                       </button>
                     </div>
-                    <p className="font-body">${item.price * item.quantity}</p>
+                    <p className="font-body">₹{item.price * item.quantity}</p>
                   </div>
                 </div>
               </motion.div>
