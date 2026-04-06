@@ -48,7 +48,7 @@ const Navbar = () => {
 
         {/* Right icons */}
         <div className="flex items-center gap-5">
-          <Link to="/profile" className="text-foreground/70 hover:text-primary transition-colors">
+          <Link to={isAuthenticated ? "/profile" : "/login"} className="text-foreground/70 hover:text-primary transition-colors">
             <User size={18} />
           </Link>
           <Link to="/cart" className="relative text-foreground/70 hover:text-primary transition-colors">
