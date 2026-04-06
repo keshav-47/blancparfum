@@ -165,7 +165,7 @@ const About = () => (
             </div>
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Contact</p>
-              <p className="text-sm">hello@blancparfum.in</p>
+              <p className="text-sm">customercare@blancparfum.in</p>
             </div>
           </div>
           <div className="md:col-span-2 border border-border overflow-hidden">
