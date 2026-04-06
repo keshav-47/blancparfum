@@ -124,17 +124,19 @@ const Cart = () => {
         prefill: {
           name: user?.name ?? "",
           email: user?.email ?? "",
-          ...(user?.phone ? { contact: user.phone } : {}),
+          contact: user?.phone ?? "",
         },
         config: {
           display: {
             blocks: {
-              banks: {
+              upi_block: {
                 name: "Pay using UPI",
-                instruments: [{ method: "upi" }],
+                instruments: [
+                  { method: "upi", flows: ["collect", "qrcode"] },
+                ],
               },
             },
-            sequence: ["block.banks"],
+            sequence: ["block.upi_block"],
             preferences: { show_default_blocks: true },
           },
         },
