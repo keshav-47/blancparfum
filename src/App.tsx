@@ -11,6 +11,7 @@ import ProductDetail from "./pages/ProductDetail";
 import CustomPerfume from "./pages/CustomPerfume";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/custom" element={<CustomPerfume />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

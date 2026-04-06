@@ -8,6 +8,7 @@ import logo from "@/assets/blanc-logo.png";
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const cartItems = useAppSelector((state) => state.cart.items);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
   const navLinks = [
@@ -48,7 +49,7 @@ const Navbar = () => {
 
         {/* Right icons */}
         <div className="flex items-center gap-5">
-          <Link to="/profile" className="text-foreground/70 hover:text-primary transition-colors">
+          <Link to={isAuthenticated ? "/profile" : "/login"} className="text-foreground/70 hover:text-primary transition-colors">
             <User size={18} />
           </Link>
           <Link to="/cart" className="relative text-foreground/70 hover:text-primary transition-colors">
