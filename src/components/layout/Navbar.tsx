@@ -8,7 +8,8 @@ import logo from "@/assets/blanc-logo.png";
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const cartItems = useAppSelector((state) => state.cart.items);
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const isAdmin = isAuthenticated && user?.role === "ADMIN";
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
   const navLinks = [
