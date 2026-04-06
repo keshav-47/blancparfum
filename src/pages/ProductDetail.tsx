@@ -102,7 +102,7 @@ const ProductDetail = () => {
             )}
             <h1 className="font-display text-4xl md:text-5xl font-medium mb-2">{product.name}</h1>
             <p className="text-sm text-muted-foreground uppercase tracking-wider mb-6">{product.tagline}</p>
-            <p className="font-body text-2xl mb-8">${currentSize.price}</p>
+            <p className="font-body text-2xl mb-8">₹{currentSize.price}</p>
 
             {/* Size selector */}
             <div className="mb-8">
