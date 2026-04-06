@@ -41,24 +41,6 @@ const Footer = () => {
               ))}
             </ul>
           </div>
-
-          {/* Newsletter */}
-          <div>
-            <h4 className="text-xs font-body uppercase tracking-[0.2em] text-primary mb-4">Stay Connected</h4>
-            <p className="text-sm text-muted-foreground mb-4">
-              Be the first to know about new fragrances and exclusive offers.
-            </p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 bg-transparent border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
-              />
-              <button className="bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-wider font-body font-semibold hover:bg-primary/90 transition-colors">
-                Join
-              </button>
-            </div>
-          </div>
         </div>
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
