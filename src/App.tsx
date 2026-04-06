@@ -11,6 +11,7 @@ import ProductDetail from "./pages/ProductDetail";
 import CustomPerfume from "./pages/CustomPerfume";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
