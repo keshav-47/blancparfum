@@ -152,8 +152,8 @@ const About = () => (
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Address</p>
               <p className="text-sm leading-relaxed">
                 BLANC PARFUM<br />
-                Hazratganj, Lucknow<br />
-                Uttar Pradesh 226001, India
+                Meerut, Uttar Pradesh<br />
+                India
               </p>
             </div>
             <div>
@@ -171,7 +171,7 @@ const About = () => (
           <div className="md:col-span-2 border border-border overflow-hidden">
             <iframe
               title="BLANC PARFUM Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.4!2d80.9462!3d26.8467!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399bfd0a0a0a0a0a%3A0x0!2sHazratganj%2C%20Lucknow!5e0!3m2!1sen!2sin!4v1700000000000"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d436.3623987728469!2d77.63831436459043!3d28.960714398867335!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390c66bd9cd8cde5%3A0x44475d545c467fb5!2sThe%20Bansuri%20Cafe!5e0!3m2!1sen!2sin!4v1775510235658!5m2!1sen!2sin"
               width="100%"
               height="350"
               style={{ border: 0 }}
