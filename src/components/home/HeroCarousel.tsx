@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch } from "@/store/hooks";
-import { setFilter } from "@/store/slices/productsSlice";
 
 const slides = [
   {
@@ -30,7 +29,7 @@ const slides = [
 ];
 
 const HeroCarousel = () => {
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -80,8 +79,8 @@ const HeroCarousel = () => {
             <Button
               variant="outline"
               onClick={() => {
-                dispatch(setFilter(slides[current].filter));
-                document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
+                const f = slides[current].filter;
+                navigate(f === "all" ? "/shop" : `/shop?category=${f}`);
               }}
               className="border-primary/40 text-primary bg-transparent hover:bg-primary hover:text-primary-foreground uppercase tracking-[0.2em] text-xs px-8 py-3 h-auto rounded-none"
             >

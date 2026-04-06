@@ -18,10 +18,16 @@ const Footer = () => {
           <div>
             <h4 className="text-xs font-body uppercase tracking-[0.2em] text-primary mb-4">Shop</h4>
             <ul className="space-y-2">
-              {["All Fragrances", "Women", "Men", "Unisex", "New Arrivals"].map((item) => (
-                <li key={item}>
-                  <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {item}
+              {[
+                { label: "All Fragrances", to: "/shop" },
+                { label: "Women", to: "/shop?category=women" },
+                { label: "Men", to: "/shop?category=men" },
+                { label: "Unisex", to: "/shop?category=unisex" },
+                { label: "New Arrivals", to: "/shop?category=new" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link to={item.to} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {item.label}
                   </Link>
                 </li>
               ))}

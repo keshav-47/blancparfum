@@ -13,7 +13,7 @@ const Navbar = () => {
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
   const navLinks = [
-    { to: "/", label: "Shop" },
+    { to: "/shop", label: "Shop" },
     { to: "/custom", label: "Custom" },
     { to: "/about", label: "About" },
   ];
