@@ -32,7 +32,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             {product.tagline}
           </p>
           <p className="font-body text-sm text-foreground">
-            From ${product.sizes[0].price}
+            From ₹{product.sizes[0].price}
           </p>
         </div>
       </Link>
