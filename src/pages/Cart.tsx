@@ -71,7 +71,16 @@ const Cart = () => {
     }
     setCheckoutLoading(true);
     try {
-      // Step 1 – create order & get Razorpay order
+      // Step 1 – sync frontend cart to server
+      await apiClient.post("/cart/sync", {
+        items: items.map((i) => ({
+          productId: i.productId,
+          sizeMl: i.size,
+          quantity: i.quantity,
+        })),
+      });
+
+      // Step 2 – create order & get Razorpay order
       const { data } = await apiClient.post<RazorpayOrderResponse>("/orders", {
         addressId: selectedAddressId,
       });
