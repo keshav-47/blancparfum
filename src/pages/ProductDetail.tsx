@@ -51,7 +51,7 @@ const ProductDetail = () => {
     <Layout>
       <SEO
         title={product.name}
-        description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM. From $${product.sizes[0].price}.`}
+        description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM. From ₹${product.sizes[0].price}.`}
         canonical={`/product/${product.id}`}
         type="product"
         image={product.images[0]}
