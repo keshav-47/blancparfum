@@ -25,6 +25,18 @@ export const fetchUserProfile = createAsyncThunk("user/fetchProfile", async (_, 
   }
 });
 
+export const updateProfile = createAsyncThunk(
+  "user/updateProfile",
+  async (data: { name: string; email: string | null }, { rejectWithValue }) => {
+    try {
+      const res = await apiClient.put<UserProfile>("/user/profile", data);
+      return res.data;
+    } catch {
+      return rejectWithValue("Failed to update profile");
+    }
+  }
+);
+
 export const fetchOrders = createAsyncThunk("user/fetchOrders", async (_, { rejectWithValue }) => {
   try {
     const res = await apiClient.get<Order[]>("/orders");
@@ -116,6 +128,9 @@ const userSlice = createSlice({
         if (state.profile) {
           state.profile.addresses = state.profile.addresses.filter((a) => a.id !== action.payload);
         }
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.profile = action.payload;
       });
   },
 });

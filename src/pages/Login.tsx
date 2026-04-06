@@ -44,7 +44,13 @@ const Login = () => {
   // Redirect on login
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(user.role === "ADMIN" ? "/admin" : "/");
+      if (user.role === "ADMIN") {
+        navigate("/admin");
+      } else if (!user.name || user.name === "Parfum Lover") {
+        navigate("/complete-profile");
+      } else {
+        navigate("/");
+      }
     }
   }, [isAuthenticated, user, navigate]);
 
