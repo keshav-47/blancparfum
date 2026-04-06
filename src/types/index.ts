@@ -57,9 +57,18 @@ export interface Order {
 export interface UserProfile {
   id: string;
   name: string;
-  email: string;
-  avatar?: string;
+  email: string | null;
+  phone?: string | null;
+  avatar?: string | null;
+  role?: "USER" | "ADMIN";
   addresses: Address[];
+}
+
+export interface DashboardStats {
+  totalRevenue: number;
+  processingOrders: number;
+  shippedOrders: number;
+  pendingCustomRequests: number;
 }
 
 export interface Address {
