@@ -27,14 +27,16 @@ declare global {
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading, otpSent, error } = useAppSelector((s) => s.auth);
+  const { isAuthenticated, loading, otpSent, error, user } = useAppSelector((s) => s.auth);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const googleBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isAuthenticated) navigate("/profile");
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated && user) {
+      navigate(user.role === "ADMIN" ? "/admin" : "/");
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleGoogleCallback = useCallback(
     (response: { credential: string }) => {
