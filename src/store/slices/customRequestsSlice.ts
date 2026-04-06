@@ -1,18 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "@/api/apiClient";
 import { CustomRequest } from "@/types";
-import { fallbackCustomRequests } from "@/data/fallbackData";
 
 interface CustomRequestsState {
   requests: CustomRequest[];
   loading: boolean;
   submitted: boolean;
+  error: string | null;
 }
 
 const initialState: CustomRequestsState = {
-  requests: fallbackCustomRequests,
+  requests: [],
   loading: false,
   submitted: false,
+  error: null,
 };
 
 export const submitCustomRequest = createAsyncThunk(
@@ -22,14 +23,7 @@ export const submitCustomRequest = createAsyncThunk(
       const response = await apiClient.post<CustomRequest>("/custom-requests", request);
       return response.data;
     } catch {
-      // Fallback: create a local request
-      const localRequest: CustomRequest = {
-        ...request,
-        id: `cr-${Date.now()}`,
-        date: new Date().toISOString().split("T")[0],
-        status: "pending",
-      };
-      return localRequest;
+      return rejectWithValue("Failed to submit custom request");
     }
   }
 );
@@ -39,7 +33,7 @@ export const fetchCustomRequests = createAsyncThunk("customRequests/fetchAll", a
     const response = await apiClient.get<CustomRequest[]>("/custom-requests");
     return response.data;
   } catch {
-    return rejectWithValue("Using fallback data");
+    return rejectWithValue("Failed to fetch custom requests");
   }
 });
 
@@ -53,20 +47,24 @@ const customRequestsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(submitCustomRequest.pending, (state) => { state.loading = true; state.submitted = false; })
+      .addCase(submitCustomRequest.pending, (state) => { state.loading = true; state.submitted = false; state.error = null; })
       .addCase(submitCustomRequest.fulfilled, (state, action) => {
         state.loading = false;
         state.submitted = true;
         state.requests.push(action.payload);
       })
-      .addCase(submitCustomRequest.rejected, (state) => {
+      .addCase(submitCustomRequest.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload as string;
       })
+      .addCase(fetchCustomRequests.pending, (state) => { state.loading = true; })
       .addCase(fetchCustomRequests.fulfilled, (state, action) => {
+        state.loading = false;
         state.requests = action.payload;
       })
-      .addCase(fetchCustomRequests.rejected, (state) => {
-        state.requests = fallbackCustomRequests;
+      .addCase(fetchCustomRequests.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

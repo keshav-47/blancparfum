@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiClient from "@/api/apiClient";
 import { Product, Collection } from "@/types";
-import { fallbackProducts, fallbackCollections } from "@/data/fallbackData";
 
 interface ProductsState {
   items: Product[];
@@ -12,8 +11,8 @@ interface ProductsState {
 }
 
 const initialState: ProductsState = {
-  items: fallbackProducts,
-  collections: fallbackCollections,
+  items: [],
+  collections: [],
   loading: false,
   error: null,
   filter: "all",
@@ -24,7 +23,7 @@ export const fetchProducts = createAsyncThunk("products/fetchAll", async (_, { r
     const response = await apiClient.get<Product[]>("/products");
     return response.data;
   } catch {
-    return rejectWithValue("Using fallback data");
+    return rejectWithValue("Failed to fetch products");
   }
 });
 
@@ -33,7 +32,7 @@ export const fetchCollections = createAsyncThunk("products/fetchCollections", as
     const response = await apiClient.get<Collection[]>("/collections");
     return response.data;
   } catch {
-    return rejectWithValue("Using fallback data");
+    return rejectWithValue("Failed to fetch collections");
   }
 });
 
@@ -47,20 +46,17 @@ const productsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchProducts.pending, (state) => { state.loading = true; })
+      .addCase(fetchProducts.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload;
       })
-      .addCase(fetchProducts.rejected, (state) => {
+      .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.items = fallbackProducts;
+        state.error = action.payload as string;
       })
       .addCase(fetchCollections.fulfilled, (state, action) => {
         state.collections = action.payload;
-      })
-      .addCase(fetchCollections.rejected, (state) => {
-        state.collections = fallbackCollections;
       });
   },
 });
