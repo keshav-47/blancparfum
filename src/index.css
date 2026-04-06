@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,44 +6,44 @@
 
 @layer base {
   :root {
-    --background: 40 33% 97%;
-    --foreground: 0 0% 15%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 8%;
 
-    --card: 40 20% 95%;
-    --card-foreground: 0 0% 15%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 8%;
 
-    --popover: 40 33% 97%;
-    --popover-foreground: 0 0% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 0 0% 18%;
-    --primary-foreground: 40 33% 97%;
+    --primary: 0 0% 8%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 15% 90%;
-    --secondary-foreground: 0 0% 20%;
+    --secondary: 30 10% 95%;
+    --secondary-foreground: 0 0% 8%;
 
-    --muted: 40 10% 92%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 30 8% 93%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 0 0% 18%;
-    --accent-foreground: 40 33% 97%;
+    --accent: 36 45% 48%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 40 10% 85%;
-    --input: 40 10% 85%;
-    --ring: 0 0% 18%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 36 45% 48%;
 
-    --radius: 0.25rem;
+    --radius: 0.5rem;
 
-    --sidebar-background: 40 20% 95%;
-    --sidebar-foreground: 0 0% 15%;
-    --sidebar-primary: 0 0% 18%;
-    --sidebar-primary-foreground: 40 33% 97%;
-    --sidebar-accent: 40 15% 90%;
-    --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 40 10% 85%;
-    --sidebar-ring: 0 0% 18%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 8%;
+    --sidebar-primary: 0 0% 8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 10% 95%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 36 45% 48%;
   }
 }
 
@@ -58,5 +58,15 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

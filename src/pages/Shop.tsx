@@ -46,13 +46,13 @@ const heroData: Record<string, { title: string; subtitle: string; image: string 
 
 const containerVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
+  show: { transition: { staggerChildren: 0.07 } },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3 } },
+  hidden: { opacity: 0, y: 25 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  exit: { opacity: 0, scale: 0.97, transition: { duration: 0.25 } },
 };
 
 const ShopCard = ({ product }: { product: Product }) => {
@@ -65,48 +65,43 @@ const ShopCard = ({ product }: { product: Product }) => {
   return (
     <motion.div variants={cardVariants} layout>
       <Link to={`/product/${product.id}`} className="group block">
-        {/* Image */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-secondary/50 mb-6">
+        <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
           <motion.img
             src={product.images[0]}
             alt={product.name}
             className="w-full h-full object-cover"
             loading="lazy"
             whileHover={{ scale: 1.04 }}
-            transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           />
           {product.isNew && (
-            <span className="absolute top-5 left-5 text-[10px] font-body uppercase tracking-[0.2em] text-foreground/80 bg-background/80 backdrop-blur-sm px-3 py-1.5">
+            <span className="absolute top-4 left-4 text-[10px] font-body font-medium uppercase tracking-[0.15em] bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full">
               New
             </span>
           )}
-          {/* Hover overlay with notes */}
-          <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-black/60 via-black/30 to-transparent p-6 pt-16">
+          {/* Hover overlay */}
+          <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-black/60 via-black/30 to-transparent p-6 pt-16 rounded-b-lg">
             {notes.length > 0 && (
-              <p className="text-[11px] text-white/80 uppercase tracking-[0.2em] font-body">
-                {notes.join(" / ")}
+              <p className="text-[10px] text-white/80 uppercase tracking-[0.2em] font-body">
+                {notes.join("  /  ")}
               </p>
             )}
-            <div className="flex items-center gap-1.5 mt-2 text-white/90 text-xs font-body uppercase tracking-[0.15em]">
-              Discover <ArrowRight size={12} />
+            <div className="flex items-center gap-1.5 mt-2 text-white/90 text-[10px] font-body font-medium uppercase tracking-[0.15em]">
+              Discover <ArrowRight size={11} />
             </div>
           </div>
         </div>
-
-        {/* Text */}
         <div className="text-center space-y-1.5 px-2">
-          <h3 className="font-display text-lg md:text-xl tracking-wider text-foreground">
-            {product.name}
-          </h3>
-          <p className="text-[11px] font-body text-muted-foreground uppercase tracking-[0.2em]">
+          <h3 className="font-display text-lg md:text-xl tracking-wider">{product.name}</h3>
+          <p className="text-[11px] font-body text-muted-foreground uppercase tracking-[0.15em]">
             Extrait de Parfum
           </p>
-          <p className="text-sm font-body text-foreground/70 pt-1">
+          <p className="text-sm font-body text-foreground/70 pt-0.5">
             {product.sizes.length > 1
               ? `From \u20B9${product.sizes[0].price.toLocaleString("en-IN")}`
               : `\u20B9${product.sizes[0].price.toLocaleString("en-IN")}`}
             {product.sizes.length > 1 && (
-              <span className="text-muted-foreground text-[11px] ml-1.5">
+              <span className="text-muted-foreground text-[10px] ml-1.5">
                 +{product.sizes.length - 1} size{product.sizes.length > 2 ? "s" : ""}
               </span>
             )}
@@ -147,53 +142,54 @@ const Shop = () => {
     <Layout>
       <SEO title={hero.title} canonical="/shop" />
 
-      {/* Hero */}
-      <section className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
+      {/* Hero - compact, modern */}
+      <section className="relative h-[45vh] md:h-[55vh] w-full overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.img
             key={category}
             src={hero.image}
             alt={hero.title}
             className="absolute inset-0 w-full h-full object-cover"
-            initial={{ opacity: 0, scale: 1.08 }}
+            initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           />
         </AnimatePresence>
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={category}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-center px-6"
-            >
-              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl tracking-wider text-white mb-4">
-                {hero.title}
-              </h1>
-              <p className="font-body text-sm md:text-base text-white/70 uppercase tracking-[0.25em] max-w-xl mx-auto">
-                {hero.subtitle}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-black/10" />
+        <div className="absolute inset-0 flex items-end">
+          <div className="container mx-auto px-6 md:px-12 lg:px-20 pb-12 md:pb-16">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={category}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+              >
+                <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-2">
+                  {hero.title}
+                </h1>
+                <p className="font-body text-sm text-white/60 max-w-lg">
+                  {hero.subtitle}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </section>
 
-      {/* Filters */}
-      <nav className="border-b border-border sticky top-16 z-40 bg-background/95 backdrop-blur-sm">
-        <div className="container mx-auto flex justify-center gap-8 md:gap-12 px-4 py-5 overflow-x-auto">
+      {/* Sticky filters */}
+      <nav className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50">
+        <div className="container mx-auto px-6 md:px-12 lg:px-20 py-4 flex gap-3 overflow-x-auto scrollbar-hide">
           {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => handleFilter(f.key)}
-              className={`text-[11px] font-body uppercase tracking-[0.25em] pb-1 whitespace-nowrap transition-all duration-300 border-b-2 ${
+              className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-5 py-2 rounded-full whitespace-nowrap transition-all duration-300 ${
                 category === f.key
-                  ? "text-foreground border-foreground"
-                  : "text-muted-foreground border-transparent hover:text-foreground hover:border-border"
+                  ? "bg-foreground text-background"
+                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
               }`}
             >
               {f.label}
@@ -202,23 +198,8 @@ const Shop = () => {
         </div>
       </nav>
 
-      {/* Narrative */}
-      <div className="container mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-20">
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center font-body text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl mx-auto italic"
-        >
-          Each BLANC fragrance is an Extrait de Parfum — the highest concentration of
-          perfume oil — handcrafted in small batches for those who believe scent is the
-          most intimate form of self-expression.
-        </motion.p>
-      </div>
-
-      {/* Product Grid */}
-      <div className="container mx-auto px-6 md:px-16 lg:px-24 pb-24">
+      {/* Product grid */}
+      <div className="container mx-auto px-6 md:px-12 lg:px-20 py-16 md:py-20">
         <AnimatePresence mode="wait">
           {filtered.length === 0 ? (
             <motion.p
@@ -235,7 +216,7 @@ const Shop = () => {
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 md:gap-x-12 md:gap-y-20"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-14 md:gap-x-8 md:gap-y-16"
             >
               {filtered.map((product) => (
                 <ShopCard key={product.id} product={product} />
@@ -244,15 +225,9 @@ const Shop = () => {
           )}
         </AnimatePresence>
 
-        {/* Count */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-center text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-body mt-20 pt-10 border-t border-border"
-        >
-          Showing {filtered.length} fragrance{filtered.length !== 1 ? "s" : ""}
-        </motion.p>
+        <p className="text-center text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body mt-16 pt-8 border-t border-border">
+          {filtered.length} fragrance{filtered.length !== 1 ? "s" : ""}
+        </p>
       </div>
     </Layout>
   );

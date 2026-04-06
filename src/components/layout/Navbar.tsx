@@ -14,20 +14,20 @@ const Navbar = () => {
 
   const navLinks = [
     { to: "/shop", label: "Shop" },
-    { to: "/custom", label: "Custom" },
+    { to: "/custom", label: "Bespoke" },
     { to: "/about", label: "About" },
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <nav className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
         {/* Left nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="text-xs font-body uppercase tracking-[0.2em] text-foreground/70 hover:text-primary transition-colors"
+              className="text-[11px] font-body font-medium uppercase tracking-[0.18em] text-foreground/60 hover:text-foreground transition-colors duration-300"
             >
               {link.label}
             </Link>
@@ -36,7 +36,7 @@ const Navbar = () => {
 
         {/* Mobile menu button */}
         <button
-          className="md:hidden text-foreground"
+          className="md:hidden text-foreground/70 hover:text-foreground transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
@@ -45,27 +45,27 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-          <img src={logo} alt="BLANC" className="h-12 md:h-14 w-auto" />
+          <img src={logo} alt="BLANC" className="h-10 md:h-12 w-auto" />
         </Link>
 
         {/* Right icons */}
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-6">
           {isAdmin && (
             <Link
               to="/admin"
-              className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] font-body text-foreground/70 hover:text-primary transition-colors border border-border rounded px-2.5 py-1"
+              className="hidden sm:flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] font-body font-medium text-foreground/60 hover:text-foreground transition-colors border border-border/60 rounded-full px-3 py-1"
             >
-              <Shield size={12} />
+              <Shield size={11} />
               Admin
             </Link>
           )}
-          <Link to={isAuthenticated ? "/profile" : "/login"} className="text-foreground/70 hover:text-primary transition-colors">
-            <User size={18} />
+          <Link to={isAuthenticated ? "/profile" : "/login"} className="text-foreground/60 hover:text-foreground transition-colors duration-300">
+            <User size={18} strokeWidth={1.5} />
           </Link>
-          <Link to="/cart" className="relative text-foreground/70 hover:text-primary transition-colors">
-            <ShoppingBag size={18} />
+          <Link to="/cart" className="relative text-foreground/60 hover:text-foreground transition-colors duration-300">
+            <ShoppingBag size={18} strokeWidth={1.5} />
             {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-body font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 bg-accent text-accent-foreground text-[9px] font-body font-semibold rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount}
               </span>
             )}
@@ -80,7 +80,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background border-b border-border overflow-hidden"
+            className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border/50 overflow-hidden"
           >
             <div className="flex flex-col items-center gap-6 py-8">
               {navLinks.map((link) => (
@@ -88,11 +88,20 @@ const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
-                  className="text-sm font-body uppercase tracking-[0.2em] text-foreground/70 hover:text-primary transition-colors"
+                  className="text-sm font-body font-medium uppercase tracking-[0.2em] text-foreground/60 hover:text-foreground transition-colors"
                 >
                   {link.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-sm font-body font-medium uppercase tracking-[0.2em] text-foreground/60 hover:text-foreground transition-colors"
+                >
+                  Admin
+                </Link>
+              )}
             </div>
           </motion.div>
         )}
