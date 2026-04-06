@@ -19,6 +19,8 @@ export interface Product {
   };
   isNew: boolean;
   isFeatured: boolean;
+  isActive?: boolean;
+  stockQuantity?: number;
 }
 
 export interface Collection {
