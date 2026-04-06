@@ -58,14 +58,17 @@ const ProductDetail = () => {
           "@context": "https://schema.org",
           "@type": "Product",
           "name": product.name,
-          "description": product.tagline,
-          "image": product.images[0],
+          "description": `${product.name} — ${product.tagline}. Handcrafted Extrait de Parfum by BLANC PARFUM.`,
+          "image": product.images,
           "brand": { "@type": "Brand", "name": "BLANC PARFUM" },
+          "category": "Fragrances",
           "offers": {
-            "@type": "Offer",
-            "price": product.sizes[0].price,
+            "@type": "AggregateOffer",
+            "lowPrice": product.sizes[0].price,
+            "highPrice": product.sizes[product.sizes.length - 1].price,
             "priceCurrency": "INR",
             "availability": "https://schema.org/InStock",
+            "offerCount": product.sizes.length,
           },
         }}
       />

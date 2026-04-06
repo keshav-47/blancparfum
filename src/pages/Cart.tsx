@@ -146,7 +146,7 @@ const Cart = () => {
 
   return (
     <Layout>
-      <SEO title="Shopping Cart" canonical="/cart" />
+      <SEO title="Shopping Cart" canonical="/cart" noindex />
       <div className="container mx-auto px-6 md:px-12 lg:px-20 pt-24 pb-16 max-w-5xl">
         <Link
           to="/shop"

@@ -46,7 +46,7 @@ const About = () => (
     {/* Hero */}
     <section className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
       <img
-        src="https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=1920&q=80"
+        src="https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?w=1920&q=80"
         alt="BLANC PARFUM"
         className="absolute inset-0 w-full h-full object-cover"
       />
@@ -99,7 +99,7 @@ const About = () => (
           >
             <div className="aspect-[4/5] rounded-2xl overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1594035910387-fbd1a3fbb128?w=800&q=80"
+                src="https://images.unsplash.com/photo-1590736969955-71cc94901144?w=800&q=80"
                 alt="BLANC craftsmanship"
                 className="w-full h-full object-cover"
               />

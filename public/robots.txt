@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
-Disallow: /cart
-Disallow: /profile
 
-Sitemap: https://blancparfum.lovable.app/sitemap.xml
+Disallow: /login
+Disallow: /profile
+Disallow: /complete-profile
+Disallow: /cart
+Disallow: /admin
+Disallow: /admin/*
+
+Sitemap: https://blancparfum.in/sitemap.xml

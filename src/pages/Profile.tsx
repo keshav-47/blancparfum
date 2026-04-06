@@ -95,7 +95,7 @@ const Profile = () => {
 
   return (
     <Layout>
-      <SEO title="Profile" canonical="/profile" />
+      <SEO title="Profile" canonical="/profile" noindex />
       <div className="container mx-auto px-6 md:px-12 lg:px-20 pt-24 pb-16 max-w-4xl">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
 

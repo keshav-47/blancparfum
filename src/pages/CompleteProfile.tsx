@@ -74,7 +74,7 @@ const CompleteProfile = () => {
 
   return (
     <Layout>
-      <SEO title="Complete Your Profile" />
+      <SEO title="Complete Your Profile" noindex />
       <div className="min-h-[80vh] flex items-center justify-center px-4 pt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -20,13 +20,20 @@ const Index = () => {
     <Layout>
       <SEO
         canonical="/"
+        description="Shop handcrafted Extrait de Parfum by BLANC PARFUM. Luxury niche fragrances for men, women & unisex — crafted in India with the world's rarest ingredients."
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Store",
           "name": "BLANC PARFUM",
-          "url": "https://blancparfum.lovable.app",
-          "description": "Handcrafted Extrait de Parfum. Luxury niche fragrances.",
-          "priceRange": "$$$",
+          "url": "https://blancparfum.in",
+          "description": "Handcrafted Extrait de Parfum. Luxury niche fragrances crafted in India.",
+          "priceRange": "\u20B9\u20B9\u20B9",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Meerut",
+            "addressRegion": "Uttar Pradesh",
+            "addressCountry": "IN",
+          },
         }}
       />
       <main>

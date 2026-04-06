@@ -140,7 +140,11 @@ const Shop = () => {
 
   return (
     <Layout>
-      <SEO title={hero.title} canonical="/shop" />
+      <SEO
+        title={hero.title}
+        description={`Shop ${hero.title} — ${hero.subtitle}. Handcrafted Extrait de Parfum by BLANC PARFUM.`}
+        canonical={category === "all" ? "/shop" : `/shop?category=${category}`}
+      />
 
       {/* Hero - compact, modern */}
       <section className="relative h-[45vh] md:h-[55vh] w-full overflow-hidden">
