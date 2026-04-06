@@ -94,7 +94,7 @@ const Cart = () => {
             <div className="space-y-3 text-sm font-body">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${subtotal}</span>
+                <span>₹{subtotal}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
