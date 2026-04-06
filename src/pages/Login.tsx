@@ -48,8 +48,9 @@ const Login = () => {
   useEffect(() => {
     const initGoogle = () => {
       if (window.google && googleBtnRef.current) {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "785552510309-hj18cn3tf1820ncd22a4usou7q7qrjmn.apps.googleusercontent.com";
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          client_id: clientId,
           callback: handleGoogleCallback,
         });
         window.google.accounts.id.renderButton(googleBtnRef.current, {
