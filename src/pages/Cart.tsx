@@ -3,14 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus, X, ArrowLeft, MapPin, ChevronRight, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { removeItemFromCart, updateItemQuantity, clearCart, fetchServerCart } from "@/store/slices/cartSlice";
-import { fetchUserProfile } from "@/store/slices/userSlice";
+import { fetchUserProfile, addAddress } from "@/store/slices/userSlice";
 import { useToast } from "@/hooks/use-toast";
 import apiClient from "@/api/apiClient";
+import type { Address } from "@/types";
 
 interface RazorpayOrderResponse {
   orderId: string;
@@ -36,6 +40,10 @@ const Cart = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [showAddrForm, setShowAddrForm] = useState(false);
+  const [addrSaving, setAddrSaving] = useState(false);
+  const emptyAddr: Omit<Address, "id"> = { label: "", street: "", city: "", state: "", zip: "", country: "India", isDefault: true };
+  const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
 
   useEffect(() => {
     if (document.getElementById("razorpay-script")) return;
@@ -243,15 +251,65 @@ const Cart = () => {
             <DialogTitle className="font-display text-xl tracking-wider">Delivery Address</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            {addresses.length === 0 ? (
-              <div className="text-center py-8 space-y-3">
-                <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto">
-                  <MapPin size={20} className="text-muted-foreground" strokeWidth={1.5} />
+            {addresses.length === 0 || showAddrForm ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Label <span className="text-destructive">*</span></Label>
+                    <Input placeholder="Home, Office..." value={addrForm.label} onChange={(e) => setAddrForm((f) => ({ ...f, label: e.target.value }))} className="rounded-lg" />
+                  </div>
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Street <span className="text-destructive">*</span></Label>
+                    <Input placeholder="123 Main St, Apt 4" value={addrForm.street} onChange={(e) => setAddrForm((f) => ({ ...f, street: e.target.value }))} className="rounded-lg" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">City <span className="text-destructive">*</span></Label>
+                    <Input value={addrForm.city} onChange={(e) => setAddrForm((f) => ({ ...f, city: e.target.value }))} className="rounded-lg" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">State <span className="text-destructive">*</span></Label>
+                    <Input value={addrForm.state} onChange={(e) => setAddrForm((f) => ({ ...f, state: e.target.value }))} className="rounded-lg" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">PIN Code <span className="text-destructive">*</span></Label>
+                    <Input value={addrForm.zip} onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value }))} className="rounded-lg" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Country <span className="text-destructive">*</span></Label>
+                    <Input value={addrForm.country} onChange={(e) => setAddrForm((f) => ({ ...f, country: e.target.value }))} className="rounded-lg" />
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground font-body">No saved addresses yet.</p>
-                <Button asChild variant="outline" size="sm" className="text-[11px] uppercase tracking-[0.15em] rounded-full font-body">
-                  <Link to="/profile" onClick={() => setCheckoutOpen(false)}>Add Address</Link>
-                </Button>
+                <div className="flex items-center gap-3 pt-1">
+                  <Switch checked={addrForm.isDefault} onCheckedChange={(v) => setAddrForm((f) => ({ ...f, isDefault: v }))} />
+                  <Label className="text-[11px] uppercase tracking-[0.15em] cursor-pointer font-body font-medium">Set as default</Label>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  {showAddrForm && addresses.length > 0 && (
+                    <Button variant="outline" onClick={() => setShowAddrForm(false)} className="flex-1 rounded-full uppercase tracking-[0.15em] text-[11px] h-11 font-body font-medium">
+                      Cancel
+                    </Button>
+                  )}
+                  <Button
+                    disabled={addrSaving || !addrForm.label || !addrForm.street || !addrForm.city || !addrForm.state || !addrForm.zip}
+                    onClick={async () => {
+                      setAddrSaving(true);
+                      try {
+                        const saved = await dispatch(addAddress(addrForm)).unwrap();
+                        setSelectedAddressId(saved.id);
+                        setShowAddrForm(false);
+                        setAddrForm(emptyAddr);
+                        toast({ title: "Address saved" });
+                      } catch {
+                        toast({ title: "Failed to save address", variant: "destructive" });
+                      } finally {
+                        setAddrSaving(false);
+                      }
+                    }}
+                    className="flex-1 rounded-full uppercase tracking-[0.15em] text-[11px] h-11 font-body font-medium"
+                  >
+                    {addrSaving ? "Saving\u2026" : "Save & Continue"}
+                  </Button>
+                </div>
               </div>
             ) : (
               <>
@@ -284,6 +342,13 @@ const Cart = () => {
                     </div>
                   </button>
                 ))}
+                <button
+                  onClick={() => { setShowAddrForm(true); setAddrForm(emptyAddr); }}
+                  className="w-full text-[11px] text-muted-foreground hover:text-foreground font-body font-medium uppercase tracking-[0.15em] py-2 transition-colors"
+                >
+                  + Add new address
+                </button>
+
                 <div className="pt-3 space-y-3">
                   <div className="flex justify-between text-sm text-muted-foreground font-body border-t border-border pt-4">
                     <span>Total</span>
