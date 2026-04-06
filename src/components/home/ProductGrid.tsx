@@ -21,7 +21,7 @@ const ProductGrid = () => {
   });
 
   return (
-    <section className="py-20 px-4 lg:px-8">
+    <section id="product-grid" className="py-20 px-4 lg:px-8">
       <div className="container mx-auto">
         <h2 className="font-display text-4xl md:text-5xl text-center mb-4">Our Fragrances</h2>
         <p className="text-center text-muted-foreground text-sm uppercase tracking-[0.2em] mb-12">

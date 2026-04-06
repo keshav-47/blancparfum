@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAppDispatch } from "@/store/hooks";
+import { setFilter } from "@/store/slices/productsSlice";
 
 const slides = [
   {
@@ -9,22 +11,26 @@ const slides = [
     title: "The Art of Scent",
     subtitle: "Discover BLANC's newest collection",
     cta: "Explore Now",
+    filter: "all",
   },
   {
     image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=1920&q=80",
     title: "Lumière d'Or",
     subtitle: "Golden hour, bottled",
     cta: "Shop Women",
+    filter: "women",
   },
   {
     image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=1920&q=80",
     title: "Noir Absolu",
     subtitle: "Dark. Magnetic. Unforgettable.",
     cta: "Shop Men",
+    filter: "men",
   },
 ];
 
 const HeroCarousel = () => {
+  const dispatch = useAppDispatch();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -73,6 +79,10 @@ const HeroCarousel = () => {
             </p>
             <Button
               variant="outline"
+              onClick={() => {
+                dispatch(setFilter(slides[current].filter));
+                document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="border-primary/40 text-primary bg-transparent hover:bg-primary hover:text-primary-foreground uppercase tracking-[0.2em] text-xs px-8 py-3 h-auto rounded-none"
             >
               {slides[current].cta}
