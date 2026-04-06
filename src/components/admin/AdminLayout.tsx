@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, Sparkles, ArrowLeft, Layers } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Sparkles, ArrowLeft, Layers, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -54,7 +54,17 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto flex flex-col">
+        {/* Top header */}
+        <header className="h-14 border-b border-border bg-card flex items-center justify-end px-8 shrink-0">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-xs uppercase tracking-widest font-body text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Store size={14} />
+            Back to Store
+          </Link>
+        </header>
         <div className="p-8 max-w-6xl">
           <Outlet />
         </div>

@@ -51,8 +51,12 @@ const Navbar = () => {
         {/* Right icons */}
         <div className="flex items-center gap-5">
           {isAdmin && (
-            <Link to="/admin" className="text-foreground/70 hover:text-primary transition-colors" title="Admin Panel">
-              <Shield size={18} />
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] font-body text-foreground/70 hover:text-primary transition-colors border border-border rounded px-2.5 py-1"
+            >
+              <Shield size={12} />
+              Admin
             </Link>
           )}
           <Link to={isAuthenticated ? "/profile" : "/login"} className="text-foreground/70 hover:text-primary transition-colors">
