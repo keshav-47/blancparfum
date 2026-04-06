@@ -14,6 +14,7 @@ import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import CompleteProfile from "./pages/CompleteProfile";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import AdminGuard from "./components/admin/AdminGuard";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/custom" element={<CustomPerfume />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/about" element={<About />} />
               <Route path="/login" element={<Login />} />
               <Route path="/complete-profile" element={<CompleteProfile />} />
               <Route path="/profile" element={<Profile />} />
