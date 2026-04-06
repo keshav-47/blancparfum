@@ -81,7 +81,7 @@ const Cart = () => {
                         <Plus size={12} />
                       </button>
                     </div>
-                    <p className="font-body">${item.price * item.quantity}</p>
+                    <p className="font-body">₹{item.price * item.quantity}</p>
                   </div>
                 </div>
               </motion.div>
@@ -94,18 +94,18 @@ const Cart = () => {
             <div className="space-y-3 text-sm font-body">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${subtotal}</span>
+                <span>₹{subtotal}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
-                <span>{shipping === 0 ? "Free" : `$${shipping}`}</span>
+                <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
               </div>
               {shipping > 0 && (
-                <p className="text-xs text-accent">Free shipping on orders over $200</p>
+                <p className="text-xs text-accent">Free shipping on orders over ₹200</p>
               )}
               <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
                 <span>Total</span>
-                <span>${total}</span>
+                <span>₹{total}</span>
               </div>
             </div>
             <Button className="w-full mt-6 h-12 rounded-none uppercase tracking-[0.15em] text-xs">

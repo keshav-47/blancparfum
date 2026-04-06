@@ -51,7 +51,7 @@ const ProductDetail = () => {
     <Layout>
       <SEO
         title={product.name}
-        description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM. From $${product.sizes[0].price}.`}
+        description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM. From ₹${product.sizes[0].price}.`}
         canonical={`/product/${product.id}`}
         type="product"
         image={product.images[0]}
@@ -102,7 +102,7 @@ const ProductDetail = () => {
             )}
             <h1 className="font-display text-4xl md:text-5xl font-medium mb-2">{product.name}</h1>
             <p className="text-sm text-muted-foreground uppercase tracking-wider mb-6">{product.tagline}</p>
-            <p className="font-body text-2xl mb-8">${currentSize.price}</p>
+            <p className="font-body text-2xl mb-8">₹{currentSize.price}</p>
 
             {/* Size selector */}
             <div className="mb-8">
@@ -143,7 +143,7 @@ const ProductDetail = () => {
               onClick={handleAddToCart}
               className="w-full h-14 rounded-none uppercase tracking-[0.2em] text-xs font-body"
             >
-              Add to Cart — ${currentSize.price * quantity}
+              Add to Cart — ₹{currentSize.price * quantity}
             </Button>
 
             {/* Tabs */}
