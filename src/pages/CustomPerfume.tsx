@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { submitCustomRequest, resetSubmitted } from "@/store/slices/customRequestsSlice";
+import { useToast } from "@/hooks/use-toast";
 
 const scentFamilies = ["Floral", "Woody", "Oriental", "Fresh", "Citrus", "Gourmand", "Aquatic", "Spicy"];
 const occasions = ["Everyday", "Evening", "Special Occasion", "Office", "Date Night", "Summer", "Winter"];
@@ -18,6 +20,9 @@ const intensities: Array<{ key: "light" | "moderate" | "strong"; label: string; 
 
 const CustomPerfume = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { loading, submitted } = useAppSelector((state) => state.customRequests);
 
   const [step, setStep] = useState(0);
@@ -33,6 +38,11 @@ const CustomPerfume = () => {
   };
 
   const handleSubmit = () => {
+    if (!isAuthenticated) {
+      toast({ title: "Please sign in to submit your request" });
+      navigate("/login");
+      return;
+    }
     dispatch(submitCustomRequest({
       scentFamilies: selectedFamilies,
       occasion,
