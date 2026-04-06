@@ -1,141 +1,125 @@
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { Save } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchAdminCustomRequests, updateCustomRequestStatus } from "@/store/slices/adminSlice";
-import { CustomRequest } from "@/types";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import type { CustomRequest } from "@/types";
 
-const statusOptions: CustomRequest["status"][] = ["pending", "in_progress", "completed", "cancelled"];
+const statuses: CustomRequest["status"][] = ["pending", "in_progress", "completed", "cancelled"];
 
 const statusColor: Record<CustomRequest["status"], string> = {
-  pending: "bg-secondary text-muted-foreground",
-  in_progress: "bg-accent/10 text-accent",
-  completed: "bg-green-500/10 text-green-600",
-  cancelled: "bg-destructive/10 text-destructive",
+  pending: "bg-yellow-600/20 text-yellow-700 border-yellow-600/30",
+  in_progress: "bg-blue-600/20 text-blue-700 border-blue-600/30",
+  completed: "bg-green-600/20 text-green-700 border-green-600/30",
+  cancelled: "bg-red-600/20 text-red-700 border-red-600/30",
 };
 
 const AdminCustomRequests = () => {
   const dispatch = useAppDispatch();
   const { customRequests, loading } = useAppSelector((s) => s.admin);
-  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<CustomRequest | null>(null);
-  const [adminNotes, setAdminNotes] = useState("");
+  const { toast } = useToast();
+  const [editNotes, setEditNotes] = useState<Record<string, string>>({});
+
+  useEffect(() => { dispatch(fetchAdminCustomRequests()); }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchAdminCustomRequests());
-  }, [dispatch]);
+    const map: Record<string, string> = {};
+    customRequests.forEach((r) => { map[r.id] = r.notes ?? ""; });
+    setEditNotes(map);
+  }, [customRequests]);
 
   const handleStatusChange = async (id: string, status: CustomRequest["status"]) => {
     try {
-      await dispatch(updateCustomRequestStatus({ id, status })).unwrap();
-      toast({ title: "Request updated" });
+      await dispatch(updateCustomRequestStatus({ id, status, notes: editNotes[id] })).unwrap();
+      toast({ title: `Status updated to ${status.replace("_", " ")}` });
     } catch {
-      toast({ title: "Error", description: "Failed to update", variant: "destructive" });
+      toast({ title: "Failed to update", variant: "destructive" });
     }
   };
 
-  const openNotesDialog = (req: CustomRequest) => {
-    setSelectedRequest(req);
-    setAdminNotes(req.notes || "");
-    setNotesDialogOpen(true);
-  };
-
-  const saveNotes = async () => {
-    if (!selectedRequest) return;
+  const handleSaveNotes = async (r: CustomRequest) => {
     try {
-      await dispatch(updateCustomRequestStatus({ id: selectedRequest.id, status: selectedRequest.status, notes: adminNotes })).unwrap();
+      await dispatch(updateCustomRequestStatus({ id: r.id, status: r.status, notes: editNotes[r.id] })).unwrap();
       toast({ title: "Notes saved" });
-      setNotesDialogOpen(false);
     } catch {
-      toast({ title: "Error", description: "Failed to save notes", variant: "destructive" });
+      toast({ title: "Failed to save notes", variant: "destructive" });
     }
   };
 
   return (
     <div>
-      <h1 className="font-display text-3xl mb-8">Custom Requests</h1>
+      <h1 className="font-display text-2xl tracking-wider mb-8">Custom Requests</h1>
 
-      {loading ? (
-        <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-full" />)}</div>
-      ) : customRequests.length === 0 ? (
-        <p className="text-muted-foreground">No custom requests found.</p>
-      ) : (
-        <div className="space-y-4">
-          {customRequests.map((req) => (
-            <div key={req.id} className="border border-border p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{req.date}</p>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-[10px] uppercase tracking-wider px-3 py-1 ${statusColor[req.status]}`}>
-                      {req.status.replace("_", " ")}
-                    </span>
+      <div className="rounded-md border border-border overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs uppercase tracking-wider">Date</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Scent Families</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Occasion</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Intensity</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Message</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider min-w-[200px]">Admin Notes</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading && !customRequests.length ? (
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+            ) : customRequests.length === 0 ? (
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No custom requests</TableCell></TableRow>
+            ) : customRequests.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell className="text-sm whitespace-nowrap">{format(new Date(r.date), "dd MMM yyyy")}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {r.scentFamilies.map((f) => (
+                      <Badge key={f} variant="outline" className="text-[10px]">{f}</Badge>
+                    ))}
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Select value={req.status} onValueChange={(v) => handleStatusChange(req.id, v as CustomRequest["status"])}>
-                    <SelectTrigger className="w-36 h-8 text-xs">
-                      <SelectValue />
+                </TableCell>
+                <TableCell className="text-sm">{r.occasion}</TableCell>
+                <TableCell><Badge variant="outline" className="text-[10px] uppercase">{r.intensity}</Badge></TableCell>
+                <TableCell className="text-sm max-w-[180px] truncate">{r.message || "—"}</TableCell>
+                <TableCell>
+                  <Select value={r.status} onValueChange={(v) => handleStatusChange(r.id, v as CustomRequest["status"])}>
+                    <SelectTrigger className="w-32 h-8 text-xs">
+                      <Badge variant="outline" className={`text-[10px] uppercase ${statusColor[r.status]}`}>
+                        {r.status.replace("_", " ")}
+                      </Badge>
                     </SelectTrigger>
                     <SelectContent>
-                      {statusOptions.map((s) => (
-                        <SelectItem key={s} value={s} className="text-xs capitalize">{s.replace("_", " ")}</SelectItem>
+                      {statuses.map((s) => (
+                        <SelectItem key={s} value={s} className="uppercase text-xs">{s.replace("_", " ")}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" size="sm" onClick={() => openNotesDialog(req)} className="text-xs">
-                    Notes
-                  </Button>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 text-sm font-body">
-                <div>
-                  <span className="text-muted-foreground">Scent Families: </span>
-                  {req.scentFamilies.join(", ")}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Occasion: </span>
-                  {req.occasion}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Intensity: </span>
-                  {req.intensity}
-                </div>
-              </div>
-              {req.message && (
-                <p className="text-sm mt-3 text-muted-foreground italic font-body">"{req.message}"</p>
-              )}
-              {req.notes && (
-                <p className="text-sm mt-2 font-body border-t border-border pt-2">
-                  <span className="text-muted-foreground">Admin Notes: </span>{req.notes}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Notes Dialog */}
-      <Dialog open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-display">Admin Notes</DialogTitle>
-          </DialogHeader>
-          <Textarea
-            value={adminNotes}
-            onChange={(e) => setAdminNotes(e.target.value)}
-            rows={5}
-            placeholder="Add notes about this custom request..."
-          />
-          <Button onClick={saveNotes} className="rounded-none uppercase tracking-widest text-xs">
-            Save Notes
-          </Button>
-        </DialogContent>
-      </Dialog>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-start gap-1">
+                    <Textarea
+                      value={editNotes[r.id] ?? ""}
+                      onChange={(e) => setEditNotes((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                      rows={2}
+                      className="text-xs min-w-[160px]"
+                      placeholder="Admin notes…"
+                    />
+                    <Button variant="ghost" size="icon" onClick={() => handleSaveNotes(r)} className="shrink-0 mt-0.5">
+                      <Save size={14} />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

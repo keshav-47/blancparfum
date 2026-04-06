@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, User, Menu, X } from "lucide-react";
+import { ShoppingBag, User, Menu, X, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
 import logo from "@/assets/blanc-logo.png";
@@ -8,7 +8,8 @@ import logo from "@/assets/blanc-logo.png";
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const cartItems = useAppSelector((state) => state.cart.items);
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const isAdmin = isAuthenticated && user?.role === "ADMIN";
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
   const navLinks = [
@@ -49,6 +50,11 @@ const Navbar = () => {
 
         {/* Right icons */}
         <div className="flex items-center gap-5">
+          {isAdmin && (
+            <Link to="/admin" className="text-foreground/70 hover:text-primary transition-colors" title="Admin Panel">
+              <Shield size={18} />
+            </Link>
+          )}
           <Link to={isAuthenticated ? "/profile" : "/login"} className="text-foreground/70 hover:text-primary transition-colors">
             <User size={18} />
           </Link>

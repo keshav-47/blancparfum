@@ -74,6 +74,22 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+export const uploadProductImage = createAsyncThunk(
+  "admin/uploadProductImage",
+  async ({ id, file }: { id: string; file: File }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await apiClient.post<Product>(`/admin/products/${id}/images`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data;
+    } catch {
+      return rejectWithValue("Failed to upload image");
+    }
+  }
+);
+
 export const fetchAdminOrders = createAsyncThunk("admin/fetchOrders", async (_, { rejectWithValue }) => {
   try {
     const res = await apiClient.get<Order[]>("/admin/orders");
@@ -87,7 +103,7 @@ export const updateOrderStatus = createAsyncThunk(
   "admin/updateOrderStatus",
   async ({ id, status }: { id: string; status: Order["status"] }, { rejectWithValue }) => {
     try {
-      const res = await apiClient.put<Order>(`/admin/orders/${id}`, { status });
+      const res = await apiClient.put<Order>(`/admin/orders/${id}/status`, { status });
       return res.data;
     } catch {
       return rejectWithValue("Failed to update order");
@@ -122,11 +138,9 @@ const adminSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Dashboard
       .addCase(fetchDashboard.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(fetchDashboard.fulfilled, (state, action) => { state.loading = false; state.dashboard = action.payload; })
       .addCase(fetchDashboard.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; })
-      // Products
       .addCase(fetchAdminProducts.pending, (state) => { state.loading = true; })
       .addCase(fetchAdminProducts.fulfilled, (state, action) => { state.loading = false; state.products = action.payload; })
       .addCase(fetchAdminProducts.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; })
@@ -138,7 +152,10 @@ const adminSlice = createSlice({
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.products = state.products.filter((p) => p.id !== action.payload);
       })
-      // Orders
+      .addCase(uploadProductImage.fulfilled, (state, action) => {
+        const idx = state.products.findIndex((p) => p.id === action.payload.id);
+        if (idx !== -1) state.products[idx] = action.payload;
+      })
       .addCase(fetchAdminOrders.pending, (state) => { state.loading = true; })
       .addCase(fetchAdminOrders.fulfilled, (state, action) => { state.loading = false; state.orders = action.payload; })
       .addCase(fetchAdminOrders.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; })
@@ -146,7 +163,6 @@ const adminSlice = createSlice({
         const idx = state.orders.findIndex((o) => o.id === action.payload.id);
         if (idx !== -1) state.orders[idx] = action.payload;
       })
-      // Custom Requests
       .addCase(fetchAdminCustomRequests.pending, (state) => { state.loading = true; })
       .addCase(fetchAdminCustomRequests.fulfilled, (state, action) => { state.loading = false; state.customRequests = action.payload; })
       .addCase(fetchAdminCustomRequests.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; })

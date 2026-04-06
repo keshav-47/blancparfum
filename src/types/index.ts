@@ -19,6 +19,8 @@ export interface Product {
   };
   isNew: boolean;
   isFeatured: boolean;
+  isActive?: boolean;
+  stockQuantity?: number;
 }
 
 export interface Collection {
@@ -52,6 +54,7 @@ export interface Order {
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   items: OrderItem[];
   total: number;
+  customerName?: string;
 }
 
 export interface UserProfile {
