@@ -12,8 +12,13 @@ interface AuthState {
   error: string | null;
 }
 
+const storedUser = (() => {
+  try { return JSON.parse(localStorage.getItem("auth_user") || "null"); }
+  catch { return null; }
+})();
+
 const initialState: AuthState = {
-  user: null,
+  user: storedUser,
   token: localStorage.getItem("auth_token"),
   isAuthenticated: !!localStorage.getItem("auth_token"),
   loading: false,
@@ -97,6 +102,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.otpSent = false;
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
     },
     clearAuthError: (state) => {
       state.error = null;
@@ -111,6 +117,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = true;
+        localStorage.setItem("auth_user", JSON.stringify(action.payload.user));
       })
       .addCase(loginWithGoogle.rejected, (state, action) => {
         state.loading = false;
@@ -131,6 +138,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.otpSent = false;
+        localStorage.setItem("auth_user", JSON.stringify(action.payload.user));
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
