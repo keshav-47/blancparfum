@@ -236,7 +236,7 @@ const Cart = () => {
             </div>
             <Button
               onClick={openCheckout}
-              className="w-full mt-6 h-12 rounded-none uppercase tracking-[0.15em] text-xs"
+              className="w-full mt-6 h-12 rounded-none uppercase tracking-wider text-xs"
             >
               Proceed to Checkout
             </Button>
