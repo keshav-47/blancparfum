@@ -152,8 +152,9 @@ const About = () => (
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Address</p>
               <p className="text-sm leading-relaxed">
                 BLANC PARFUM<br />
-                Meerut, Uttar Pradesh<br />
-                India
+                The Bansuri Cafe<br />
+                Gate No. 8, Subharti University<br />
+                NH58, Meerut, Uttar Pradesh 250002
               </p>
             </div>
             <div>
