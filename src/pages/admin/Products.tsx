@@ -11,11 +11,24 @@ import { fetchAdminProducts, createProduct, updateProduct, deleteProduct } from 
 import { Product } from "@/types";
 import { toast } from "@/hooks/use-toast";
 
-const emptyProduct = {
+type ProductForm = {
+  name: string;
+  tagline: string;
+  price: number;
+  category: "men" | "women" | "unisex";
+  images: string[];
+  sizes: { ml: number; price: number }[];
+  description: string;
+  notes: { top: string[]; heart: string[]; base: string[] };
+  isNew: boolean;
+  isFeatured: boolean;
+};
+
+const emptyProduct: ProductForm = {
   name: "",
   tagline: "",
   price: 0,
-  category: "unisex" as const,
+  category: "unisex",
   images: [""],
   sizes: [{ ml: 30, price: 0 }, { ml: 50, price: 0 }, { ml: 100, price: 0 }],
   description: "",
