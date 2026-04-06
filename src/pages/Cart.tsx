@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Minus, Plus, X, ArrowLeft, MapPin, ChevronRight } from "lucide-react";
+import { Minus, Plus, X, ArrowLeft, MapPin, ChevronRight, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -37,7 +37,6 @@ const Cart = () => {
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  // Load Razorpay SDK once
   useEffect(() => {
     if (document.getElementById("razorpay-script")) return;
     const script = document.createElement("script");
@@ -47,7 +46,6 @@ const Cart = () => {
     document.body.appendChild(script);
   }, []);
 
-  // Fetch profile (for addresses) and server cart when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       if (!profile) dispatch(fetchUserProfile());
@@ -58,10 +56,7 @@ const Cart = () => {
   const addresses = profile?.addresses ?? [];
 
   const openCheckout = () => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
+    if (!isAuthenticated) { navigate("/login"); return; }
     const def = addresses.find((a) => a.isDefault) ?? addresses[0];
     if (def) setSelectedAddressId(def.id);
     setCheckoutOpen(true);
@@ -74,14 +69,8 @@ const Cart = () => {
     }
     setCheckoutLoading(true);
     try {
-      // Step 1 – create order & get Razorpay order
-      const { data } = await apiClient.post<RazorpayOrderResponse>("/orders", {
-        addressId: selectedAddressId,
-      });
-
+      const { data } = await apiClient.post<RazorpayOrderResponse>("/orders", { addressId: selectedAddressId });
       setCheckoutOpen(false);
-
-      // Step 2 – open Razorpay checkout
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const Razorpay = (window as any).Razorpay;
       if (!Razorpay) {
@@ -89,7 +78,6 @@ const Cart = () => {
         setCheckoutLoading(false);
         return;
       }
-
       const rzp = new Razorpay({
         key: data.keyId,
         amount: data.amount,
@@ -99,7 +87,6 @@ const Cart = () => {
         description: "Luxury Extrait de Parfum",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handler: async (response: any) => {
-          // Step 3 – verify payment
           try {
             await apiClient.post(`/orders/${data.orderId}/verify`, {
               razorpayOrderId: response.razorpay_order_id,
@@ -113,36 +100,20 @@ const Cart = () => {
             toast({ title: "Payment verification failed. Contact support.", variant: "destructive" });
           }
         },
-        modal: {
-          ondismiss: () => setCheckoutLoading(false),
-        },
-        prefill: {
-          name: user?.name ?? "",
-          email: user?.email ?? "",
-          contact: user?.phone ?? "",
-        },
+        modal: { ondismiss: () => setCheckoutLoading(false) },
+        prefill: { name: user?.name ?? "", email: user?.email ?? "", contact: user?.phone ?? "" },
         config: {
           display: {
-            blocks: {
-              upi_block: {
-                name: "Pay using UPI",
-                instruments: [
-                  { method: "upi", flows: ["collect", "qrcode"] },
-                ],
-              },
-            },
+            blocks: { upi_block: { name: "Pay using UPI", instruments: [{ method: "upi", flows: ["collect", "qrcode"] }] } },
             sequence: ["block.upi_block"],
             preferences: { show_default_blocks: true },
           },
         },
-        theme: { color: "#0f0f0f" },
+        theme: { color: "#B8860B" },
       });
-
       rzp.open();
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Checkout failed. Please try again.";
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Checkout failed. Please try again.";
       toast({ title: msg, variant: "destructive" });
       setCheckoutLoading(false);
     }
@@ -151,11 +122,14 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <Layout>
-        <div className="min-h-[70vh] flex flex-col items-center justify-center px-4">
-          <h2 className="font-display text-3xl mb-4">Your Cart is Empty</h2>
-          <p className="text-muted-foreground mb-8">Discover our fragrances and find your signature scent.</p>
-          <Button asChild className="rounded-none uppercase tracking-[0.15em] text-xs">
-            <Link to="/">Shop Now</Link>
+        <div className="min-h-[70vh] flex flex-col items-center justify-center px-6">
+          <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-6">
+            <ShoppingBag size={24} className="text-muted-foreground" strokeWidth={1.5} />
+          </div>
+          <h2 className="font-display text-3xl mb-2">Your Cart is Empty</h2>
+          <p className="text-muted-foreground font-body text-sm mb-8">Discover our fragrances and find your signature scent.</p>
+          <Button asChild className="rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium px-8 h-11">
+            <Link to="/shop">Shop Now</Link>
           </Button>
         </div>
       </Layout>
@@ -164,58 +138,61 @@ const Cart = () => {
 
   return (
     <Layout>
-      <SEO title="Shopping Cart" description="Review your BLANC PARFUM selections and proceed to checkout." canonical="/cart" />
-      <div className="container mx-auto px-4 lg:px-8 py-12 max-w-4xl">
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-8">
-          <ArrowLeft size={16} /> Continue Shopping
+      <SEO title="Shopping Cart" canonical="/cart" />
+      <div className="container mx-auto px-6 md:px-12 lg:px-20 pt-24 pb-16 max-w-5xl">
+        <Link
+          to="/shop"
+          className="group inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-[11px] font-body font-medium uppercase tracking-[0.15em] mb-10"
+        >
+          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" /> Continue Shopping
         </Link>
 
-        <h1 className="font-display text-4xl mb-10">Shopping Cart</h1>
+        <h1 className="font-display text-4xl font-light mb-10">Shopping Cart</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Items */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-0 divide-y divide-border">
             {items.map((item, i) => (
               <motion.div
                 key={`${item.productId}-${item.size}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="flex gap-4 pb-6 border-b border-border"
+                transition={{ delay: i * 0.08 }}
+                className="flex gap-5 py-6 first:pt-0"
               >
-                <div className="w-24 h-28 bg-secondary overflow-hidden flex-shrink-0">
+                <div className="w-24 h-28 bg-secondary overflow-hidden rounded-lg flex-shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-display text-lg">{item.name}</h3>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">{item.size}ml</p>
+                      <p className="text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body">{item.size}ml</p>
                     </div>
                     <button
                       onClick={() => dispatch(removeItemFromCart({ productId: item.productId, size: item.size }))}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1"
                     >
-                      <X size={16} />
+                      <X size={16} strokeWidth={1.5} />
                     </button>
                   </div>
                   <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center gap-3">
+                    <div className="inline-flex items-center border border-border rounded-full overflow-hidden">
                       <button
                         onClick={() => dispatch(updateItemQuantity({ productId: item.productId, size: item.size, quantity: item.quantity - 1 }))}
-                        className="w-8 h-8 border border-border flex items-center justify-center hover:border-foreground transition-colors"
+                        className="w-8 h-8 flex items-center justify-center hover:bg-secondary transition-colors"
                       >
                         <Minus size={12} />
                       </button>
-                      <span className="text-sm w-6 text-center">{item.quantity}</span>
+                      <span className="text-sm font-body w-7 text-center">{item.quantity}</span>
                       <button
                         onClick={() => dispatch(updateItemQuantity({ productId: item.productId, size: item.size, quantity: item.quantity + 1 }))}
-                        className="w-8 h-8 border border-border flex items-center justify-center hover:border-foreground transition-colors"
+                        className="w-8 h-8 flex items-center justify-center hover:bg-secondary transition-colors"
                       >
                         <Plus size={12} />
                       </button>
                     </div>
-                    <p className="font-body">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
+                    <p className="font-body font-medium">{"\u20B9"}{(item.price * item.quantity).toLocaleString("en-IN")}</p>
                   </div>
                 </div>
               </motion.div>
@@ -223,56 +200,57 @@ const Cart = () => {
           </div>
 
           {/* Summary */}
-          <div className="bg-secondary p-8 min-w-0 overflow-hidden">
-            <h3 className="font-display text-xl mb-6">Order Summary</h3>
-            <div className="space-y-3 text-sm font-body">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>₹{subtotal.toLocaleString("en-IN")}</span>
+          <div className="lg:sticky lg:top-24 self-start">
+            <div className="bg-secondary/50 rounded-2xl p-8">
+              <h3 className="font-display text-xl mb-6">Order Summary</h3>
+              <div className="space-y-3 text-sm font-body">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>{"\u20B9"}{subtotal.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span>{shipping === 0 ? "Free" : `\u20B9${shipping}`}</span>
+                </div>
+                {shipping > 0 && (
+                  <p className="text-[11px] text-muted-foreground">Free shipping on orders over {"\u20B9"}2,000</p>
+                )}
+                <div className="border-t border-border pt-4 mt-4 flex justify-between font-medium text-base">
+                  <span>Total</span>
+                  <span>{"\u20B9"}{total.toLocaleString("en-IN")}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
-                <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
-              </div>
-              {shipping > 0 && (
-                <p className="text-xs text-muted-foreground">Free shipping on orders over ₹2,000</p>
+              <Button
+                onClick={openCheckout}
+                className="w-full mt-6 h-12 rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium"
+              >
+                Proceed to Checkout
+              </Button>
+              {!isAuthenticated && (
+                <p className="text-[11px] text-muted-foreground text-center mt-3 font-body">
+                  You'll be asked to sign in
+                </p>
               )}
-              <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
-                <span>Total</span>
-                <span>₹{total.toLocaleString("en-IN")}</span>
-              </div>
             </div>
-            <Button
-              onClick={openCheckout}
-              className="w-full mt-6 h-12 rounded-none uppercase tracking-wider text-xs"
-            >
-              Proceed to Checkout
-            </Button>
-            {!isAuthenticated && (
-              <p className="text-xs text-muted-foreground text-center mt-3">
-                You'll be asked to sign in
-              </p>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Address selection dialog */}
+      {/* Address dialog */}
       <Dialog open={checkoutOpen} onOpenChange={(o) => { setCheckoutOpen(o); if (!o) setCheckoutLoading(false); }}>
-        <DialogContent className="max-w-md bg-card">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display tracking-wider">Select Delivery Address</DialogTitle>
+            <DialogTitle className="font-display text-xl tracking-wider">Delivery Address</DialogTitle>
           </DialogHeader>
-
           <div className="space-y-3 py-2">
             {addresses.length === 0 ? (
-              <div className="text-center py-6 space-y-3">
-                <MapPin size={28} className="mx-auto text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">No saved addresses yet.</p>
-                <Button asChild variant="outline" size="sm" className="text-xs uppercase tracking-wider rounded-none">
-                  <Link to="/profile" onClick={() => setCheckoutOpen(false)}>
-                    Add Address in Profile
-                  </Link>
+              <div className="text-center py-8 space-y-3">
+                <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto">
+                  <MapPin size={20} className="text-muted-foreground" strokeWidth={1.5} />
+                </div>
+                <p className="text-sm text-muted-foreground font-body">No saved addresses yet.</p>
+                <Button asChild variant="outline" size="sm" className="text-[11px] uppercase tracking-[0.15em] rounded-full font-body">
+                  <Link to="/profile" onClick={() => setCheckoutOpen(false)}>Add Address</Link>
                 </Button>
               </div>
             ) : (
@@ -282,44 +260,42 @@ const Cart = () => {
                     key={addr.id}
                     type="button"
                     onClick={() => setSelectedAddressId(addr.id)}
-                    className={`w-full text-left p-4 rounded border transition-colors ${
+                    className={`w-full text-left p-4 rounded-xl border transition-all duration-300 ${
                       selectedAddressId === addr.id
-                        ? "border-foreground bg-secondary"
-                        : "border-border hover:border-foreground/40 hover:bg-secondary/40"
+                        ? "border-foreground bg-secondary/50"
+                        : "border-border hover:border-foreground/30"
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-sm font-medium flex items-center gap-2">
+                        <p className="text-sm font-body font-medium flex items-center gap-2">
                           {addr.label}
                           {addr.isDefault && (
-                            <span className="text-[9px] uppercase tracking-wider bg-foreground text-background px-1.5 py-0.5 rounded-sm">Default</span>
+                            <span className="text-[9px] uppercase tracking-[0.1em] bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium">Default</span>
                           )}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        <p className="text-[11px] text-muted-foreground font-body mt-1 leading-relaxed">
                           {addr.street}, {addr.city}, {addr.state} – {addr.zip}
                         </p>
-                        <p className="text-xs text-muted-foreground">{addr.country}</p>
                       </div>
-                      {selectedAddressId === addr.id && (
-                        <div className="w-4 h-4 rounded-full bg-foreground shrink-0 mt-0.5" />
-                      )}
+                      <div className={`w-4 h-4 rounded-full border-2 shrink-0 mt-0.5 transition-colors ${
+                        selectedAddressId === addr.id ? "border-foreground bg-foreground" : "border-border"
+                      }`} />
                     </div>
                   </button>
                 ))}
-
-                <div className="pt-2 space-y-2">
-                  <div className="flex justify-between text-xs text-muted-foreground border-t border-border pt-3 font-body">
-                    <span>Total to pay</span>
-                    <span className="text-foreground font-semibold">₹{total.toLocaleString("en-IN")}</span>
+                <div className="pt-3 space-y-3">
+                  <div className="flex justify-between text-sm text-muted-foreground font-body border-t border-border pt-4">
+                    <span>Total</span>
+                    <span className="text-foreground font-medium">{"\u20B9"}{total.toLocaleString("en-IN")}</span>
                   </div>
                   <Button
                     onClick={confirmCheckout}
                     disabled={!selectedAddressId || checkoutLoading}
-                    className="w-full rounded-none uppercase tracking-[0.15em] text-xs h-11 flex items-center gap-2"
+                    className="w-full rounded-full uppercase tracking-[0.15em] text-[11px] h-12 font-body font-medium gap-2"
                   >
-                    {checkoutLoading ? "Opening payment…" : (
-                      <><span>Pay ₹{total.toLocaleString("en-IN")}</span><ChevronRight size={14} /></>
+                    {checkoutLoading ? "Opening payment\u2026" : (
+                      <><span>Pay {"\u20B9"}{total.toLocaleString("en-IN")}</span><ChevronRight size={14} /></>
                     )}
                   </Button>
                 </div>
