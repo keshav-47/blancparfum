@@ -34,8 +34,7 @@ const Cart = () => {
   const { profile } = useAppSelector((s) => s.user);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shipping = subtotal >= 2000 ? 0 : 150;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState("");
@@ -233,11 +232,8 @@ const Cart = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span>{shipping === 0 ? "Free" : `\u20B9${shipping}`}</span>
+                  <span className="text-accent font-medium">Free</span>
                 </div>
-                {shipping > 0 && (
-                  <p className="text-[11px] text-muted-foreground">Free shipping on orders over {"\u20B9"}2,000</p>
-                )}
                 <div className="border-t border-border pt-4 mt-4 flex justify-between font-medium text-base">
                   <span>Total</span>
                   <span>{"\u20B9"}{total.toLocaleString("en-IN")}</span>
