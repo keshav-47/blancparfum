@@ -182,13 +182,15 @@ const Cart = () => {
                 transition={{ delay: i * 0.08 }}
                 className="flex gap-5 py-6 first:pt-0"
               >
-                <div className="w-24 h-28 bg-secondary overflow-hidden rounded-lg flex-shrink-0">
+                <Link to={`/product/${item.productId}`} className="w-24 h-28 bg-secondary overflow-hidden rounded-lg flex-shrink-0 hover:opacity-80 transition-opacity">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                </div>
+                </Link>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-display text-lg">{item.name}</h3>
+                      <Link to={`/product/${item.productId}`} className="hover:text-accent transition-colors">
+                        <h3 className="font-display text-lg">{item.name}</h3>
+                      </Link>
                       <p className="text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body">{item.size}ml</p>
                     </div>
                     <button
