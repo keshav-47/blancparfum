@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { setFilter } from "@/store/slices/productsSlice";
+import { addItemToCart } from "@/store/slices/cartSlice";
+import { toast } from "@/hooks/use-toast";
 
 const LIMIT = 6;
 
@@ -84,23 +86,48 @@ const ProductGrid = () => {
         >
           {filtered.map((product) => (
             <motion.div key={product.id} variants={cardVariants} layout>
-              <Link to={`/product/${product.id}`} className="group block">
-                <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
-                  <motion.img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    whileHover={{ scale: 1.04 }}
-                    transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-                  />
-                  {product.isNew && (
-                    <span className="absolute top-4 left-4 text-[10px] font-body font-medium uppercase tracking-[0.15em] bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full">
-                      New
-                    </span>
-                  )}
-                </div>
-                <div className="text-center space-y-1.5">
+              <div className="group relative">
+                <Link to={`/product/${product.id}`} className="block">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
+                    <motion.img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      whileHover={{ scale: 1.04 }}
+                      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                    />
+                    {product.isNew && (
+                      <span className="absolute top-4 left-4 text-[10px] font-body font-medium uppercase tracking-[0.15em] bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full">
+                        New
+                      </span>
+                    )}
+                  </div>
+                </Link>
+                {/* Quick add button */}
+                <button
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (!product.sizes[0]) return;
+                    try {
+                      await dispatch(addItemToCart({
+                        productId: product.id,
+                        name: product.name,
+                        image: product.images[0] || "",
+                        size: product.sizes[0].ml,
+                        price: product.sizes[0].price,
+                        quantity: 1,
+                      })).unwrap();
+                      toast({ title: `${product.name} added to cart` });
+                    } catch {
+                      toast({ title: "Failed to add", variant: "destructive" });
+                    }
+                  }}
+                  className="absolute bottom-[88px] left-1/2 -translate-x-1/2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-foreground text-background rounded-full px-5 py-2.5 text-[10px] font-body font-medium uppercase tracking-[0.15em] flex items-center gap-2 hover:bg-foreground/90 shadow-lg"
+                >
+                  <ShoppingBag size={12} strokeWidth={2} /> Quick Add
+                </button>
+                <Link to={`/product/${product.id}`} className="block text-center space-y-1.5">
                   <h3 className="font-display text-xl tracking-wider">{product.name}</h3>
                   <p className="text-[11px] font-body text-muted-foreground uppercase tracking-[0.15em]">
                     {product.tagline}
@@ -108,8 +135,8 @@ const ProductGrid = () => {
                   <p className="text-sm font-body text-foreground/70">
                     From {"\u20B9"}{product.sizes[0]?.price.toLocaleString("en-IN")}
                   </p>
-                </div>
-              </Link>
+                </Link>
+              </div>
             </motion.div>
           ))}
         </motion.div>

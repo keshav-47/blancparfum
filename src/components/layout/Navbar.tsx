@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, User, Menu, X, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,18 @@ const Navbar = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const isAdmin = isAuthenticated && user?.role === "ADMIN";
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+
+  // Bounce cart badge when count changes
+  const [cartBounce, setCartBounce] = useState(false);
+  const prevCount = useRef(cartCount);
+  useEffect(() => {
+    if (cartCount > prevCount.current) {
+      setCartBounce(true);
+      const t = setTimeout(() => setCartBounce(false), 600);
+      return () => clearTimeout(t);
+    }
+    prevCount.current = cartCount;
+  }, [cartCount]);
 
   const navLinks = [
     { to: "/shop", label: "Shop" },
@@ -64,11 +76,19 @@ const Navbar = () => {
           </Link>
           <Link to="/cart" className="relative text-foreground/60 hover:text-foreground transition-colors duration-300">
             <ShoppingBag size={18} strokeWidth={1.5} />
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-accent text-accent-foreground text-[9px] font-body font-semibold rounded-full w-4 h-4 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
+            <AnimatePresence>
+              {cartCount > 0 && (
+                <motion.span
+                  key={cartCount}
+                  initial={cartBounce ? { scale: 1.8 } : { scale: 1 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  className="absolute -top-1.5 -right-1.5 bg-accent text-accent-foreground text-[9px] font-body font-semibold rounded-full w-4 h-4 flex items-center justify-center"
+                >
+                  {cartCount}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </Link>
         </div>
       </nav>

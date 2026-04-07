@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import HeroCarousel from "@/components/home/HeroCarousel";
+import BrandMarquee from "@/components/home/BrandMarquee";
 import FeaturedCollections from "@/components/home/FeaturedCollections";
 import ProductGrid from "@/components/home/ProductGrid";
 import HorizontalProductScroll from "@/components/home/HorizontalProductScroll";
@@ -38,6 +39,7 @@ const Index = () => {
       />
       <main>
         <HeroCarousel />
+        <BrandMarquee />
         <HorizontalProductScroll />
         <FeaturedCollections />
         <ProductGrid />
