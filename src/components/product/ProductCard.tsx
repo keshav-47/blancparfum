@@ -10,7 +10,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
     >
-      <Link to={`/product/${product.id}`} className="group block">
+      <Link to={`/product/${product.slug || product.id}`} className="group block">
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
           <img
             src={product.images[0]}

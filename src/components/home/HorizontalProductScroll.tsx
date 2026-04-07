@@ -20,7 +20,7 @@ const HorizontalProductScroll = () => {
   const x = useTransform(scrollYProgress, [0, 1], ["0%", `-${(cardCount - 1) * (100 / cardCount)}%`]);
 
   const Card = ({ product, i }: { product: typeof featured[0]; i: number }) => (
-    <Link to={`/product/${product.id}`} className="group block">
+    <Link to={`/product/${product.slug || product.id}`} className="group block">
       <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
         <motion.img
           src={product.images[0]}

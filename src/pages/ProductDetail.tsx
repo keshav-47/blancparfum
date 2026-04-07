@@ -14,7 +14,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const products = useAppSelector((state) => state.products.items);
-  const product = products.find((p) => p.id === id);
+  const product = products.find((p) => p.id === id || p.slug === id);
 
   const [selectedSize, setSelectedSize] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -55,7 +55,7 @@ const ProductDetail = () => {
       <SEO
         title={product.name}
         description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM. From \u20B9${product.sizes[0].price}.`}
-        canonical={`/product/${product.id}`}
+        canonical={`/product/${product.slug || product.id}`}
         type="product"
         image={product.images[0]}
         jsonLd={{
@@ -241,7 +241,7 @@ const ProductDetail = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
                 >
-                  <Link to={`/product/${p.id}`} className="group block">
+                  <Link to={`/product/${p.slug || p.id}`} className="group block">
                     <div className="aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-4">
                       <motion.img
                         src={p.images[0]}

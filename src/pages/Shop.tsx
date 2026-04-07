@@ -64,7 +64,7 @@ const ShopCard = ({ product }: { product: Product }) => {
 
   return (
     <motion.div variants={cardVariants} layout>
-      <Link to={`/product/${product.id}`} className="group block">
+      <Link to={`/product/${product.slug || product.id}`} className="group block">
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
           <motion.img
             src={product.images[0]}

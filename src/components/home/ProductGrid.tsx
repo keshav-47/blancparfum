@@ -87,7 +87,7 @@ const ProductGrid = () => {
           {filtered.map((product) => (
             <motion.div key={product.id} variants={cardVariants} layout>
               <div className="group relative">
-                <Link to={`/product/${product.id}`} className="block">
+                <Link to={`/product/${product.slug || product.id}`} className="block">
                   <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
                     <motion.img
                       src={product.images[0]}
@@ -127,7 +127,7 @@ const ProductGrid = () => {
                 >
                   <ShoppingBag size={12} strokeWidth={2} /> Quick Add
                 </button>
-                <Link to={`/product/${product.id}`} className="block text-center space-y-1.5">
+                <Link to={`/product/${product.slug || product.id}`} className="block text-center space-y-1.5">
                   <h3 className="font-display text-xl tracking-wider">{product.name}</h3>
                   <p className="text-[11px] font-body text-muted-foreground uppercase tracking-[0.15em]">
                     {product.tagline}
