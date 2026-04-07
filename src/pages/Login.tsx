@@ -47,6 +47,7 @@ const Login = () => {
   const [verifying, setVerifying] = useState(false);
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const confirmationRef = useRef<ConfirmationResult | null>(null);
+  const autoVerifiedRef = useRef(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +146,7 @@ const Login = () => {
   };
 
   // Verify OTP via Firebase, then send ID token to our backend
-  const handleVerifyOtp = useCallback(async () => {
+  const handleVerifyOtp = async () => {
     if (otp.length < 6 || !confirmationRef.current || verifying) return;
     setFirebaseError(null);
     setVerifying(true);
@@ -164,14 +165,19 @@ const Login = () => {
     } finally {
       setVerifying(false);
     }
-  }, [otp, verifying, dispatch, navigate]);
+  };
 
-  // Auto-verify when all 6 digits entered
+  // Auto-verify once when all 6 digits entered
   useEffect(() => {
-    if (otp.length === 6 && confirmationRef.current && !verifying) {
+    if (otp.length === 6 && confirmationRef.current && !autoVerifiedRef.current) {
+      autoVerifiedRef.current = true;
       handleVerifyOtp();
     }
-  }, [otp, verifying, handleVerifyOtp]);
+    if (otp.length < 6) {
+      autoVerifiedRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [otp]);
 
   const displayError = firebaseError || error;
   const isLoading = loading || verifying;
