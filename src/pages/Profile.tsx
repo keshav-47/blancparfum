@@ -16,6 +16,7 @@ import { fetchUserProfile, fetchOrders, addAddress, updateAddress, deleteAddress
 import { fetchCustomRequests } from "@/store/slices/customRequestsSlice";
 import { logout } from "@/store/slices/authSlice";
 import { useToast } from "@/hooks/use-toast";
+import { usePincodeLookup } from "@/hooks/use-pincode";
 import type { Address } from "@/types";
 
 const emptyAddr: Omit<Address, "id"> = {
@@ -35,6 +36,14 @@ const Profile = () => {
   const [editingAddr, setEditingAddr] = useState<Address | null>(null);
   const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
   const [addrSaving, setAddrSaving] = useState(false);
+
+  // Auto-fill city/state from PIN code
+  const pinLookup = usePincodeLookup(addrForm.zip);
+  useEffect(() => {
+    if (pinLookup.city && pinLookup.state) {
+      setAddrForm((f) => ({ ...f, city: pinLookup.city, state: pinLookup.state }));
+    }
+  }, [pinLookup.city, pinLookup.state]);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate("/login"); return; }
@@ -293,7 +302,10 @@ const Profile = () => {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">PIN Code <span className="text-destructive">*</span></Label>
-                <Input value={addrForm.zip} onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value }))} className="rounded-lg" />
+                <div className="relative">
+                  <Input value={addrForm.zip} onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value.replace(/\D/g, "").slice(0, 6) }))} className="rounded-lg" placeholder="110001" maxLength={6} />
+                  {pinLookup.loading && <span className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />}
+                </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Country <span className="text-destructive">*</span></Label>

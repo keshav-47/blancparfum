@@ -13,6 +13,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { removeItemFromCart, updateItemQuantity, clearCart, fetchServerCart } from "@/store/slices/cartSlice";
 import { fetchUserProfile, addAddress } from "@/store/slices/userSlice";
 import { useToast } from "@/hooks/use-toast";
+import { usePincodeLookup } from "@/hooks/use-pincode";
 import apiClient from "@/api/apiClient";
 import type { Address } from "@/types";
 
@@ -44,6 +45,14 @@ const Cart = () => {
   const [addrSaving, setAddrSaving] = useState(false);
   const emptyAddr: Omit<Address, "id"> = { label: "", street: "", city: "", state: "", zip: "", country: "India", isDefault: true };
   const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
+
+  // Auto-fill city/state from PIN code
+  const pinLookup = usePincodeLookup(addrForm.zip);
+  useEffect(() => {
+    if (pinLookup.city && pinLookup.state) {
+      setAddrForm((f) => ({ ...f, city: pinLookup.city, state: pinLookup.state }));
+    }
+  }, [pinLookup.city, pinLookup.state]);
 
   useEffect(() => {
     if (document.getElementById("razorpay-script")) return;
@@ -285,7 +294,10 @@ const Cart = () => {
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">PIN Code <span className="text-destructive">*</span></Label>
-                    <Input value={addrForm.zip} onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value }))} className="rounded-lg" />
+                    <div className="relative">
+                      <Input value={addrForm.zip} onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value.replace(/\D/g, "").slice(0, 6) }))} className="rounded-lg" placeholder="110001" maxLength={6} />
+                      {pinLookup.loading && <span className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Country <span className="text-destructive">*</span></Label>

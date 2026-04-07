@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -12,6 +12,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { updateProfile, addAddress } from "@/store/slices/userSlice";
 import { updateAuthUser } from "@/store/slices/authSlice";
 import { useToast } from "@/hooks/use-toast";
+import { usePincodeLookup } from "@/hooks/use-pincode";
 import type { Address } from "@/types";
 import logo from "@/assets/blanc-logo.png";
 
@@ -35,6 +36,14 @@ const CompleteProfile = () => {
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
+
+  // Auto-fill city/state from PIN code
+  const pinLookup = usePincodeLookup(addrForm.zip);
+  useEffect(() => {
+    if (pinLookup.city && pinLookup.state) {
+      setAddrForm((f) => ({ ...f, city: pinLookup.city, state: pinLookup.state }));
+    }
+  }, [pinLookup.city, pinLookup.state]);
 
   if (!isAuthenticated) {
     navigate("/login");
@@ -182,10 +191,15 @@ const CompleteProfile = () => {
                     <Label className="text-xs uppercase tracking-wider">
                       PIN Code <span className="text-destructive">*</span>
                     </Label>
-                    <Input
-                      value={addrForm.zip}
-                      onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value }))}
-                    />
+                    <div className="relative">
+                      <Input
+                        value={addrForm.zip}
+                        onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value.replace(/\D/g, "").slice(0, 6) }))}
+                        placeholder="110001"
+                        maxLength={6}
+                      />
+                      {pinLookup.loading && <span className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs uppercase tracking-wider">
