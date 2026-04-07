@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Instagram } from "lucide-react";
 import logo from "@/assets/blanc-logo.png";
 
 const legalLinks = [
@@ -62,6 +63,16 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
+
+            <h4 className="text-[10px] font-body font-medium uppercase tracking-[0.25em] text-white/30 mt-8 mb-4">Connect With Us</h4>
+            <a
+              href="https://www.instagram.com/blanc.parfume/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-body text-white/50 hover:text-white transition-colors duration-300"
+            >
+              <Instagram size={16} strokeWidth={1.5} /> Instagram
+            </a>
           </div>
 
         </div>
