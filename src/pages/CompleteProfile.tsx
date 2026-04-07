@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,14 +17,10 @@ import type { Address } from "@/types";
 import logo from "@/assets/blanc-logo.png";
 
 const emptyAddr: Omit<Address, "id"> = {
-  label: "",
-  street: "",
-  city: "",
-  state: "",
-  zip: "",
-  country: "India",
-  isDefault: true,
+  label: "", street: "", city: "", state: "", zip: "", country: "India", isDefault: true,
 };
+
+type Step = "name" | "contact" | "address";
 
 const CompleteProfile = () => {
   const dispatch = useAppDispatch();
@@ -32,12 +28,17 @@ const CompleteProfile = () => {
   const { toast } = useToast();
   const { isAuthenticated, user } = useAppSelector((s) => s.auth);
 
-  const [step, setStep] = useState<"name" | "address">("name");
+  // Determine what's missing
+  const needsEmail = !user?.email;
+  const needsPhone = !user?.phone;
+
+  const [step, setStep] = useState<Step>("name");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
 
-  // Auto-fill city/state from PIN code
   const pinLookup = usePincodeLookup(addrForm.zip);
   useEffect(() => {
     if (pinLookup.city && pinLookup.state) {
@@ -50,15 +51,36 @@ const CompleteProfile = () => {
     return null;
   }
 
+  const needsContact = needsEmail || needsPhone;
+  const totalSteps = needsContact ? 3 : 2;
+
   const handleSaveName = async () => {
     if (!name.trim()) return;
     setSaving(true);
     try {
-      const updated = await dispatch(updateProfile({ name: name.trim(), email: user?.email || null })).unwrap();
+      const updated = await dispatch(updateProfile({ name: name.trim() })).unwrap();
       dispatch(updateAuthUser({ name: updated.name }));
-      setStep("address");
+      setStep(needsContact ? "contact" : "address");
     } catch {
       toast({ title: "Failed to save name", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveContact = async () => {
+    if (needsEmail && !email.trim()) return;
+    if (needsPhone && !phone.trim()) return;
+    setSaving(true);
+    try {
+      const payload: { email?: string; phone?: string } = {};
+      if (needsEmail && email.trim()) payload.email = email.trim();
+      if (needsPhone && phone.trim()) payload.phone = phone.trim();
+      const updated = await dispatch(updateProfile(payload)).unwrap();
+      dispatch(updateAuthUser({ email: updated.email, phone: updated.phone }));
+      setStep("address");
+    } catch {
+      toast({ title: "Failed to save contact info", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -81,6 +103,8 @@ const CompleteProfile = () => {
     }
   };
 
+  const stepIndex = step === "name" ? 0 : step === "contact" ? 1 : needsContact ? 2 : 1;
+
   return (
     <Layout>
       <SEO title="Complete Your Profile" noindex />
@@ -94,28 +118,27 @@ const CompleteProfile = () => {
           <div className="text-center space-y-3">
             <img src={logo} alt="BLANC" className="h-16 mx-auto" />
             <h1 className="font-display text-2xl tracking-wider">
-              {step === "name" ? "Welcome to Blanc" : "Add Your Address"}
+              {step === "name" ? "Welcome to Blanc" : step === "contact" ? "Contact Details" : "Add Your Address"}
             </h1>
             <p className="text-sm font-body text-muted-foreground tracking-wide">
               {step === "name"
                 ? "Let's set up your profile"
-                : "Where should we deliver your fragrances?"}
+                : step === "contact"
+                  ? needsEmail ? "We need your email for order updates" : "We need your phone for delivery updates"
+                  : "Where should we deliver your fragrances?"}
             </p>
           </div>
 
           {/* Step indicator */}
           <div className="flex items-center justify-center gap-2">
-            <div className={`h-1 w-12 rounded-full ${step === "name" ? "bg-foreground" : "bg-foreground"}`} />
-            <div className={`h-1 w-12 rounded-full ${step === "address" ? "bg-foreground" : "bg-border"}`} />
+            {Array.from({ length: totalSteps }).map((_, i) => (
+              <div key={i} className={`h-1 w-12 rounded-full ${i <= stepIndex ? "bg-foreground" : "bg-border"}`} />
+            ))}
           </div>
 
-          {step === "name" ? (
-            <motion.div
-              key="name"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="space-y-6"
-            >
+          {/* Step: Name */}
+          {step === "name" && (
+            <motion.div key="name" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
               <div className="space-y-2">
                 <Label className="text-xs font-body uppercase tracking-widest text-muted-foreground">
                   Your Name <span className="text-destructive">*</span>
@@ -139,58 +162,91 @@ const CompleteProfile = () => {
                 {!saving && <ArrowRight size={14} />}
               </Button>
             </motion.div>
-          ) : (
-            <motion.div
-              key="address"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="space-y-6"
-            >
+          )}
+
+          {/* Step: Contact */}
+          {step === "contact" && (
+            <motion.div key="contact" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+              {needsEmail && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-body uppercase tracking-widest text-muted-foreground">
+                    <Mail size={12} className="inline mr-1.5" />
+                    Email Address <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="font-body h-12"
+                    autoFocus
+                    onKeyDown={(e) => e.key === "Enter" && email.trim() && handleSaveContact()}
+                  />
+                  <p className="text-[11px] text-muted-foreground font-body">
+                    Used for order confirmations and status updates
+                  </p>
+                </div>
+              )}
+              {needsPhone && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-body uppercase tracking-widest text-muted-foreground">
+                    <Phone size={12} className="inline mr-1.5" />
+                    Phone Number <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="flex gap-2">
+                    <span className="flex items-center px-3 border border-border rounded-md text-sm text-muted-foreground bg-muted font-body">
+                      +91
+                    </span>
+                    <Input
+                      type="tel"
+                      placeholder="9876543210"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      maxLength={10}
+                      className="font-body h-12"
+                      autoFocus={!needsEmail}
+                      onKeyDown={(e) => e.key === "Enter" && phone.length === 10 && handleSaveContact()}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-body">
+                    Used for delivery updates and order coordination
+                  </p>
+                </div>
+              )}
+              <Button
+                onClick={handleSaveContact}
+                disabled={saving || (needsEmail && !email.trim()) || (needsPhone && phone.length < 10)}
+                className="w-full font-body uppercase tracking-widest text-xs h-12 gap-2"
+              >
+                {saving ? "Saving..." : "Continue"}
+                {!saving && <ArrowRight size={14} />}
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Step: Address */}
+          {step === "address" && (
+            <motion.div key="address" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider">
-                    Label <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    placeholder="Home, Office..."
-                    value={addrForm.label}
-                    onChange={(e) => setAddrForm((f) => ({ ...f, label: e.target.value }))}
-                    autoFocus
-                  />
+                  <Label className="text-xs uppercase tracking-wider">Label <span className="text-destructive">*</span></Label>
+                  <Input placeholder="Home, Office..." value={addrForm.label} onChange={(e) => setAddrForm((f) => ({ ...f, label: e.target.value }))} autoFocus />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider">
-                    Street <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    placeholder="123 Main St, Apt 4"
-                    value={addrForm.street}
-                    onChange={(e) => setAddrForm((f) => ({ ...f, street: e.target.value }))}
-                  />
+                  <Label className="text-xs uppercase tracking-wider">Street <span className="text-destructive">*</span></Label>
+                  <Input placeholder="123 Main St, Apt 4" value={addrForm.street} onChange={(e) => setAddrForm((f) => ({ ...f, street: e.target.value }))} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs uppercase tracking-wider">
-                      City <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      value={addrForm.city}
-                      onChange={(e) => setAddrForm((f) => ({ ...f, city: e.target.value }))}
-                    />
+                    <Label className="text-xs uppercase tracking-wider">City <span className="text-destructive">*</span></Label>
+                    <Input value={addrForm.city} onChange={(e) => setAddrForm((f) => ({ ...f, city: e.target.value }))} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs uppercase tracking-wider">
-                      State <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      value={addrForm.state}
-                      onChange={(e) => setAddrForm((f) => ({ ...f, state: e.target.value }))}
-                    />
+                    <Label className="text-xs uppercase tracking-wider">State <span className="text-destructive">*</span></Label>
+                    <Input value={addrForm.state} onChange={(e) => setAddrForm((f) => ({ ...f, state: e.target.value }))} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs uppercase tracking-wider">
-                      PIN Code <span className="text-destructive">*</span>
-                    </Label>
+                    <Label className="text-xs uppercase tracking-wider">PIN Code <span className="text-destructive">*</span></Label>
                     <div className="relative">
                       <Input
                         value={addrForm.zip}
@@ -202,32 +258,18 @@ const CompleteProfile = () => {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs uppercase tracking-wider">
-                      Country <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      value={addrForm.country}
-                      onChange={(e) => setAddrForm((f) => ({ ...f, country: e.target.value }))}
-                    />
+                    <Label className="text-xs uppercase tracking-wider">Country <span className="text-destructive">*</span></Label>
+                    <Input value={addrForm.country} onChange={(e) => setAddrForm((f) => ({ ...f, country: e.target.value }))} />
                   </div>
                 </div>
                 <div className="flex items-center gap-3 pt-1">
-                  <Switch
-                    checked={addrForm.isDefault}
-                    onCheckedChange={(v) => setAddrForm((f) => ({ ...f, isDefault: v }))}
-                  />
-                  <Label className="text-xs uppercase tracking-wider cursor-pointer">
-                    Set as default address
-                  </Label>
+                  <Switch checked={addrForm.isDefault} onCheckedChange={(v) => setAddrForm((f) => ({ ...f, isDefault: v }))} />
+                  <Label className="text-xs uppercase tracking-wider cursor-pointer">Set as default address</Label>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Button
-                  onClick={handleSaveAddress}
-                  disabled={saving}
-                  className="w-full font-body uppercase tracking-widest text-xs h-12"
-                >
+                <Button onClick={handleSaveAddress} disabled={saving} className="w-full font-body uppercase tracking-widest text-xs h-12">
                   {saving ? "Saving..." : "Save Address & Continue"}
                 </Button>
                 <button

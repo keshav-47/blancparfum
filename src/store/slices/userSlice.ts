@@ -27,7 +27,7 @@ export const fetchUserProfile = createAsyncThunk("user/fetchProfile", async (_, 
 
 export const updateProfile = createAsyncThunk(
   "user/updateProfile",
-  async (data: { name: string; email: string | null }, { rejectWithValue }) => {
+  async (data: { name?: string; email?: string | null; phone?: string | null }, { rejectWithValue }) => {
     try {
       const res = await apiClient.put<UserProfile>("/user/profile", data);
       return res.data;
