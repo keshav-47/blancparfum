@@ -34,16 +34,20 @@ const ProductDetail = () => {
   const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 3);
   const currentSize = product.sizes[selectedSize];
 
-  const handleAddToCart = () => {
-    dispatch(addItemToCart({
-      productId: product.id,
-      name: product.name,
-      image: product.images[0],
-      size: currentSize.ml,
-      price: currentSize.price,
-      quantity,
-    }));
-    toast({ title: "Added to cart", description: `${product.name} (${currentSize.ml}ml) \u00D7 ${quantity}` });
+  const handleAddToCart = async () => {
+    try {
+      await dispatch(addItemToCart({
+        productId: product.id,
+        name: product.name,
+        image: product.images[0],
+        size: currentSize.ml,
+        price: currentSize.price,
+        quantity,
+      })).unwrap();
+      toast({ title: "Added to cart", description: `${product.name} (${currentSize.ml}ml) \u00D7 ${quantity}` });
+    } catch {
+      toast({ title: "Failed to add to cart", variant: "destructive" });
+    }
   };
 
   return (

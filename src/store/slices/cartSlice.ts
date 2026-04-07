@@ -45,15 +45,20 @@ export const fetchServerCart = createAsyncThunk(
 
 export const addItemToCart = createAsyncThunk(
   "cart/addItem",
-  async (item: CartItem, { getState }) => {
+  async (item: CartItem, { getState, rejectWithValue }) => {
     const { auth } = getState() as RootState;
     if (auth.isAuthenticated) {
-      const res = await apiClient.post<{ items: ServerCartItem[] }>("/cart/items", {
-        productId: item.productId,
-        sizeMl: item.size,
-        quantity: item.quantity,
-      });
-      return { serverItems: res.data.items.map(mapServerItem), local: null };
+      try {
+        const res = await apiClient.post<{ items: ServerCartItem[] }>("/cart/items", {
+          productId: item.productId,
+          sizeMl: item.size,
+          quantity: item.quantity,
+        });
+        return { serverItems: res.data.items.map(mapServerItem), local: null };
+      } catch {
+        // API failed — fall back to local add so cart still updates
+        return { serverItems: null, local: item };
+      }
     }
     return { serverItems: null, local: item };
   }
@@ -64,10 +69,14 @@ export const removeItemFromCart = createAsyncThunk(
   async (payload: { productId: string; size: number }, { getState }) => {
     const { auth } = getState() as RootState;
     if (auth.isAuthenticated) {
-      const res = await apiClient.delete<{ items: ServerCartItem[] }>(
-        `/cart/items/${payload.productId}/${payload.size}`
-      );
-      return { serverItems: res.data.items.map(mapServerItem), local: null };
+      try {
+        const res = await apiClient.delete<{ items: ServerCartItem[] }>(
+          `/cart/items/${payload.productId}/${payload.size}`
+        );
+        return { serverItems: res.data.items.map(mapServerItem), local: null };
+      } catch {
+        return { serverItems: null, local: payload };
+      }
     }
     return { serverItems: null, local: payload };
   }
@@ -82,12 +91,16 @@ export const updateItemQuantity = createAsyncThunk(
     const { auth } = getState() as RootState;
     const qty = Math.max(1, payload.quantity);
     if (auth.isAuthenticated) {
-      const res = await apiClient.post<{ items: ServerCartItem[] }>("/cart/items", {
-        productId: payload.productId,
-        sizeMl: payload.size,
-        quantity: qty,
-      });
-      return { serverItems: res.data.items.map(mapServerItem), local: null };
+      try {
+        const res = await apiClient.post<{ items: ServerCartItem[] }>("/cart/items", {
+          productId: payload.productId,
+          sizeMl: payload.size,
+          quantity: qty,
+        });
+        return { serverItems: res.data.items.map(mapServerItem), local: null };
+      } catch {
+        return { serverItems: null, local: { ...payload, quantity: qty } };
+      }
     }
     return { serverItems: null, local: { ...payload, quantity: qty } };
   }
