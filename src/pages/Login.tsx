@@ -76,16 +76,15 @@ const Login = () => {
     };
   }, []);
 
-  // Google Sign-In — navigate from thunk result
-  const handleGoogleCallback = useCallback(
-    async (response: { credential: string }) => {
-      try {
-        const result = await dispatch(loginWithGoogle(response.credential)).unwrap();
-        navigateAfterLogin(navigate, result.user, returnTo);
-      } catch { /* error shown via Redux */ }
-    },
-    [dispatch, navigate]
-  );
+  // Google Sign-In — use a ref so the callback is always current
+  // without re-initializing the Google SDK (which cancels in-flight requests)
+  const googleCallbackRef = useRef<(response: { credential: string }) => void>();
+  googleCallbackRef.current = async (response: { credential: string }) => {
+    try {
+      const result = await dispatch(loginWithGoogle(response.credential)).unwrap();
+      navigateAfterLogin(navigate, result.user, returnTo);
+    } catch { /* error shown via Redux */ }
+  };
 
   useEffect(() => {
     const initGoogle = () => {
@@ -95,7 +94,7 @@ const Login = () => {
           "785552510309-hj18cn3tf1820ncd22a4usou7q7qrjmn.apps.googleusercontent.com";
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: handleGoogleCallback,
+          callback: (resp: { credential: string }) => googleCallbackRef.current?.(resp),
         });
         window.google.accounts.id.renderButton(googleBtnRef.current, {
           theme: "outline",
@@ -117,7 +116,7 @@ const Login = () => {
       }, 200);
       return () => clearInterval(interval);
     }
-  }, [handleGoogleCallback]);
+  }, []);
 
   // Send OTP via Firebase
   const handleSendOtp = async () => {
