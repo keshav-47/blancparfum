@@ -119,7 +119,7 @@ const AdminDashboard = () => {
       {/* Quick links */}
       <div>
         <h2 className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body mb-3">Quick Access</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {quickLinks.map((link) => (
             <Link
               key={link.to}
@@ -157,34 +157,55 @@ const AdminDashboard = () => {
           ) : recentOrders.length === 0 ? (
             <div className="py-10 text-center text-xs text-muted-foreground">No orders yet</div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Order</th>
-                  <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Customer</th>
-                  <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Date</th>
-                  <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Total</th>
-                  <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <>
+              {/* Desktop table */}
+              <table className="w-full text-sm hidden md:table">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Order</th>
+                    <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Customer</th>
+                    <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Date</th>
+                    <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Total</th>
+                    <th className="text-left px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-body font-normal">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {recentOrders.map((o) => (
+                    <tr key={o.id} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-5 py-3 font-mono text-xs text-muted-foreground">#{o.id.substring(0, 8).toUpperCase()}</td>
+                      <td className="px-5 py-3 text-sm">{o.customerName || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                        {format(new Date(o.date), "dd MMM yyyy")}
+                      </td>
+                      <td className="px-5 py-3 text-sm font-medium">₹{o.total.toLocaleString("en-IN")}</td>
+                      <td className="px-5 py-3">
+                        <Badge variant="outline" className={`text-[10px] uppercase ${statusColor[o.status] ?? ""}`}>
+                          {o.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {/* Mobile cards */}
+              <div className="md:hidden divide-y divide-border">
                 {recentOrders.map((o) => (
-                  <tr key={o.id} className="hover:bg-secondary/30 transition-colors">
-                    <td className="px-5 py-3 font-mono text-xs text-muted-foreground">#{o.id.substring(0, 8).toUpperCase()}</td>
-                    <td className="px-5 py-3 text-sm">{o.customerName || "—"}</td>
-                    <td className="px-5 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                      {format(new Date(o.date), "dd MMM yyyy")}
-                    </td>
-                    <td className="px-5 py-3 text-sm font-medium">₹{o.total.toLocaleString("en-IN")}</td>
-                    <td className="px-5 py-3">
+                  <div key={o.id} className="p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs text-muted-foreground">#{o.id.substring(0, 8).toUpperCase()}</span>
                       <Badge variant="outline" className={`text-[10px] uppercase ${statusColor[o.status] ?? ""}`}>
                         {o.status}
                       </Badge>
-                    </td>
-                  </tr>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-body">{o.customerName || "—"}</span>
+                      <span className="text-sm font-body font-medium">₹{o.total.toLocaleString("en-IN")}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground font-body">{format(new Date(o.date), "dd MMM yyyy")}</p>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       </div>

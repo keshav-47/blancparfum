@@ -39,10 +39,10 @@ const AdminOrders = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <h1 className="font-display text-2xl tracking-wider">Orders</h1>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Filter status" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="Filter status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
             {statuses.map((s) => (
@@ -52,7 +52,8 @@ const AdminOrders = () => {
         </Select>
       </div>
 
-      <div className="rounded-md border border-border overflow-x-auto">
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-md border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -98,6 +99,38 @@ const AdminOrders = () => {
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {loading && !orders.length ? (
+          <p className="text-center py-8 text-muted-foreground text-sm">Loading…</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-center py-8 text-muted-foreground text-sm">No orders found</p>
+        ) : filtered.map((o) => (
+          <div key={o.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-xs text-muted-foreground">#{o.id.substring(0, 8).toUpperCase()}</span>
+              <Badge variant="outline" className={`text-[10px] uppercase ${statusColor[o.status]}`}>{o.status}</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-body">{o.customerName || "—"}</span>
+              <span className="text-sm font-body font-medium">₹{o.total.toLocaleString("en-IN")}</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground font-body">{format(new Date(o.date), "dd MMM yyyy")}</p>
+            <p className="text-xs text-muted-foreground font-body truncate">
+              {o.items.map((i) => `${i.name} (${i.size}ml × ${i.quantity})`).join(", ")}
+            </p>
+            <Select value={o.status} onValueChange={(v) => handleStatusChange(o.id, v as Order["status"])}>
+              <SelectTrigger className="w-full h-9 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {statuses.map((s) => (
+                  <SelectItem key={s} value={s} className="uppercase text-xs">{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
       </div>
     </div>
   );
