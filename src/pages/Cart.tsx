@@ -40,6 +40,7 @@ const Cart = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [showAddrForm, setShowAddrForm] = useState(false);
   const [addrSaving, setAddrSaving] = useState(false);
   const emptyAddr: Omit<Address, "id"> = { label: "", street: "", city: "", state: "", zip: "", country: "India", isDefault: true };
@@ -95,6 +96,7 @@ const Cart = () => {
         description: "Luxury Extrait de Parfum",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handler: async (response: any) => {
+          setVerifyingPayment(true);
           try {
             await apiClient.post(`/orders/${data.orderId}/verify`, {
               razorpayOrderId: response.razorpay_order_id,
@@ -105,6 +107,7 @@ const Cart = () => {
             toast({ title: "Order placed!", description: "Thank you for your purchase." });
             navigate("/profile");
           } catch {
+            setVerifyingPayment(false);
             toast({ title: "Payment verification failed. Contact support.", variant: "destructive" });
           }
         },
@@ -126,6 +129,18 @@ const Cart = () => {
       setCheckoutLoading(false);
     }
   };
+
+  if (verifyingPayment) {
+    return (
+      <Layout>
+        <div className="min-h-[70vh] flex flex-col items-center justify-center px-6">
+          <div className="w-10 h-10 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin mb-6" />
+          <h2 className="font-display text-2xl mb-2">Confirming Your Order</h2>
+          <p className="text-muted-foreground font-body text-sm">Please wait while we verify your payment...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (items.length === 0) {
     return (

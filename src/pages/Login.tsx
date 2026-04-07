@@ -177,6 +177,19 @@ const Login = () => {
   const displayError = firebaseError || error;
   const isLoading = loading || verifying;
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <SEO title="Login" canonical="/login" noindex />
+        <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
+          <div className="w-10 h-10 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin mb-6" />
+          <h2 className="font-display text-2xl mb-2">Signing you in</h2>
+          <p className="text-muted-foreground font-body text-sm">Please wait...</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <SEO title="Login" canonical="/login" noindex />
