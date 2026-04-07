@@ -78,8 +78,15 @@ const Profile = () => {
       dispatch(updateAuthUser({ name: updated.name, email: updated.email, phone: updated.phone }));
       toast({ title: "Profile updated" });
       setProfileOpen(false);
-    } catch {
-      toast({ title: "Failed to update profile", variant: "destructive" });
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message || "Failed to update profile";
+      if (msg.toLowerCase().includes("phone")) {
+        setProfileErrors((e) => ({ ...e, phone: msg }));
+      } else if (msg.toLowerCase().includes("email")) {
+        setProfileErrors((e) => ({ ...e, email: msg }));
+      } else {
+        toast({ title: msg, variant: "destructive" });
+      }
     } finally {
       setProfileSaving(false);
     }

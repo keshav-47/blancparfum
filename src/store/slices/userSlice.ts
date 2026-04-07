@@ -31,8 +31,10 @@ export const updateProfile = createAsyncThunk(
     try {
       const res = await apiClient.put<UserProfile>("/user/profile", data);
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to update profile");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        || "Failed to update profile";
+      return rejectWithValue(msg);
     }
   }
 );

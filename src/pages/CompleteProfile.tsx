@@ -100,8 +100,16 @@ const CompleteProfile = () => {
       const updated = await dispatch(updateProfile(payload)).unwrap();
       dispatch(updateAuthUser({ email: updated.email, phone: updated.phone }));
       setStep("address");
-    } catch {
-      toast({ title: "Failed to save contact info", variant: "destructive" });
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message || "Failed to save contact info";
+      // Show inline error on the right field
+      if (msg.toLowerCase().includes("phone")) {
+        setPhoneError(msg);
+      } else if (msg.toLowerCase().includes("email")) {
+        setEmailError(msg);
+      } else {
+        toast({ title: msg, variant: "destructive" });
+      }
     } finally {
       setSaving(false);
     }
