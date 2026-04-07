@@ -2,6 +2,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "@/api/apiClient";
 import { Product, Collection, Order, CustomRequest, DashboardStats } from "@/types";
 
+const extractError = (err: unknown, fallback: string): string =>
+  (err as { response?: { data?: { message?: string } } })?.response?.data?.message || fallback;
+
 interface AdminState {
   dashboard: DashboardStats | null;
   products: Product[];
@@ -48,8 +51,8 @@ export const createProduct = createAsyncThunk(
     try {
       const res = await apiClient.post<Product>("/admin/products", product);
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to create product");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to create product"));
     }
   }
 );
@@ -60,8 +63,8 @@ export const updateProduct = createAsyncThunk(
     try {
       const res = await apiClient.put<Product>(`/admin/products/${id}`, data);
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to update product");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to update product"));
     }
   }
 );
@@ -72,8 +75,8 @@ export const deleteProduct = createAsyncThunk(
     try {
       await apiClient.delete(`/admin/products/${id}`);
       return id;
-    } catch {
-      return rejectWithValue("Failed to delete product");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to delete product"));
     }
   }
 );
@@ -88,8 +91,8 @@ export const uploadProductImage = createAsyncThunk(
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to upload image");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to upload image"));
     }
   }
 );
@@ -111,8 +114,8 @@ export const createCollection = createAsyncThunk(
     try {
       const res = await apiClient.post<Collection>("/admin/collections", data);
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to create collection");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to create collection"));
     }
   }
 );
@@ -123,8 +126,8 @@ export const updateCollection = createAsyncThunk(
     try {
       const res = await apiClient.put<Collection>(`/admin/collections/${id}`, data);
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to update collection");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to update collection"));
     }
   }
 );
@@ -135,8 +138,8 @@ export const deleteCollection = createAsyncThunk(
     try {
       await apiClient.delete(`/admin/collections/${id}`);
       return id;
-    } catch {
-      return rejectWithValue("Failed to delete collection");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to delete collection"));
     }
   }
 );
@@ -151,8 +154,8 @@ export const uploadCollectionImage = createAsyncThunk(
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to upload image");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to upload image"));
     }
   }
 );
@@ -198,8 +201,8 @@ export const updateCustomRequestStatus = createAsyncThunk(
       // Backend field is `adminNotes`, not `notes`
       const res = await apiClient.put<CustomRequest>(`/admin/custom-requests/${id}`, { status, adminNotes: notes });
       return res.data;
-    } catch {
-      return rejectWithValue("Failed to update custom request");
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to update custom request"));
     }
   }
 );
