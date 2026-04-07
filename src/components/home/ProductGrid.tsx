@@ -1,8 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { setFilter } from "@/store/slices/productsSlice";
+
+const LIMIT = 6;
 
 const filters = [
   { key: "all", label: "All" },
@@ -24,13 +27,16 @@ const cardVariants = {
 
 const ProductGrid = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { items, filter } = useAppSelector((state) => state.products);
 
-  const filtered = items.filter((p) => {
+  const allFiltered = items.filter((p) => {
     if (filter === "all") return true;
     if (filter === "new") return p.isNew;
     return p.category === filter;
   });
+  const filtered = allFiltered.slice(0, LIMIT);
+  const hasMore = allFiltered.length > LIMIT;
 
   return (
     <section id="product-grid" className="py-24 md:py-32">
@@ -107,6 +113,19 @@ const ProductGrid = () => {
             </motion.div>
           ))}
         </motion.div>
+
+        {hasMore && (
+          <div className="text-center mt-16">
+            <Button
+              variant="outline"
+              onClick={() => navigate(filter === "all" ? "/shop" : `/shop?category=${filter}`)}
+              className="rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium px-10 h-11 gap-2"
+            >
+              View All {filter !== "all" ? filters.find(f => f.key === filter)?.label : ""} Fragrances
+              <ArrowRight size={13} />
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );
