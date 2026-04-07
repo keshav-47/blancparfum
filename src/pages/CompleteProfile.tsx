@@ -39,7 +39,9 @@ const CompleteProfile = () => {
   const [step, setStep] = useState<Step>(initialStep);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [saving, setSaving] = useState(false);
   const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
 
@@ -72,9 +74,24 @@ const CompleteProfile = () => {
     }
   };
 
+  const validateContact = () => {
+    let valid = true;
+    if (needsEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email.trim()) { setEmailError("Email is required"); valid = false; }
+      else if (!emailRegex.test(email.trim())) { setEmailError("Please enter a valid email address"); valid = false; }
+      else setEmailError("");
+    }
+    if (needsPhone) {
+      if (!phone.trim()) { setPhoneError("Phone number is required"); valid = false; }
+      else if (phone.length < 10) { setPhoneError("Phone number must be 10 digits"); valid = false; }
+      else setPhoneError("");
+    }
+    return valid;
+  };
+
   const handleSaveContact = async () => {
-    if (needsEmail && !email.trim()) return;
-    if (needsPhone && !phone.trim()) return;
+    if (!validateContact()) return;
     setSaving(true);
     try {
       const payload: { email?: string; phone?: string } = {};
@@ -181,14 +198,15 @@ const CompleteProfile = () => {
                     type="email"
                     placeholder="you@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="font-body h-12"
+                    onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
+                    className={`font-body h-12 ${emailError ? "border-destructive" : ""}`}
                     autoFocus
-                    onKeyDown={(e) => e.key === "Enter" && email.trim() && handleSaveContact()}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
                   />
-                  <p className="text-[11px] text-muted-foreground font-body">
-                    Used for order confirmations and status updates
-                  </p>
+                  {emailError
+                    ? <p className="text-[11px] text-destructive font-body">{emailError}</p>
+                    : <p className="text-[11px] text-muted-foreground font-body">Used for order confirmations and status updates</p>
+                  }
                 </div>
               )}
               {needsPhone && (
@@ -205,16 +223,17 @@ const CompleteProfile = () => {
                       type="tel"
                       placeholder="9876543210"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); setPhoneError(""); }}
                       maxLength={10}
-                      className="font-body h-12"
+                      className={`font-body h-12 ${phoneError ? "border-destructive" : ""}`}
                       autoFocus={!needsEmail}
-                      onKeyDown={(e) => e.key === "Enter" && phone.length === 10 && handleSaveContact()}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
                     />
                   </div>
-                  <p className="text-[11px] text-muted-foreground font-body">
-                    Used for delivery updates and order coordination
-                  </p>
+                  {phoneError
+                    ? <p className="text-[11px] text-destructive font-body">{phoneError}</p>
+                    : <p className="text-[11px] text-muted-foreground font-body">Used for delivery updates and order coordination</p>
+                  }
                 </div>
               )}
               <Button
