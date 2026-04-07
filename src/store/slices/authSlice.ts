@@ -31,7 +31,7 @@ export const loginWithGoogle = createAsyncThunk(
   async (idToken: string, { dispatch, getState, rejectWithValue }) => {
     try {
       const res = await apiClient.post("/auth/google", { idToken });
-      const { token, user } = res.data.data;
+      const { token, user } = res.data;
       localStorage.setItem("auth_token", token);
 
       // Sync local cart to server
@@ -60,7 +60,7 @@ export const loginWithFirebase = createAsyncThunk(
   async (firebaseIdToken: string, { dispatch, getState, rejectWithValue }) => {
     try {
       const res = await apiClient.post("/auth/firebase", { idToken: firebaseIdToken });
-      const { token, user } = res.data.data;
+      const { token, user } = res.data;
       localStorage.setItem("auth_token", token);
 
       // Sync local cart to server

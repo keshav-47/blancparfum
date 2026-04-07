@@ -21,13 +21,18 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle common errors
+// Response interceptor — unwrap ApiResponse and handle errors
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Unwrap ApiResponse wrapper: { success, data, message } → data
+    if (response.data && typeof response.data === "object" && "success" in response.data && "data" in response.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("auth_token");
-      // Could dispatch a logout action here
     }
     return Promise.reject(error);
   }
