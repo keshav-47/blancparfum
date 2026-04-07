@@ -34,7 +34,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:bg-foreground/90 transition-colors"
+            className="fixed bottom-6 right-6 z-[999] w-11 h-11 rounded-full bg-white text-foreground border border-border flex items-center justify-center shadow-xl hover:bg-secondary transition-colors"
             aria-label="Back to top"
           >
             <ArrowUp size={16} strokeWidth={2} />
