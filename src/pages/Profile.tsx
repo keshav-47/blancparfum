@@ -12,9 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { fetchUserProfile, fetchOrders, addAddress, updateAddress, deleteAddress } from "@/store/slices/userSlice";
+import { fetchUserProfile, fetchOrders, updateProfile, addAddress, updateAddress, deleteAddress } from "@/store/slices/userSlice";
 import { fetchCustomRequests } from "@/store/slices/customRequestsSlice";
-import { logout } from "@/store/slices/authSlice";
+import { logout, updateAuthUser } from "@/store/slices/authSlice";
 import { useToast } from "@/hooks/use-toast";
 import { usePincodeLookup } from "@/hooks/use-pincode";
 import type { Address } from "@/types";
@@ -36,6 +36,54 @@ const Profile = () => {
   const [editingAddr, setEditingAddr] = useState<Address | null>(null);
   const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
   const [addrSaving, setAddrSaving] = useState(false);
+
+  // Profile edit
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", email: "", phone: "" });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileErrors, setProfileErrors] = useState({ name: "", email: "", phone: "" });
+
+  const openEditProfile = () => {
+    setProfileForm({
+      name: displayProfile?.name || "",
+      email: displayProfile?.email || "",
+      phone: displayProfile?.phone?.replace("+91", "") || "",
+    });
+    setProfileErrors({ name: "", email: "", phone: "" });
+    setProfileOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    const errors = { name: "", email: "", phone: "" };
+    let valid = true;
+    if (!profileForm.name.trim() || profileForm.name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters"; valid = false;
+    }
+    if (profileForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileForm.email)) {
+      errors.email = "Please enter a valid email"; valid = false;
+    }
+    if (profileForm.phone && profileForm.phone.length < 10) {
+      errors.phone = "Phone must be 10 digits"; valid = false;
+    }
+    setProfileErrors(errors);
+    if (!valid) return;
+
+    setProfileSaving(true);
+    try {
+      const payload: { name?: string; email?: string; phone?: string } = {};
+      if (profileForm.name.trim()) payload.name = profileForm.name.trim();
+      if (profileForm.email.trim()) payload.email = profileForm.email.trim();
+      if (profileForm.phone.trim()) payload.phone = profileForm.phone.trim();
+      const updated = await dispatch(updateProfile(payload)).unwrap();
+      dispatch(updateAuthUser({ name: updated.name, email: updated.email, phone: updated.phone }));
+      toast({ title: "Profile updated" });
+      setProfileOpen(false);
+    } catch {
+      toast({ title: "Failed to update profile", variant: "destructive" });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   // Auto-fill city/state from PIN code
   const pinLookup = usePincodeLookup(addrForm.zip);
@@ -119,7 +167,12 @@ const Profile = () => {
                 )}
               </div>
               <div>
-                <h1 className="font-display text-2xl md:text-3xl">{displayProfile?.name || "User"}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-display text-2xl md:text-3xl">{displayProfile?.name || "User"}</h1>
+                  <button onClick={openEditProfile} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+                    <Pencil size={14} strokeWidth={1.5} />
+                  </button>
+                </div>
                 <p className="text-muted-foreground text-sm font-body">{displayProfile?.email || displayProfile?.phone}</p>
               </div>
             </div>
@@ -322,6 +375,62 @@ const Profile = () => {
               className="w-full rounded-full uppercase tracking-[0.15em] text-[11px] h-11 font-body font-medium"
             >
               {addrSaving ? "Saving\u2026" : editingAddr ? "Update Address" : "Save Address"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Profile dialog */}
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wider">Edit Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-1">
+            <div className="space-y-1.5">
+              <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Name <span className="text-destructive">*</span></Label>
+              <Input
+                value={profileForm.name}
+                onChange={(e) => { setProfileForm((f) => ({ ...f, name: e.target.value })); setProfileErrors((e2) => ({ ...e2, name: "" })); }}
+                className={`rounded-lg ${profileErrors.name ? "border-destructive" : ""}`}
+                placeholder="Your full name"
+              />
+              {profileErrors.name && <p className="text-[11px] text-destructive font-body">{profileErrors.name}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Email</Label>
+              <Input
+                type="email"
+                value={profileForm.email}
+                onChange={(e) => { setProfileForm((f) => ({ ...f, email: e.target.value })); setProfileErrors((e2) => ({ ...e2, email: "" })); }}
+                className={`rounded-lg ${profileErrors.email ? "border-destructive" : ""}`}
+                placeholder="you@example.com"
+              />
+              {profileErrors.email && <p className="text-[11px] text-destructive font-body">{profileErrors.email}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Phone</Label>
+              <div className="flex gap-2">
+                <span className="flex items-center px-3 border border-border rounded-lg text-sm text-muted-foreground bg-muted font-body">
+                  +91
+                </span>
+                <Input
+                  type="tel"
+                  value={profileForm.phone}
+                  onChange={(e) => { setProfileForm((f) => ({ ...f, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })); setProfileErrors((e2) => ({ ...e2, phone: "" })); }}
+                  className={`rounded-lg ${profileErrors.phone ? "border-destructive" : ""}`}
+                  placeholder="9876543210"
+                  maxLength={10}
+                />
+              </div>
+              {profileErrors.phone && <p className="text-[11px] text-destructive font-body">{profileErrors.phone}</p>}
+            </div>
+            <Button
+              onClick={handleSaveProfile}
+              disabled={profileSaving}
+              className="w-full rounded-full uppercase tracking-[0.15em] text-[11px] h-11 font-body font-medium"
+            >
+              {profileSaving ? "Saving\u2026" : "Save Changes"}
             </Button>
           </div>
         </DialogContent>
