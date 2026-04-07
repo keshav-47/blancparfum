@@ -98,7 +98,7 @@ const ProductGrid = () => {
                       transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                     />
                     {product.isNew && (
-                      <span className="absolute top-4 left-4 text-[10px] font-body font-medium uppercase tracking-[0.15em] bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full">
+                      <span className="absolute top-4 left-4 text-[10px] font-body font-medium uppercase tracking-[0.15em] bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full border border-foreground/20">
                         New
                       </span>
                     )}
