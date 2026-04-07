@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
 import logo from "@/assets/blanc-logo.png";
 
+const legalLinks = [
+  { label: "Privacy", to: "/privacy" },
+  { label: "Terms", to: "/terms" },
+];
+
 const Footer = () => {
   return (
     <footer className="bg-foreground text-white/70">
@@ -69,14 +74,14 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} BLANC PARFUM. All rights reserved.
           </p>
           <div className="flex gap-8">
-            {["Privacy", "Terms"].map((item) => (
-              <a
-                key={item}
-                href="#"
+            {legalLinks.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
                 className="text-[11px] text-white/30 hover:text-white/60 transition-colors font-body"
               >
-                {item}
-              </a>
+                {item.label}
+              </Link>
             ))}
           </div>
         </div>
