@@ -27,9 +27,9 @@ declare global {
   }
 }
 
-const navigateAfterLogin = (nav: ReturnType<typeof useNavigate>, u: { name?: string; role?: string }, returnTo?: string | null) => {
+const navigateAfterLogin = (nav: ReturnType<typeof useNavigate>, u: { name?: string; email?: string | null; phone?: string | null; role?: string }, returnTo?: string | null) => {
   if (u.role === "ADMIN") nav("/admin");
-  else if (!u.name || u.name === "Parfum Lover") nav("/complete-profile");
+  else if (!u.name || u.name === "Parfum Lover" || !u.email || !u.phone) nav("/complete-profile");
   else nav(returnTo || "/");
 };
 

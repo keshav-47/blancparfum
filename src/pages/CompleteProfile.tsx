@@ -29,10 +29,14 @@ const CompleteProfile = () => {
   const { isAuthenticated, user } = useAppSelector((s) => s.auth);
 
   // Determine what's missing
+  const needsName = !user?.name || user.name === "Parfum Lover";
   const needsEmail = !user?.email;
   const needsPhone = !user?.phone;
+  const needsContact = needsEmail || needsPhone;
 
-  const [step, setStep] = useState<Step>("name");
+  // Start at the first incomplete step
+  const initialStep: Step = needsName ? "name" : needsContact ? "contact" : "address";
+  const [step, setStep] = useState<Step>(initialStep);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -51,8 +55,8 @@ const CompleteProfile = () => {
     return null;
   }
 
-  const needsContact = needsEmail || needsPhone;
-  const totalSteps = needsContact ? 3 : 2;
+  const stepsNeeded = [needsName && "name", needsContact && "contact", "address"].filter(Boolean);
+  const totalSteps = stepsNeeded.length;
 
   const handleSaveName = async () => {
     if (!name.trim()) return;
@@ -103,7 +107,7 @@ const CompleteProfile = () => {
     }
   };
 
-  const stepIndex = step === "name" ? 0 : step === "contact" ? 1 : needsContact ? 2 : 1;
+  const stepIndex = stepsNeeded.indexOf(step);
 
   return (
     <Layout>
