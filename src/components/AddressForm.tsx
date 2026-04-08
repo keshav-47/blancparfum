@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePincodeLookup } from "@/hooks/use-pincode";
-import { useCitiesForState } from "@/hooks/use-cities";
+import { useCitiesForState, preloadAllCities } from "@/hooks/use-cities";
 import { indianStates } from "@/data/indian-states";
 import type { Address } from "@/types";
 import { Check } from "lucide-react";
@@ -23,10 +23,21 @@ interface AddressFormProps {
   onCancel?: () => void;
 }
 
+// Preload cities for all states in background on first render
+let preloadStarted = false;
+
 const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Address", onCancel }: AddressFormProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const pinLookup = usePincodeLookup(value.zip);
   const [pinFilled, setPinFilled] = useState(false);
+
+  // Kick off background preload once
+  useEffect(() => {
+    if (!preloadStarted) {
+      preloadStarted = true;
+      preloadAllCities(indianStates);
+    }
+  }, []);
 
   // Fetch cities for selected state (only when not pin-filled)
   const { cities, loading: citiesLoading } = useCitiesForState(pinFilled ? "" : value.state);
@@ -169,7 +180,7 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
           ) : cities.length > 0 ? (
             <Select value={value.city} onValueChange={(v) => set("city", v)}>
               <SelectTrigger className={`rounded-lg ${errors.city ? "border-destructive" : ""}`}>
-                <SelectValue placeholder={citiesLoading ? "Loading..." : "Select city"} />
+                <SelectValue placeholder="Select city" />
               </SelectTrigger>
               <SelectContent className="max-h-60">
                 {cities.map((c) => (
@@ -179,11 +190,11 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
             </Select>
           ) : (
             <Input
-              placeholder={value.state ? (citiesLoading ? "Loading cities..." : "Enter city") : "Select state first"}
+              placeholder={!value.state ? "Select state first" : "Enter city"}
               value={value.city}
               onChange={(e) => set("city", e.target.value)}
-              disabled={!value.state}
-              className={`rounded-lg ${!value.state ? "bg-muted" : ""} ${errors.city ? "border-destructive" : ""}`}
+              disabled={!value.state || citiesLoading}
+              className={`rounded-lg ${!value.state || citiesLoading ? "bg-muted" : ""} ${errors.city ? "border-destructive" : ""}`}
             />
           )}
           {errors.city && <p className="text-[11px] text-destructive font-body">{errors.city}</p>}
