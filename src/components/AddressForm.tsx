@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePincodeLookup } from "@/hooks/use-pincode";
+import { useCitiesForState } from "@/hooks/use-cities";
 import { indianStates } from "@/data/indian-states";
 import type { Address } from "@/types";
 import { Check } from "lucide-react";
@@ -25,9 +26,10 @@ interface AddressFormProps {
 const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Address", onCancel }: AddressFormProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const pinLookup = usePincodeLookup(value.zip);
-
-  // Was pincode auto-filled?
   const [pinFilled, setPinFilled] = useState(false);
+
+  // Fetch cities for selected state (only when not pin-filled)
+  const { cities, loading: citiesLoading } = useCitiesForState(pinFilled ? "" : value.state);
 
   // Auto-fill city/state from pincode
   useEffect(() => {
@@ -47,6 +49,12 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
     }
   }, [pinLookup.valid, value.zip]);
 
+  // Clear city when state changes (manual selection)
+  const handleStateChange = (newState: string) => {
+    onChange({ ...value, state: newState, city: "" });
+    if (errors.state) setErrors((e) => ({ ...e, state: "" }));
+  };
+
   const set = (field: string, val: string) => {
     onChange({ ...value, [field]: val });
     if (errors[field]) setErrors((e) => ({ ...e, [field]: "" }));
@@ -56,10 +64,11 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
     const e: Record<string, string> = {};
     if (!value.label.trim()) e.label = "Label is required";
     if (!value.street.trim()) e.street = "Street address is required";
+    else if (value.street.trim().length < 8) e.street = "Street address must be at least 8 characters";
     if (!value.zip || value.zip.length !== 6) e.zip = "PIN code must be 6 digits";
     else if (pinLookup.valid === false) e.zip = "Please enter a valid PIN code";
     if (!value.state) e.state = "Please select a state";
-    if (!value.city.trim()) e.city = "City is required";
+    if (!value.city.trim()) e.city = "Please select or enter a city";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -88,14 +97,17 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
 
         {/* Street */}
         <div className="col-span-2 space-y-1.5">
-          <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Street <span className="text-destructive">*</span></Label>
+          <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Street Address <span className="text-destructive">*</span></Label>
           <Input
-            placeholder="123 Main St, Apt 4"
+            placeholder="House/Flat No., Street, Landmark"
             value={value.street}
             onChange={(e) => set("street", e.target.value)}
             className={`rounded-lg ${errors.street ? "border-destructive" : ""}`}
           />
-          {errors.street && <p className="text-[11px] text-destructive font-body">{errors.street}</p>}
+          {errors.street
+            ? <p className="text-[11px] text-destructive font-body">{errors.street}</p>
+            : <p className="text-[11px] text-muted-foreground font-body">Min 8 characters</p>
+          }
         </div>
 
         {/* PIN Code */}
@@ -135,7 +147,7 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
           {pinFilled ? (
             <Input value={value.state} disabled className="rounded-lg bg-muted" />
           ) : (
-            <Select value={value.state} onValueChange={(v) => set("state", v)}>
+            <Select value={value.state} onValueChange={handleStateChange}>
               <SelectTrigger className={`rounded-lg ${errors.state ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="Select state" />
               </SelectTrigger>
@@ -149,15 +161,31 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
           {errors.state && <p className="text-[11px] text-destructive font-body">{errors.state}</p>}
         </div>
 
-        {/* City */}
+        {/* City dropdown or input */}
         <div className="space-y-1.5">
           <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">City <span className="text-destructive">*</span></Label>
-          <Input
-            value={value.city}
-            onChange={(e) => set("city", e.target.value)}
-            disabled={pinFilled}
-            className={`rounded-lg ${pinFilled ? "bg-muted" : ""} ${errors.city ? "border-destructive" : ""}`}
-          />
+          {pinFilled ? (
+            <Input value={value.city} disabled className="rounded-lg bg-muted" />
+          ) : cities.length > 0 ? (
+            <Select value={value.city} onValueChange={(v) => set("city", v)}>
+              <SelectTrigger className={`rounded-lg ${errors.city ? "border-destructive" : ""}`}>
+                <SelectValue placeholder={citiesLoading ? "Loading..." : "Select city"} />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {cities.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              placeholder={value.state ? (citiesLoading ? "Loading cities..." : "Enter city") : "Select state first"}
+              value={value.city}
+              onChange={(e) => set("city", e.target.value)}
+              disabled={!value.state}
+              className={`rounded-lg ${!value.state ? "bg-muted" : ""} ${errors.city ? "border-destructive" : ""}`}
+            />
+          )}
           {errors.city && <p className="text-[11px] text-destructive font-body">{errors.city}</p>}
         </div>
       </div>
