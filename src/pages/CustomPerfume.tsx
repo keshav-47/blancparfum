@@ -37,7 +37,7 @@ const CustomPerfume = () => {
   const [step, setStep] = useState(saved ? 3 : 0);
   const [selectedFamilies, setSelectedFamilies] = useState<string[]>(saved?.scentFamilies || []);
   const [occasion, setOccasion] = useState(saved?.occasion || "");
-  const [intensity, setIntensity] = useState<"light" | "moderate" | "strong">(saved?.intensity || "moderate");
+  const [intensity, setIntensity] = useState<"light" | "moderate" | "strong" | "">(saved?.intensity || "");
   const [message, setMessage] = useState(saved?.message || "");
 
   const toggleFamily = (f: string) => {
@@ -163,7 +163,7 @@ const CustomPerfume = () => {
     </div>,
   ];
 
-  const canProceed = step === 0 ? selectedFamilies.length > 0 : step === 1 ? occasion !== "" : true;
+  const canProceed = step === 0 ? selectedFamilies.length > 0 : step === 1 ? occasion !== "" : step === 2 ? intensity !== "" : true;
 
   return (
     <Layout>
