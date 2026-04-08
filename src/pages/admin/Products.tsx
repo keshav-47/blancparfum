@@ -16,12 +16,12 @@ import { useToast } from "@/hooks/use-toast";
 
 type NoteType = "top" | "heart" | "base";
 interface NoteEntry { type: NoteType; name: string }
-interface SizeEntry { ml: number; price: number }
+interface SizeEntry { ml: number; price: number; stockQuantity: number }
 
 const emptyForm = {
   name: "", tagline: "", category: "men" as Product["category"],
   description: "", stockQuantity: 0, isNew: false, isFeatured: false, isActive: true,
-  sizes: [{ ml: 30, price: 0 }] as SizeEntry[],
+  sizes: [{ ml: 30, price: 0, stockQuantity: 100 }] as SizeEntry[],
   noteEntries: [{ type: "top" as NoteType, name: "" }] as NoteEntry[],
 };
 
@@ -60,7 +60,7 @@ const AdminProducts = () => {
       name: p.name, tagline: p.tagline, category: p.category,
       description: p.description, stockQuantity: p.stockQuantity ?? 0,
       isNew: p.isNew, isFeatured: p.isFeatured, isActive: p.isActive ?? true,
-      sizes: p.sizes.length ? p.sizes : [{ ml: 30, price: 0 }],
+      sizes: p.sizes.length ? p.sizes.map(s => ({ ml: s.ml, price: s.price, stockQuantity: s.stockQuantity ?? 100 })) : [{ ml: 30, price: 0, stockQuantity: 100 }],
       noteEntries: noteEntries.length ? noteEntries : [{ type: "top", name: "" }],
     });
     setExistingImages(p.images ?? []);
@@ -91,7 +91,7 @@ const AdminProducts = () => {
       name: form.name, tagline: form.tagline, category: form.category,
       description: form.description, stockQuantity: form.stockQuantity,
       isNew: form.isNew, isFeatured: form.isFeatured, isActive: form.isActive,
-      sizes: form.sizes.filter((s) => s.ml > 0 && s.price > 0),
+      sizes: form.sizes.filter((s) => s.ml > 0 && s.price > 0).map(s => ({ ml: s.ml, price: s.price, stockQuantity: s.stockQuantity })),
       notes, images: [], price: Math.min(...form.sizes.map((s) => s.price)),
     };
 
@@ -120,7 +120,7 @@ const AdminProducts = () => {
     toast({ title: "Product deleted" });
   };
 
-  const addSize = () => setForm((f) => ({ ...f, sizes: [...f.sizes, { ml: 0, price: 0 }] }));
+  const addSize = () => setForm((f) => ({ ...f, sizes: [...f.sizes, { ml: 0, price: 0, stockQuantity: 100 }] }));
   const removeSize = (i: number) => setForm((f) => ({ ...f, sizes: f.sizes.filter((_, idx) => idx !== i) }));
   const updateSize = (i: number, field: keyof SizeEntry, val: number) =>
     setForm((f) => ({ ...f, sizes: f.sizes.map((s, idx) => idx === i ? { ...s, [field]: val } : s) }));
@@ -171,7 +171,9 @@ const AdminProducts = () => {
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell><Badge variant="outline" className="uppercase text-[10px]">{p.category}</Badge></TableCell>
                 <TableCell>₹{p.sizes.length ? Math.min(...p.sizes.map((s) => s.price)).toLocaleString("en-IN") : p.price.toLocaleString("en-IN")}</TableCell>
-                <TableCell>{p.stockQuantity ?? "—"}</TableCell>
+                <TableCell className="text-xs">
+                  {p.sizes.length ? p.sizes.map(s => `${s.ml}ml: ${s.stockQuantity ?? "—"}`).join(", ") : "—"}
+                </TableCell>
                 <TableCell>{p.isNew ? <Badge className="bg-primary text-primary-foreground text-[10px]">Yes</Badge> : "No"}</TableCell>
                 <TableCell>{p.isFeatured ? <Badge className="bg-primary text-primary-foreground text-[10px]">Yes</Badge> : "No"}</TableCell>
                 <TableCell>{p.isActive !== false ? <Badge className="bg-green-700 text-white text-[10px]">Active</Badge> : <Badge variant="outline" className="text-[10px]">Inactive</Badge>}</TableCell>
@@ -248,22 +250,16 @@ const AdminProducts = () => {
                 <Input value={form.tagline} onChange={(e) => setForm((f) => ({ ...f, tagline: e.target.value }))} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs uppercase tracking-wider">Category</Label>
-                <Select value={form.category} onValueChange={(v) => setForm((f) => ({ ...f, category: v as Product["category"] }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="men">MEN</SelectItem>
-                    <SelectItem value="women">WOMEN</SelectItem>
-                    <SelectItem value="unisex">UNISEX</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs uppercase tracking-wider">Stock Quantity</Label>
-                <Input type="number" value={form.stockQuantity || ""} onChange={(e) => setForm((f) => ({ ...f, stockQuantity: Number(e.target.value) || 0 }))} />
-              </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-wider">Category</Label>
+              <Select value={form.category} onValueChange={(v) => setForm((f) => ({ ...f, category: v as Product["category"] }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="men">MEN</SelectItem>
+                  <SelectItem value="women">WOMEN</SelectItem>
+                  <SelectItem value="unisex">UNISEX</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs uppercase tracking-wider">Description</Label>
@@ -286,13 +282,20 @@ const AdminProducts = () => {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-xs uppercase tracking-wider">Sizes</Label>
+                <Label className="text-xs uppercase tracking-wider">Sizes & Stock</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addSize} className="text-xs gap-1"><Plus size={12} /> Add Size</Button>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider px-1">
+                <span className="w-20">ML</span>
+                <span className="flex-1">Price (₹)</span>
+                <span className="w-20">Stock</span>
+                <span className="w-8" />
               </div>
               {form.sizes.map((s, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <Input type="number" placeholder="ml" value={s.ml || ""} onChange={(e) => updateSize(i, "ml", Number(e.target.value))} className="w-24" />
+                  <Input type="number" placeholder="ml" value={s.ml || ""} onChange={(e) => updateSize(i, "ml", Number(e.target.value))} className="w-20" />
                   <Input type="number" placeholder="₹ Price" value={s.price || ""} onChange={(e) => updateSize(i, "price", Number(e.target.value))} className="flex-1" />
+                  <Input type="number" placeholder="Stock" value={s.stockQuantity ?? ""} onChange={(e) => updateSize(i, "stockQuantity", Number(e.target.value))} className="w-20" />
                   {form.sizes.length > 1 && (
                     <Button type="button" variant="ghost" size="icon" onClick={() => removeSize(i)}><X size={14} /></Button>
                   )}
