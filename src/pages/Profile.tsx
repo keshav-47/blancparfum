@@ -75,7 +75,7 @@ const Profile = () => {
       if (profileForm.email.trim()) payload.email = profileForm.email.trim();
       if (profileForm.phone.trim()) payload.phone = profileForm.phone.trim();
       const updated = await dispatch(updateProfile(payload)).unwrap();
-      dispatch(updateAuthUser({ name: updated.name, email: updated.email, phone: updated.phone, profileComplete: updated.profileComplete }));
+      dispatch(updateAuthUser({ name: updated.name, email: updated.email, phone: updated.phone }));
       toast({ title: "Profile updated" });
       setProfileOpen(false);
     } catch (err: unknown) {
@@ -102,7 +102,6 @@ const Profile = () => {
 
   useEffect(() => {
     if (!isAuthenticated) { navigate("/login"); return; }
-    if (authUser && !authUser.profileComplete) { navigate("/complete-profile"); return; }
     dispatch(fetchUserProfile());
     dispatch(fetchOrders());
     dispatch(fetchCustomRequests());

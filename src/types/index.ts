@@ -65,7 +65,6 @@ export interface UserProfile {
   phone?: string | null;
   avatar?: string | null;
   role?: "USER" | "ADMIN";
-  profileComplete?: boolean;
   addresses: Address[];
 }
 

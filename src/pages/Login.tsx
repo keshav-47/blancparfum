@@ -27,9 +27,8 @@ declare global {
   }
 }
 
-const navigateAfterLogin = (nav: ReturnType<typeof useNavigate>, u: { name?: string; email?: string | null; phone?: string | null; role?: string; profileComplete?: boolean }, returnTo?: string | null) => {
+const navigateAfterLogin = (nav: ReturnType<typeof useNavigate>, u: { role?: string }, returnTo?: string | null) => {
   if (u.role === "ADMIN") nav("/admin");
-  else if (!u.profileComplete) nav("/complete-profile");
   else nav(returnTo || "/");
 };
 
@@ -38,7 +37,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
-  const { isAuthenticated, loading, error, user } = useAppSelector((s) => s.auth);
+  const { isAuthenticated, loading, error, user, registration } = useAppSelector((s) => s.auth);
 
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -83,7 +82,11 @@ const Login = () => {
   googleCallbackRef.current = async (response: { credential: string }) => {
     try {
       const result = await dispatch(loginWithGoogle(response.credential)).unwrap();
-      navigateAfterLogin(navigate, result.user, returnTo);
+      if (result.newUser) {
+        navigate("/complete-profile");
+      } else {
+        navigateAfterLogin(navigate, result.user, returnTo);
+      }
     } catch { /* error shown via Redux */ }
   };
 
@@ -154,7 +157,11 @@ const Login = () => {
       const credential = await confirmationRef.current.confirm(otp);
       const idToken = await credential.user.getIdToken();
       const result = await dispatch(loginWithFirebase(idToken)).unwrap();
-      navigateAfterLogin(navigate, result.user, returnTo);
+      if (result.newUser) {
+        navigate("/complete-profile");
+      } else {
+        navigateAfterLogin(navigate, result.user, returnTo);
+      }
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       if (code === "auth/invalid-verification-code") {
