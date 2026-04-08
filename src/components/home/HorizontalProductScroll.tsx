@@ -11,7 +11,7 @@ const HorizontalProductScroll = () => {
 
   return (
     <section className="pt-16 pb-20 md:pt-24 md:pb-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mb-8 flex items-end justify-between gap-4">
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-2">Featured</p>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-light">Signature Scents</h2>
