@@ -45,8 +45,9 @@ const ProductDetail = () => {
         quantity,
       })).unwrap();
       toast({ title: "Added to cart", description: `${product.name} (${currentSize.ml}ml) \u00D7 ${quantity}` });
-    } catch {
-      toast({ title: "Failed to add to cart", variant: "destructive" });
+    } catch (err: unknown) {
+      const msg = typeof err === "string" ? err : "Failed to add to cart";
+      toast({ title: msg, variant: "destructive" });
     }
   };
 

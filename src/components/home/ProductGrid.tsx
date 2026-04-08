@@ -69,8 +69,9 @@ const MistCard = ({ product, index, dispatch }: { product: any; index: number; d
                 quantity: 1,
               })).unwrap();
               toast({ title: `${product.name} added to cart` });
-            } catch {
-              toast({ title: "Failed to add", variant: "destructive" });
+            } catch (err: unknown) {
+              const msg = typeof err === "string" ? err : "Failed to add";
+              toast({ title: msg, variant: "destructive" });
             }
           }}
           className="absolute bottom-[88px] left-1/2 -translate-x-1/2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-foreground text-background rounded-full px-5 py-2.5 text-[10px] font-body font-medium uppercase tracking-[0.15em] flex items-center gap-2 hover:bg-foreground/90 shadow-lg"

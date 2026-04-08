@@ -55,8 +55,14 @@ export const addItemToCart = createAsyncThunk(
           quantity: item.quantity,
         });
         return { serverItems: res.data.items.map(mapServerItem), local: null };
-      } catch {
-        // API failed — fall back to local add so cart still updates
+      } catch (err: unknown) {
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        // Stock/validation errors (400) — show to user, don't fall back
+        if (status === 400 && msg) {
+          return rejectWithValue(msg);
+        }
+        // Network/other errors — fall back to local
         return { serverItems: null, local: item };
       }
     }
