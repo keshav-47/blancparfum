@@ -12,7 +12,10 @@ import { useEffect } from "react";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => {
+    // Force instant scroll (bypass Lenis smooth scroll on navigation)
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]);
   return null;
 };
 import Index from "./pages/Index";

@@ -4,6 +4,7 @@ import { ArrowRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TextReveal from "@/components/animations/TextReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
+import SprayReveal from "@/components/home/SprayReveal";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { setFilter } from "@/store/slices/productsSlice";
 import { addItemToCart } from "@/store/slices/cartSlice";
@@ -81,6 +82,9 @@ const ProductGrid = () => {
             </button>
           ))}
         </div>
+
+        {/* Spray animation */}
+        <SprayReveal />
 
         {/* Grid */}
         <motion.div
