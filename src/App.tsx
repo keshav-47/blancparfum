@@ -23,6 +23,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import CompleteProfile from "./pages/CompleteProfile";
 import Shop from "./pages/Shop";
+import CollectionDetail from "./pages/CollectionDetail";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -49,6 +50,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/shop" element={<Shop />} />
+              <Route path="/collection/:slug" element={<CollectionDetail />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/custom" element={<CustomPerfume />} />
               <Route path="/cart" element={<Cart />} />

@@ -33,7 +33,7 @@ const FeaturedCollections = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.12 }}
             >
-              <Link to="/shop" className="group block relative aspect-[3/4] overflow-hidden rounded-lg">
+              <Link to={`/collection/${col.slug || col.id}`} className="group block relative aspect-[3/4] overflow-hidden rounded-lg">
                 <img
                   src={col.image}
                   alt={col.name}
