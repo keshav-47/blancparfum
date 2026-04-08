@@ -15,7 +15,7 @@ const BrandMarquee = () => (
       {[...phrases, ...phrases].map((p, i) => (
         <span
           key={i}
-          className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-muted-foreground mx-8 inline-flex items-center gap-3"
+          className="text-[10px] font-body font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-muted-foreground mx-4 sm:mx-8 inline-flex items-center gap-2 sm:gap-3"
         >
           <span className="w-1 h-1 rounded-full bg-accent" />
           {p}

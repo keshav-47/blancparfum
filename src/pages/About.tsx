@@ -52,7 +52,7 @@ const About = () => (
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
       <div className="absolute inset-0 flex items-end">
-        <div className="container mx-auto px-6 md:px-12 lg:px-20 pb-12 md:pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pb-12 md:pb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ const About = () => (
     </section>
 
     {/* Intro */}
-    <section className="container mx-auto px-6 md:px-12 lg:px-20 py-20 md:py-28">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-20 md:py-28">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -89,7 +89,7 @@ const About = () => (
 
     {/* Brand narrative - split layout */}
     <section className="bg-secondary/30">
-      <div className="container mx-auto px-6 md:px-12 lg:px-20 py-20 md:py-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-20 md:py-28">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -135,7 +135,7 @@ const About = () => (
     </section>
 
     {/* Values */}
-    <section className="container mx-auto px-6 md:px-12 lg:px-20 py-20 md:py-28">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-20 md:py-28">
       <div className="text-center mb-16">
         <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Why BLANC</p>
         <h2 className="font-display text-3xl md:text-4xl font-light">What Sets Us Apart</h2>
@@ -173,7 +173,7 @@ const About = () => (
         />
         <div className="absolute inset-0 bg-black/60" />
       </div>
-      <div className="relative container mx-auto px-6 md:px-12 lg:px-20 py-24 md:py-32 text-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-24 md:py-32 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -195,7 +195,7 @@ const About = () => (
     </section>
 
     {/* Map / Visit Us */}
-    <section className="container mx-auto px-6 md:px-12 lg:px-20 py-20 md:py-28">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-20 md:py-28">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Location</p>

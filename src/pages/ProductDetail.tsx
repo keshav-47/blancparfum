@@ -77,7 +77,7 @@ const ProductDetail = () => {
         }}
       />
 
-      <div className="container mx-auto px-6 md:px-12 lg:px-20 pt-24 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pt-24 pb-16 overflow-hidden">
         {/* Back */}
         <Link
           to="/shop"
@@ -101,12 +101,12 @@ const ProductDetail = () => {
               />
             </div>
             {product.images.length > 1 && (
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide">
                 {product.images.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveImage(i)}
-                    className={`w-20 h-20 overflow-hidden rounded-lg border-2 transition-all duration-300 ${
+                    className={`w-16 h-16 sm:w-20 sm:h-20 overflow-hidden rounded-lg border-2 transition-all duration-300 flex-shrink-0 ${
                       i === activeImage ? "border-accent ring-1 ring-accent/30" : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                   >
@@ -185,19 +185,19 @@ const ProductDetail = () => {
 
               {/* Tabs */}
               <Tabs defaultValue="notes" className="mt-12">
-                <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-8 px-0 h-auto">
+                <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-4 sm:gap-8 px-0 h-auto overflow-x-auto scrollbar-hide">
                   {["notes", "description", "ingredients"].map((tab) => (
                     <TabsTrigger
                       key={tab}
                       value={tab}
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-[11px] uppercase tracking-[0.15em] px-0 pb-3 font-body font-medium"
+                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-[11px] uppercase tracking-[0.15em] px-0 pb-3 font-body font-medium whitespace-nowrap flex-shrink-0"
                     >
                       {tab}
                     </TabsTrigger>
                   ))}
                 </TabsList>
                 <TabsContent value="notes" className="pt-8">
-                  <div className="grid grid-cols-3 gap-6">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-6">
                     {(["top", "heart", "base"] as const).map((type) => (
                       <div key={type} className="text-center">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-accent font-body font-medium mb-3">

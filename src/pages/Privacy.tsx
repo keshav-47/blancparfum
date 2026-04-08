@@ -5,7 +5,7 @@ import SEO from "@/components/SEO";
 const Privacy = () => (
   <Layout>
     <SEO title="Privacy Policy" canonical="/privacy" />
-    <div className="container mx-auto px-6 md:px-12 lg:px-20 pt-28 pb-20 max-w-3xl">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pt-28 pb-20">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Legal</p>
         <h1 className="font-display text-4xl md:text-5xl font-light mb-10">Privacy Policy</h1>

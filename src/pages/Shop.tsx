@@ -162,7 +162,7 @@ const Shop = () => {
         </AnimatePresence>
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-black/10" />
         <div className="absolute inset-0 flex items-end">
-          <div className="container mx-auto px-6 md:px-12 lg:px-20 pb-12 md:pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pb-12 md:pb-16">
             <AnimatePresence mode="wait">
               <motion.div
                 key={category}
@@ -185,12 +185,12 @@ const Shop = () => {
 
       {/* Sticky filters */}
       <nav className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50">
-        <div className="container mx-auto px-6 md:px-12 lg:px-20 py-4 flex gap-3 overflow-x-auto scrollbar-hide">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-4 flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide">
           {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => handleFilter(f.key)}
-              className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-5 py-2 rounded-full whitespace-nowrap transition-all duration-300 ${
+              className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-4 sm:px-5 py-2 rounded-full whitespace-nowrap flex-shrink-0 transition-all duration-300 ${
                 category === f.key
                   ? "bg-foreground text-background"
                   : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
@@ -203,7 +203,7 @@ const Shop = () => {
       </nav>
 
       {/* Product grid */}
-      <div className="container mx-auto px-6 md:px-12 lg:px-20 py-16 md:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-16 md:py-20">
         <AnimatePresence mode="wait">
           {filtered.length === 0 ? (
             <motion.p

@@ -51,7 +51,7 @@ const HorizontalProductScroll = () => {
   if (isMobile) {
     return (
       <section className="py-16">
-        <div className="px-6 mb-8 flex items-end justify-between">
+        <div className="px-4 sm:px-6 mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-2">Featured</p>
             <h2 className="font-display text-3xl font-light">Signature Scents</h2>
@@ -64,9 +64,9 @@ const HorizontalProductScroll = () => {
           </Link>
         </div>
         <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-4 px-6" style={{ width: "max-content" }}>
+          <div className="flex gap-3 sm:gap-4 px-4 sm:px-6" style={{ width: "max-content" }}>
             {featured.map((product, i) => (
-              <div key={product.id} className="w-[70vw] flex-shrink-0">
+              <div key={product.id} className="w-[65vw] sm:w-[70vw] flex-shrink-0">
                 <Card product={product} i={i} />
               </div>
             ))}

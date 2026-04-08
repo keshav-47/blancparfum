@@ -160,40 +160,40 @@ const Profile = () => {
   return (
     <Layout>
       <SEO title="Profile" canonical="/profile" noindex />
-      <div className="container mx-auto px-6 md:px-12 lg:px-20 pt-24 pb-16 max-w-4xl">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pt-24 pb-16 overflow-hidden">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-12">
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center overflow-hidden">
                 {displayProfile?.avatar ? (
                   <img src={displayProfile.avatar} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <User size={24} className="text-muted-foreground" strokeWidth={1.5} />
                 )}
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h1 className="font-display text-2xl md:text-3xl">{displayProfile?.name || "User"}</h1>
-                  <button onClick={openEditProfile} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+                  <h1 className="font-display text-2xl md:text-3xl truncate">{displayProfile?.name || "User"}</h1>
+                  <button onClick={openEditProfile} className="text-muted-foreground hover:text-foreground transition-colors p-1 flex-shrink-0">
                     <Pencil size={14} strokeWidth={1.5} />
                   </button>
                 </div>
-                <p className="text-muted-foreground text-sm font-body">{displayProfile?.email || displayProfile?.phone}</p>
+                <p className="text-muted-foreground text-sm font-body truncate">{displayProfile?.email || displayProfile?.phone}</p>
               </div>
             </div>
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="text-[11px] uppercase tracking-[0.15em] gap-2 font-body font-medium text-muted-foreground hover:text-foreground"
+              className="text-[11px] uppercase tracking-[0.15em] gap-2 font-body font-medium text-muted-foreground hover:text-foreground self-start sm:self-auto flex-shrink-0"
             >
               <LogOut size={14} strokeWidth={1.5} /> Logout
             </Button>
           </div>
 
           <Tabs defaultValue="orders">
-            <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-8 px-0 h-auto">
+            <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-4 sm:gap-8 px-0 h-auto overflow-x-auto scrollbar-hide">
               {[
                 { value: "orders", label: "Orders", icon: Clock },
                 { value: "addresses", label: "Addresses", icon: MapPin },
@@ -202,7 +202,7 @@ const Profile = () => {
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-[11px] uppercase tracking-[0.15em] px-0 pb-3 flex items-center gap-2 font-body font-medium"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-[11px] uppercase tracking-[0.15em] px-0 pb-3 flex items-center gap-1.5 sm:gap-2 font-body font-medium whitespace-nowrap flex-shrink-0"
                 >
                   <tab.icon size={14} strokeWidth={1.5} /> {tab.label}
                 </TabsTrigger>
@@ -218,15 +218,15 @@ const Profile = () => {
               ) : (
                 <div className="space-y-4">
                   {orders.map((order) => (
-                    <div key={order.id} className="border border-border rounded-xl p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <p className="text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body font-medium">
+                    <div key={order.id} className="border border-border rounded-xl p-4 sm:p-6 overflow-hidden">
+                      <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
+                        <div className="min-w-0">
+                          <p className="text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body font-medium truncate">
                             Order #{order.id.substring(0, 8).toUpperCase()}
                           </p>
                           <p className="text-sm text-muted-foreground font-body">{order.date}</p>
                         </div>
-                        <span className={`text-[10px] uppercase tracking-[0.15em] font-body font-medium px-3 py-1 rounded-full ${
+                        <span className={`text-[10px] uppercase tracking-[0.15em] font-body font-medium px-3 py-1 rounded-full flex-shrink-0 ${
                           order.status === "delivered"
                             ? "bg-green-50 text-green-700"
                             : order.status === "shipped"
@@ -237,9 +237,9 @@ const Profile = () => {
                         </span>
                       </div>
                       {order.items.map((item, i) => (
-                        <div key={i} className="flex justify-between text-sm py-1 font-body">
-                          <span className="text-muted-foreground">{item.name} ({item.size}ml) &times; {item.quantity}</span>
-                          <span>{"\u20B9"}{item.price.toLocaleString("en-IN")}</span>
+                        <div key={i} className="flex justify-between gap-2 text-sm py-1 font-body">
+                          <span className="text-muted-foreground min-w-0 break-words">{item.name} ({item.size}ml) &times; {item.quantity}</span>
+                          <span className="flex-shrink-0">{"\u20B9"}{item.price.toLocaleString("en-IN")}</span>
                         </div>
                       ))}
                       <div className="border-t border-border mt-3 pt-3 flex justify-between font-medium font-body">
@@ -310,10 +310,10 @@ const Profile = () => {
               ) : (
                 <div className="space-y-4">
                   {requests.map((req) => (
-                    <div key={req.id} className="border border-border rounded-xl p-6">
-                      <div className="flex justify-between items-start mb-3">
+                    <div key={req.id} className="border border-border rounded-xl p-4 sm:p-6 overflow-hidden">
+                      <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
                         <p className="text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body font-medium">{req.date}</p>
-                        <span className={`text-[10px] uppercase tracking-[0.15em] font-body font-medium px-3 py-1 rounded-full ${
+                        <span className={`text-[10px] uppercase tracking-[0.15em] font-body font-medium px-3 py-1 rounded-full flex-shrink-0 ${
                           req.status === "completed" ? "bg-green-50 text-green-700"
                             : req.status === "in_progress" ? "bg-blue-50 text-blue-700"
                             : "bg-secondary text-muted-foreground"

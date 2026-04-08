@@ -58,7 +58,7 @@ const HeroCarousel = () => {
 
       {/* Content - bottom left aligned */}
       <div className="absolute inset-0 flex items-end">
-        <div className="container mx-auto px-6 md:px-12 lg:px-20 pb-24 md:pb-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pb-24 md:pb-32">
           <AnimatePresence mode="wait">
             <motion.div
               key={current}
@@ -71,7 +71,7 @@ const HeroCarousel = () => {
               <p className="text-[11px] font-body font-medium uppercase tracking-[0.3em] text-white/50 mb-4">
                 {slides[current].label}
               </p>
-              <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] mb-8 whitespace-pre-line">
+              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] mb-8 whitespace-pre-line break-words">
                 {slides[current].title}
               </h1>
               <button

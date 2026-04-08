@@ -69,7 +69,7 @@ const StickyRevealBlock = ({
         />
 
         {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 lg:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8">
           <div
             className={`flex flex-col ${
               isReversed ? "items-end text-right" : "items-start text-left"

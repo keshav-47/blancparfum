@@ -170,7 +170,7 @@ const Cart = () => {
   return (
     <Layout>
       <SEO title="Shopping Cart" canonical="/cart" noindex />
-      <div className="container mx-auto px-6 md:px-12 lg:px-20 pt-24 pb-16 max-w-5xl">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pt-24 pb-16 overflow-hidden">
         <Link
           to="/shop"
           className="group inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-[11px] font-body font-medium uppercase tracking-[0.15em] mb-10"
@@ -189,9 +189,9 @@ const Cart = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="flex gap-5 py-6 first:pt-0"
+                className="flex gap-3 sm:gap-5 py-6 first:pt-0"
               >
-                <Link to={`/product/${item.productId}`} className="w-24 h-28 bg-secondary overflow-hidden rounded-lg flex-shrink-0 hover:opacity-80 transition-opacity">
+                <Link to={`/product/${item.productId}`} className="w-20 sm:w-24 h-24 sm:h-28 bg-secondary overflow-hidden rounded-lg flex-shrink-0 hover:opacity-80 transition-opacity">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </Link>
                 <div className="flex-1 min-w-0">

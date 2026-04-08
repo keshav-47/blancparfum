@@ -42,7 +42,7 @@ const ProductGrid = () => {
 
   return (
     <section id="product-grid" className="py-24 md:py-32">
-      <div className="container mx-auto px-6 md:px-12 lg:px-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
@@ -60,12 +60,12 @@ const ProductGrid = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-3 mb-12 overflow-x-auto scrollbar-hide pb-1">
+        <div className="flex gap-2 sm:gap-3 mb-12 overflow-x-auto scrollbar-hide pb-1">
           {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => dispatch(setFilter(f.key))}
-              className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 ${
+              className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-4 sm:px-5 py-2 sm:py-2.5 rounded-full whitespace-nowrap flex-shrink-0 transition-all duration-300 ${
                 filter === f.key
                   ? "bg-foreground text-background"
                   : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"

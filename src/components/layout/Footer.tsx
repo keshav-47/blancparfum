@@ -11,8 +11,8 @@ const Footer = () => {
   return (
     <footer className="bg-foreground text-white/70">
       {/* Main footer */}
-      <div className="container mx-auto px-6 md:px-12 lg:px-20 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-12 sm:py-20 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
           {/* Brand */}
           <div>
             <img src={logo} alt="BLANC" className="h-14 w-auto mb-5 brightness-0 invert" />
@@ -80,7 +80,7 @@ const Footer = () => {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="container mx-auto px-6 md:px-12 lg:px-20 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[11px] text-white/30 font-body">
             &copy; {new Date().getFullYear()} BLANC PARFUM. All rights reserved.
           </p>
