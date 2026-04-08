@@ -6,22 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
+import AddressForm, { emptyAddress } from "@/components/AddressForm";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { fetchUserProfile, fetchOrders, updateProfile, addAddress, updateAddress, deleteAddress } from "@/store/slices/userSlice";
 import { fetchCustomRequests } from "@/store/slices/customRequestsSlice";
 import { logout, updateAuthUser } from "@/store/slices/authSlice";
 import { useToast } from "@/hooks/use-toast";
-import { usePincodeLookup } from "@/hooks/use-pincode";
 import type { Address } from "@/types";
-
-const emptyAddr: Omit<Address, "id"> = {
-  label: "", street: "", city: "", state: "", zip: "", country: "India", isDefault: false,
-};
 
 const Profile = () => {
   const dispatch = useAppDispatch();
@@ -34,7 +29,7 @@ const Profile = () => {
 
   const [addrOpen, setAddrOpen] = useState(false);
   const [editingAddr, setEditingAddr] = useState<Address | null>(null);
-  const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
+  const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddress);
   const [addrSaving, setAddrSaving] = useState(false);
 
   // Profile edit
@@ -92,14 +87,6 @@ const Profile = () => {
     }
   };
 
-  // Auto-fill city/state from PIN code
-  const pinLookup = usePincodeLookup(addrForm.zip);
-  useEffect(() => {
-    if (pinLookup.city && pinLookup.state) {
-      setAddrForm((f) => ({ ...f, city: pinLookup.city, state: pinLookup.state }));
-    }
-  }, [pinLookup.city, pinLookup.state]);
-
   useEffect(() => {
     if (!isAuthenticated) { navigate("/login"); return; }
     dispatch(fetchUserProfile());
@@ -113,7 +100,7 @@ const Profile = () => {
 
   const openAddAddress = () => {
     setEditingAddr(null);
-    setAddrForm(emptyAddr);
+    setAddrForm(emptyAddress);
     setAddrOpen(true);
   };
 
@@ -342,48 +329,13 @@ const Profile = () => {
               {editingAddr ? "Edit Address" : "Add Address"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-1">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2 space-y-1.5">
-                <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Label <span className="text-destructive">*</span></Label>
-                <Input placeholder="Home, Office…" value={addrForm.label} onChange={(e) => setAddrForm((f) => ({ ...f, label: e.target.value }))} className="rounded-lg" />
-              </div>
-              <div className="col-span-2 space-y-1.5">
-                <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Street <span className="text-destructive">*</span></Label>
-                <Input placeholder="123 Main St, Apt 4" value={addrForm.street} onChange={(e) => setAddrForm((f) => ({ ...f, street: e.target.value }))} className="rounded-lg" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">City <span className="text-destructive">*</span></Label>
-                <Input value={addrForm.city} onChange={(e) => setAddrForm((f) => ({ ...f, city: e.target.value }))} className="rounded-lg" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">State <span className="text-destructive">*</span></Label>
-                <Input value={addrForm.state} onChange={(e) => setAddrForm((f) => ({ ...f, state: e.target.value }))} className="rounded-lg" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">PIN Code <span className="text-destructive">*</span></Label>
-                <div className="relative">
-                  <Input value={addrForm.zip} onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value.replace(/\D/g, "").slice(0, 6) }))} className="rounded-lg" placeholder="110001" maxLength={6} />
-                  {pinLookup.loading && <span className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />}
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Country <span className="text-destructive">*</span></Label>
-                <Input value={addrForm.country} onChange={(e) => setAddrForm((f) => ({ ...f, country: e.target.value }))} className="rounded-lg" />
-              </div>
-            </div>
-            <div className="flex items-center gap-3 pt-1">
-              <Switch checked={addrForm.isDefault} onCheckedChange={(v) => setAddrForm((f) => ({ ...f, isDefault: v }))} />
-              <Label className="text-[11px] uppercase tracking-[0.15em] cursor-pointer font-body font-medium">Set as default</Label>
-            </div>
-            <Button
-              onClick={handleSaveAddress}
-              disabled={addrSaving}
-              className="w-full rounded-full uppercase tracking-[0.15em] text-[11px] h-11 font-body font-medium"
-            >
-              {addrSaving ? "Saving\u2026" : editingAddr ? "Update Address" : "Save Address"}
-            </Button>
-          </div>
+          <AddressForm
+            value={addrForm}
+            onChange={setAddrForm}
+            saving={addrSaving}
+            submitLabel={editingAddr ? "Update Address" : "Save Address"}
+            onSubmit={handleSaveAddress}
+          />
         </DialogContent>
       </Dialog>
 

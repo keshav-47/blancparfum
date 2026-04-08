@@ -3,17 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus, X, ArrowLeft, MapPin, ChevronRight, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
+import AddressForm, { emptyAddress } from "@/components/AddressForm";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { removeItemFromCart, updateItemQuantity, clearCart, fetchServerCart } from "@/store/slices/cartSlice";
 import { fetchUserProfile, addAddress } from "@/store/slices/userSlice";
 import { useToast } from "@/hooks/use-toast";
-import { usePincodeLookup } from "@/hooks/use-pincode";
 import apiClient from "@/api/apiClient";
 import type { Address } from "@/types";
 
@@ -43,16 +40,7 @@ const Cart = () => {
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [showAddrForm, setShowAddrForm] = useState(false);
   const [addrSaving, setAddrSaving] = useState(false);
-  const emptyAddr: Omit<Address, "id"> = { label: "", street: "", city: "", state: "", zip: "", country: "India", isDefault: true };
-  const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddr);
-
-  // Auto-fill city/state from PIN code
-  const pinLookup = usePincodeLookup(addrForm.zip);
-  useEffect(() => {
-    if (pinLookup.city && pinLookup.state) {
-      setAddrForm((f) => ({ ...f, city: pinLookup.city, state: pinLookup.state }));
-    }
-  }, [pinLookup.city, pinLookup.state]);
+  const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddress);
 
   useEffect(() => {
     if (document.getElementById("razorpay-script")) return;
@@ -274,68 +262,27 @@ const Cart = () => {
           </DialogHeader>
           <div className="space-y-3 py-2">
             {addresses.length === 0 || showAddrForm ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2 space-y-1.5">
-                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Label <span className="text-destructive">*</span></Label>
-                    <Input placeholder="Home, Office..." value={addrForm.label} onChange={(e) => setAddrForm((f) => ({ ...f, label: e.target.value }))} className="rounded-lg" />
-                  </div>
-                  <div className="col-span-2 space-y-1.5">
-                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Street <span className="text-destructive">*</span></Label>
-                    <Input placeholder="123 Main St, Apt 4" value={addrForm.street} onChange={(e) => setAddrForm((f) => ({ ...f, street: e.target.value }))} className="rounded-lg" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">City <span className="text-destructive">*</span></Label>
-                    <Input value={addrForm.city} onChange={(e) => setAddrForm((f) => ({ ...f, city: e.target.value }))} className="rounded-lg" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">State <span className="text-destructive">*</span></Label>
-                    <Input value={addrForm.state} onChange={(e) => setAddrForm((f) => ({ ...f, state: e.target.value }))} className="rounded-lg" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">PIN Code <span className="text-destructive">*</span></Label>
-                    <div className="relative">
-                      <Input value={addrForm.zip} onChange={(e) => setAddrForm((f) => ({ ...f, zip: e.target.value.replace(/\D/g, "").slice(0, 6) }))} className="rounded-lg" placeholder="110001" maxLength={6} />
-                      {pinLookup.loading && <span className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />}
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] uppercase tracking-[0.15em] font-body font-medium">Country <span className="text-destructive">*</span></Label>
-                    <Input value={addrForm.country} onChange={(e) => setAddrForm((f) => ({ ...f, country: e.target.value }))} className="rounded-lg" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 pt-1">
-                  <Switch checked={addrForm.isDefault} onCheckedChange={(v) => setAddrForm((f) => ({ ...f, isDefault: v }))} />
-                  <Label className="text-[11px] uppercase tracking-[0.15em] cursor-pointer font-body font-medium">Set as default</Label>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  {showAddrForm && addresses.length > 0 && (
-                    <Button variant="outline" onClick={() => setShowAddrForm(false)} className="flex-1 rounded-full uppercase tracking-[0.15em] text-[11px] h-11 font-body font-medium">
-                      Cancel
-                    </Button>
-                  )}
-                  <Button
-                    disabled={addrSaving || !addrForm.label || !addrForm.street || !addrForm.city || !addrForm.state || !addrForm.zip}
-                    onClick={async () => {
-                      setAddrSaving(true);
-                      try {
-                        const saved = await dispatch(addAddress(addrForm)).unwrap();
-                        setSelectedAddressId(saved.id);
-                        setShowAddrForm(false);
-                        setAddrForm(emptyAddr);
-                        toast({ title: "Address saved" });
-                      } catch {
-                        toast({ title: "Failed to save address", variant: "destructive" });
-                      } finally {
-                        setAddrSaving(false);
-                      }
-                    }}
-                    className="flex-1 rounded-full uppercase tracking-[0.15em] text-[11px] h-11 font-body font-medium"
-                  >
-                    {addrSaving ? "Saving\u2026" : "Save & Continue"}
-                  </Button>
-                </div>
-              </div>
+              <AddressForm
+                value={addrForm}
+                onChange={setAddrForm}
+                saving={addrSaving}
+                submitLabel="Save & Continue"
+                onCancel={showAddrForm && addresses.length > 0 ? () => setShowAddrForm(false) : undefined}
+                onSubmit={async () => {
+                  setAddrSaving(true);
+                  try {
+                    const saved = await dispatch(addAddress(addrForm)).unwrap();
+                    setSelectedAddressId(saved.id);
+                    setShowAddrForm(false);
+                    setAddrForm(emptyAddress);
+                    toast({ title: "Address saved" });
+                  } catch {
+                    toast({ title: "Failed to save address", variant: "destructive" });
+                  } finally {
+                    setAddrSaving(false);
+                  }
+                }}
+              />
             ) : (
               <>
                 {addresses.map((addr) => (
@@ -368,7 +315,7 @@ const Cart = () => {
                   </button>
                 ))}
                 <button
-                  onClick={() => { setShowAddrForm(true); setAddrForm(emptyAddr); }}
+                  onClick={() => { setShowAddrForm(true); setAddrForm(emptyAddress); }}
                   className="w-full text-[11px] text-muted-foreground hover:text-foreground font-body font-medium uppercase tracking-[0.15em] py-2 transition-colors"
                 >
                   + Add new address
