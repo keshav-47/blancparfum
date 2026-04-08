@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import TextReveal from "@/components/animations/TextReveal";
+import ScrollReveal from "@/components/animations/ScrollReveal";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { setFilter } from "@/store/slices/productsSlice";
 import { addItemToCart } from "@/store/slices/cartSlice";
@@ -46,10 +48,14 @@ const ProductGrid = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
-            <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">
-              Discover
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl font-light">Our Fragrances</h2>
+            <ScrollReveal>
+              <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">
+                Discover
+              </p>
+            </ScrollReveal>
+            <TextReveal as="h2" className="font-display text-4xl md:text-5xl font-light">
+              Our Fragrances
+            </TextReveal>
           </div>
           <Link
             to="/shop"

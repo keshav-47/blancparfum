@@ -1,11 +1,20 @@
 import { ReactNode, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUp } from "lucide-react";
+import Lenis from "lenis";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const [showTop, setShowTop] = useState(false);
+
+  // Smooth scrolling
+  useEffect(() => {
+    const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+    function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+    return () => lenis.destroy();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 500);

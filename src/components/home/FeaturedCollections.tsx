@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import TextReveal from "@/components/animations/TextReveal";
+import ScrollReveal from "@/components/animations/ScrollReveal";
 
 const FeaturedCollections = () => {
   const collections = useAppSelector((state) => state.products.collections);
@@ -11,28 +12,20 @@ const FeaturedCollections = () => {
   return (
     <section className="py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">
-            Curated
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl font-light">Collections</h2>
-        </motion.div>
+        <div className="text-center mb-16">
+          <ScrollReveal>
+            <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">
+              Curated
+            </p>
+          </ScrollReveal>
+          <TextReveal as="h2" className="font-display text-4xl md:text-5xl font-light">
+            Collections
+          </TextReveal>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {collections.map((col, i) => (
-            <motion.div
-              key={col.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.12 }}
-            >
+            <ScrollReveal key={col.id} delay={i * 0.15} direction={i === 0 ? "left" : i === 2 ? "right" : "up"}>
               <Link to={`/collection/${col.slug || col.id}`} className="group block relative aspect-[3/4] overflow-hidden rounded-lg">
                 <img
                   src={col.image}
@@ -53,7 +46,7 @@ const FeaturedCollections = () => {
                   </span>
                 </div>
               </Link>
-            </motion.div>
+            </ScrollReveal>
           ))}
         </div>
       </div>
