@@ -139,20 +139,36 @@ const ProductDetail = () => {
               <div className="mb-8">
                 <p className="text-[11px] font-body font-medium uppercase tracking-[0.2em] text-muted-foreground mb-3">Size</p>
                 <div className="flex gap-2">
-                  {product.sizes.map((s, i) => (
-                    <button
-                      key={s.ml}
-                      onClick={() => setSelectedSize(i)}
-                      className={`px-5 py-2.5 rounded-full text-sm font-body font-medium transition-all duration-300 ${
-                        i === selectedSize
-                          ? "bg-foreground text-background"
-                          : "bg-secondary text-foreground hover:bg-secondary/70"
-                      }`}
-                    >
-                      {s.ml}ml
-                    </button>
-                  ))}
+                  {product.sizes.map((s, i) => {
+                    const outOfStock = s.stockQuantity != null && s.stockQuantity <= 0;
+                    return (
+                      <button
+                        key={s.ml}
+                        onClick={() => !outOfStock && setSelectedSize(i)}
+                        disabled={outOfStock}
+                        className={`px-5 py-2.5 rounded-full text-sm font-body font-medium transition-all duration-300 ${
+                          outOfStock
+                            ? "bg-secondary/50 text-muted-foreground/40 line-through cursor-not-allowed"
+                            : i === selectedSize
+                              ? "bg-foreground text-background"
+                              : "bg-secondary text-foreground hover:bg-secondary/70"
+                        }`}
+                      >
+                        {s.ml}ml
+                      </button>
+                    );
+                  })}
                 </div>
+                {currentSize.stockQuantity != null && currentSize.stockQuantity > 0 && currentSize.stockQuantity <= 5 && (
+                  <p className="text-[11px] text-accent font-body font-medium mt-2">
+                    Only {currentSize.stockQuantity} left in stock
+                  </p>
+                )}
+                {currentSize.stockQuantity != null && currentSize.stockQuantity <= 0 && (
+                  <p className="text-[11px] text-destructive font-body font-medium mt-2">
+                    Out of stock
+                  </p>
+                )}
               </div>
 
               {/* Quantity */}
@@ -178,10 +194,13 @@ const ProductDetail = () => {
               {/* Add to cart */}
               <Button
                 onClick={handleAddToCart}
+                disabled={currentSize.stockQuantity != null && currentSize.stockQuantity <= 0}
                 className="w-full h-14 rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium gap-2"
               >
                 <ShoppingBag size={15} strokeWidth={1.5} />
-                Add to Cart — {"\u20B9"}{(currentSize.price * quantity).toLocaleString("en-IN")}
+                {currentSize.stockQuantity != null && currentSize.stockQuantity <= 0
+                  ? "Out of Stock"
+                  : `Add to Cart — \u20B9${(currentSize.price * quantity).toLocaleString("en-IN")}`}
               </Button>
 
               {/* Tabs */}

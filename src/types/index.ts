@@ -1,6 +1,7 @@
 export interface ProductSize {
   ml: number;
   price: number;
+  stockQuantity: number;
 }
 
 export interface Product {
