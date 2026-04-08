@@ -1,83 +1,121 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
-// Mist particles that spray outward from center
-const particles = Array.from({ length: 20 }, (_, i) => ({
+// Mist particles — varied sizes and directions
+const particles = Array.from({ length: 30 }, (_, i) => ({
   id: i,
-  x: (Math.random() - 0.5) * 300,
-  y: (Math.random() - 0.5) * 200 - 100,
-  scale: Math.random() * 0.6 + 0.4,
-  delay: Math.random() * 0.5,
-  duration: Math.random() * 1.5 + 1,
+  x: (Math.random() - 0.5) * 400,
+  y: -(Math.random() * 200 + 40),
+  size: Math.random() * 12 + 6,
+  delay: Math.random() * 0.6,
+  duration: Math.random() * 1.2 + 0.8,
+  opacity: Math.random() * 0.3 + 0.15,
+}));
+
+// Droplet trails
+const droplets = Array.from({ length: 8 }, (_, i) => ({
+  id: i,
+  x: (Math.random() - 0.5) * 120,
+  y: -(Math.random() * 80 + 30),
+  delay: Math.random() * 0.3 + 0.2,
 }));
 
 const SprayReveal = () => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
 
   return (
-    <div ref={ref} className="relative flex flex-col items-center py-12 overflow-hidden">
-      {/* Perfume bottle silhouette */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
-        className="relative z-10"
-      >
-        <svg
-          width="48" height="80" viewBox="0 0 48 80" fill="none"
-          className="text-foreground/15"
-        >
-          {/* Bottle cap */}
-          <rect x="18" y="0" width="12" height="8" rx="2" fill="currentColor" />
-          {/* Nozzle */}
-          <rect x="22" y="8" width="4" height="6" fill="currentColor" />
-          {/* Bottle body */}
-          <path d="M10 20 C10 16 16 14 24 14 C32 14 38 16 38 20 L38 70 C38 75 32 78 24 78 C16 78 10 75 10 70 Z" fill="currentColor" />
-          {/* Label line */}
-          <rect x="16" y="38" width="16" height="1" rx="0.5" fill="white" opacity="0.4" />
-          <rect x="18" y="42" width="12" height="1" rx="0.5" fill="white" opacity="0.3" />
-        </svg>
-      </motion.div>
-
-      {/* Spray mist particles */}
+    <div ref={ref} className="relative flex flex-col items-center py-8 overflow-visible">
+      {/* Spray mist cloud */}
       {isInView && particles.map((p) => (
         <motion.div
-          key={p.id}
-          className="absolute top-8 left-1/2"
+          key={`mist-${p.id}`}
+          className="absolute"
+          style={{ top: "50%", left: "50%" }}
           initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
           animate={{
-            opacity: [0, 0.4, 0],
+            opacity: [0, p.opacity, 0],
             x: p.x,
             y: p.y,
-            scale: p.scale,
+            scale: [0, 1.5, 2],
           }}
           transition={{
             duration: p.duration,
-            delay: p.delay + 0.5,
+            delay: p.delay,
             ease: "easeOut",
           }}
         >
-          <div className="w-3 h-3 rounded-full bg-accent/20 blur-sm" />
+          <div
+            className="rounded-full bg-accent/30 blur-md"
+            style={{ width: p.size, height: p.size }}
+          />
         </motion.div>
       ))}
 
-      {/* Spray line */}
-      <motion.div
-        initial={{ scaleY: 0, opacity: 0 }}
-        animate={isInView ? { scaleY: 1, opacity: [0, 0.3, 0] } : {}}
-        transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
-        className="w-[1px] h-16 bg-gradient-to-b from-accent/40 to-transparent origin-top -mt-2"
-      />
+      {/* Fine droplets */}
+      {isInView && droplets.map((d) => (
+        <motion.div
+          key={`drop-${d.id}`}
+          className="absolute"
+          style={{ top: "50%", left: "50%" }}
+          initial={{ opacity: 0, x: 0, y: 0 }}
+          animate={{
+            opacity: [0, 0.6, 0],
+            x: d.x,
+            y: d.y,
+          }}
+          transition={{ duration: 0.6, delay: d.delay, ease: "easeOut" }}
+        >
+          <div className="w-1 h-1 rounded-full bg-accent" />
+        </motion.div>
+      ))}
+
+      {/* Central spray burst */}
+      {isInView && (
+        <motion.div
+          className="absolute"
+          style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: [0, 0.2, 0], scale: [0, 3, 5] }}
+          transition={{ duration: 1.5, delay: 0.1, ease: "easeOut" }}
+        >
+          <div className="w-16 h-16 rounded-full bg-accent/20 blur-xl" />
+        </motion.div>
+      )}
+
+      {/* Perfume bottle */}
+      <motion.svg
+        width="40" height="72" viewBox="0 0 40 72" fill="none"
+        className="relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+      >
+        {/* Cap */}
+        <rect x="14" y="0" width="12" height="6" rx="1.5" fill="#1a1a1a" opacity="0.7" />
+        {/* Nozzle */}
+        <rect x="18" y="6" width="4" height="5" fill="#1a1a1a" opacity="0.5" />
+        {/* Shoulder */}
+        <path d="M12 15 C12 12 16 11 20 11 C24 11 28 12 28 15 L28 18 L12 18 Z" fill="#1a1a1a" opacity="0.15" />
+        {/* Body */}
+        <rect x="8" y="18" width="24" height="46" rx="3" fill="#1a1a1a" opacity="0.1" />
+        {/* Glass shine */}
+        <rect x="12" y="22" width="2" height="38" rx="1" fill="#1a1a1a" opacity="0.06" />
+        {/* Label */}
+        <rect x="14" y="34" width="12" height="0.5" fill="#1a1a1a" opacity="0.15" />
+        <rect x="16" y="37" width="8" height="0.5" fill="#1a1a1a" opacity="0.1" />
+        {/* Bottom */}
+        <path d="M8 64 L8 60 L32 60 L32 64 C32 67 28 68 20 68 C12 68 8 67 8 64 Z" fill="#1a1a1a" opacity="0.08" />
+      </motion.svg>
 
       {/* Tagline */}
       <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 1.2 }}
-        className="text-[10px] font-body uppercase tracking-[0.3em] text-muted-foreground mt-4"
+        initial={{ opacity: 0, letterSpacing: "0.1em" }}
+        animate={isInView ? { opacity: 1, letterSpacing: "0.3em" } : {}}
+        transition={{ duration: 1, delay: 1 }}
+        className="text-[9px] font-body uppercase text-muted-foreground/60 mt-6"
       >
-        Sprayed with passion
+        Crafted with passion
       </motion.p>
     </div>
   );
