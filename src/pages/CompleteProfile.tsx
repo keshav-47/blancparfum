@@ -65,7 +65,7 @@ const CompleteProfile = () => {
     setSaving(true);
     try {
       const updated = await dispatch(updateProfile({ name: name.trim() })).unwrap();
-      dispatch(updateAuthUser({ name: updated.name }));
+      dispatch(updateAuthUser({ name: updated.name, profileComplete: updated.profileComplete }));
       setStep(needsContact ? "contact" : "address");
     } catch {
       toast({ title: "Failed to save name", variant: "destructive" });
@@ -98,7 +98,7 @@ const CompleteProfile = () => {
       if (needsEmail && email.trim()) payload.email = email.trim();
       if (needsPhone && phone.trim()) payload.phone = phone.trim();
       const updated = await dispatch(updateProfile(payload)).unwrap();
-      dispatch(updateAuthUser({ email: updated.email, phone: updated.phone }));
+      dispatch(updateAuthUser({ email: updated.email, phone: updated.phone, profileComplete: updated.profileComplete }));
       setStep("address");
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message || "Failed to save contact info";
