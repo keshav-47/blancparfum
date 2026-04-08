@@ -10,7 +10,7 @@ const HorizontalProductScroll = () => {
   if (!featured.length) return null;
 
   return (
-    <section className="py-16 md:py-24 overflow-hidden">
+    <section className="pt-16 pb-20 md:pt-24 md:pb-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-2">Featured</p>
@@ -24,8 +24,8 @@ const HorizontalProductScroll = () => {
         </Link>
       </div>
 
-      <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex gap-4 md:gap-6 px-4 sm:px-6 md:px-12 lg:px-20" style={{ width: "max-content" }}>
+      <div className="overflow-x-auto overflow-y-visible scrollbar-hide">
+        <div className="flex gap-4 md:gap-6 px-4 sm:px-6 md:px-12 lg:px-20 pb-2" style={{ width: "max-content" }}>
           {featured.map((product, i) => (
             <motion.div
               key={product.id}
