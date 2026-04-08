@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePincodeLookup } from "@/hooks/use-pincode";
 import { useCitiesForState, preloadAllCities } from "@/hooks/use-cities";
-import { useGeolocation } from "@/hooks/use-geolocation";
 import { indianStates } from "@/data/indian-states";
 import type { Address } from "@/types";
-import { Check, LocateFixed } from "lucide-react";
+import { Check } from "lucide-react";
 
 export const emptyAddress: Omit<Address, "id"> = {
   label: "", street: "", city: "", state: "", zip: "", country: "India", isDefault: true,
@@ -32,8 +31,6 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
   const pinLookup = usePincodeLookup(value.zip);
   const [pinFilled, setPinFilled] = useState(false);
 
-  const geo = useGeolocation();
-
   // Kick off background preload once
   useEffect(() => {
     if (!preloadStarted) {
@@ -44,23 +41,6 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
 
   // Fetch cities for selected state (only when not pin-filled)
   const { cities, loading: citiesLoading } = useCitiesForState(pinFilled ? "" : value.state);
-
-  const handleUseLocation = async () => {
-    const result = await geo.detect();
-    if (result) {
-      onChange({
-        ...value,
-        street: result.street || value.street,
-        city: result.city,
-        state: result.state,
-        zip: result.pincode,
-      });
-      if (result.pincode && result.city && result.state) {
-        setPinFilled(true);
-      }
-      setErrors({});
-    }
-  };
 
   // Auto-fill city/state from pincode
   useEffect(() => {
@@ -113,22 +93,6 @@ const AddressForm = ({ value, onChange, onSubmit, saving, submitLabel = "Save Ad
 
   return (
     <div className="space-y-4">
-      {/* Use current location */}
-      <button
-        type="button"
-        onClick={handleUseLocation}
-        disabled={geo.loading}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-dashed border-accent/50 text-accent text-[11px] font-body font-medium uppercase tracking-[0.15em] hover:bg-accent/5 transition-colors disabled:opacity-50"
-      >
-        {geo.loading ? (
-          <span className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-        ) : (
-          <LocateFixed size={14} />
-        )}
-        {geo.loading ? "Detecting location..." : "Use my current location"}
-      </button>
-      {geo.error && <p className="text-[11px] text-destructive font-body -mt-2">{geo.error}</p>}
-
       <div className="grid grid-cols-2 gap-3">
         {/* Label */}
         <div className="col-span-2 space-y-1.5">
