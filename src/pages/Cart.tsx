@@ -153,12 +153,12 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <Layout>
-        <div className="min-h-[70vh] flex flex-col items-center justify-center px-6">
+        <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
           <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-6">
             <ShoppingBag size={24} className="text-muted-foreground" strokeWidth={1.5} />
           </div>
           <h2 className="font-display text-3xl mb-2">Your Cart is Empty</h2>
-          <p className="text-muted-foreground font-body text-sm mb-8">Discover our fragrances and find your signature scent.</p>
+          <p className="text-muted-foreground font-body text-sm mb-8 max-w-xs">Discover our fragrances and find your signature scent.</p>
           <Button asChild className="rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium px-8 h-11">
             <Link to="/shop">Shop Now</Link>
           </Button>
