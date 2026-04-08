@@ -58,6 +58,8 @@ export interface Order {
   items: OrderItem[];
   total: number;
   customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
 }
 
 export interface UserProfile {
@@ -98,4 +100,7 @@ export interface CustomRequest {
   intensity: "light" | "moderate" | "strong";
   message?: string;
   notes?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
 }

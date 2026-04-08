@@ -194,6 +194,18 @@ export const fetchAdminCustomRequests = createAsyncThunk("admin/fetchCustomReque
   }
 });
 
+export const sendCustomEmail = createAsyncThunk(
+  "admin/sendCustomEmail",
+  async (data: { email: string; name: string; subject: string; message: string }, { rejectWithValue }) => {
+    try {
+      await apiClient.post("/admin/send-email", data);
+      return true;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to send email"));
+    }
+  }
+);
+
 export const updateCustomRequestStatus = createAsyncThunk(
   "admin/updateCustomRequestStatus",
   async ({ id, status, notes }: { id: string; status: CustomRequest["status"]; notes?: string }, { rejectWithValue }) => {
