@@ -8,13 +8,42 @@ import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { store } from "@/store";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import Lenis from "lenis";
+
+// Global Lenis instance
+let lenisInstance: Lenis | null = null;
+
+const SmoothScroll = () => {
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    lenisInstance = new Lenis({ duration: 1.1, smoothWheel: true });
+    function raf(time: number) {
+      lenisInstance?.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => { lenisInstance?.destroy(); lenisInstance = null; };
+  }, []);
+  return null;
+};
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
-    // Force instant scroll (bypass Lenis smooth scroll on navigation)
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    // Stop Lenis, force scroll to 0, then resume
+    if (lenisInstance) {
+      lenisInstance.stop();
+      window.scrollTo(0, 0);
+      // Small delay to let the DOM settle before resuming
+      requestAnimationFrame(() => {
+        lenisInstance?.start();
+      });
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
   return null;
 };
@@ -49,6 +78,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <SmoothScroll />
             <ScrollToTop />
             <Routes>
               <Route path="/" element={<Index />} />
