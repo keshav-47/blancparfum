@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
@@ -116,6 +116,7 @@ const Shop = () => {
   const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const { items } = useAppSelector((state) => state.products);
+  const [query, setQuery] = useState("");
 
   const category = searchParams.get("category") || "all";
   const hero = heroData[category] || heroData.all;
@@ -129,9 +130,18 @@ const Shop = () => {
   }, [category, dispatch]);
 
   const filtered = items.filter((p) => {
-    if (category === "all") return true;
-    if (category === "new") return p.isNew;
-    return p.category === category;
+    // Category filter
+    const matchCat = category === "all" ? true : category === "new" ? p.isNew : p.category === category;
+    if (!matchCat) return false;
+    // Search filter
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return p.name.toLowerCase().includes(q)
+      || p.tagline.toLowerCase().includes(q)
+      || p.description?.toLowerCase().includes(q)
+      || p.notes?.top?.some(n => n.toLowerCase().includes(q))
+      || p.notes?.heart?.some(n => n.toLowerCase().includes(q))
+      || p.notes?.base?.some(n => n.toLowerCase().includes(q));
   });
 
   const handleFilter = (key: string) => {
@@ -183,22 +193,44 @@ const Shop = () => {
         </div>
       </section>
 
-      {/* Sticky filters */}
+      {/* Sticky filters + search */}
       <nav className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-4 flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide">
-          {filters.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => handleFilter(f.key)}
-              className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-4 sm:px-5 py-2 rounded-full whitespace-nowrap flex-shrink-0 transition-all duration-300 ${
-                category === f.key
-                  ? "bg-foreground text-background"
-                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-3 space-y-3">
+          {/* Search bar */}
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name, notes, occasion..."
+              className="w-full h-10 pl-10 pr-10 rounded-full bg-secondary/60 border-0 text-sm font-body placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+          {/* Filter pills */}
+          <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide">
+            {filters.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => handleFilter(f.key)}
+                className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-4 sm:px-5 py-2 rounded-full whitespace-nowrap flex-shrink-0 transition-all duration-300 ${
+                  category === f.key
+                    ? "bg-foreground text-background"
+                    : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
       </nav>
 

@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react";
-import { Plus, Pencil, Trash2, X, ImagePlus } from "lucide-react";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { Plus, Pencil, Trash2, X, ImagePlus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,8 +37,19 @@ const AdminProducts = () => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => { dispatch(fetchAdminProducts()); }, [dispatch]);
+
+  const filteredProducts = useMemo(() => {
+    if (!search.trim()) return products;
+    const q = search.toLowerCase();
+    return products.filter(p =>
+      p.name.toLowerCase().includes(q)
+      || p.category.toLowerCase().includes(q)
+      || p.tagline?.toLowerCase().includes(q)
+    );
+  }, [products, search]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -132,9 +143,26 @@ const AdminProducts = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-2xl tracking-wider">Products</h1>
-        <Button onClick={openCreate} className="gap-2"><Plus size={16} /> Create Product</Button>
+        <Button onClick={openCreate} className="gap-2 self-start sm:self-auto"><Plus size={16} /> Create Product</Button>
+      </div>
+
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search products by name, category..."
+          className="w-full sm:w-80 h-10 pl-10 pr-10 rounded-lg bg-secondary/60 border border-border text-sm font-body placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <X size={14} />
+          </button>
+        )}
       </div>
 
       <div className="rounded-md border border-border overflow-x-auto">
@@ -155,9 +183,9 @@ const AdminProducts = () => {
           <TableBody>
             {loading && !products.length ? (
               <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
-            ) : products.length === 0 ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No products yet</TableCell></TableRow>
-            ) : products.map((p) => (
+            ) : filteredProducts.length === 0 ? (
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">{search ? "No products match your search" : "No products yet"}</TableCell></TableRow>
+            ) : filteredProducts.map((p) => (
               <TableRow key={p.id}>
                 <TableCell>
                   {p.images?.[0] ? (
