@@ -49,8 +49,9 @@ export const loginWithGoogle = createAsyncThunk(
       }
 
       // Existing user
-      const { token, user } = data;
+      const { token, refreshToken, user } = data;
       localStorage.setItem("auth_token", token);
+      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
 
       // Sync local cart to server
       const state = getState() as RootState;
@@ -84,8 +85,9 @@ export const loginWithFirebase = createAsyncThunk(
         return { newUser: true, registration: data };
       }
 
-      const { token, user } = data;
+      const { token, refreshToken, user } = data;
       localStorage.setItem("auth_token", token);
+      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
 
       const state = getState() as RootState;
       const localItems = state.cart.items.map((i) => ({
@@ -112,8 +114,9 @@ export const completeRegistration = createAsyncThunk(
   async (data: { registrationToken: string; name: string; email: string; phone: string }, { dispatch, getState, rejectWithValue }) => {
     try {
       const res = await apiClient.post("/auth/register", data);
-      const { token, user } = res.data;
+      const { token, refreshToken, user } = res.data;
       localStorage.setItem("auth_token", token);
+      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
 
       // Sync local cart
       const state = getState() as RootState;
@@ -148,6 +151,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.registration = null;
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("refresh_token");
       localStorage.removeItem("auth_user");
       localStorage.removeItem("bp_cart");
     },
