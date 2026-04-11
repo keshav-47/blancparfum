@@ -57,8 +57,11 @@ import CompleteProfile from "./pages/CompleteProfile";
 import Shop from "./pages/Shop";
 import CollectionDetail from "./pages/CollectionDetail";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Pricing from "./pages/Pricing";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import RefundPolicy from "./pages/RefundPolicy";
 import NotFound from "./pages/NotFound";
 import AdminGuard from "./components/admin/AdminGuard";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -88,11 +91,14 @@ const App = () => (
               <Route path="/custom" element={<CustomPerfume />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/complete-profile" element={<CompleteProfile />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
               {/* Admin routes — guarded by role check */}
               <Route element={<AdminGuard />}>
                 <Route element={<AdminLayout />}>
