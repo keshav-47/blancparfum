@@ -13,7 +13,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       <Link to={`/product/${product.slug || product.id}`} className="group block">
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
           <img
-            src={product.images[0]}
+            src={product.images?.[0] || product.image || ""}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
@@ -32,7 +32,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             {product.tagline}
           </p>
           <p className="font-body text-sm text-foreground">
-            From ₹{product.sizes[0].price}
+            From ₹{(product.sizes?.[0]?.price ?? product.price).toLocaleString("en-IN")}
           </p>
         </div>
       </Link>

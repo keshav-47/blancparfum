@@ -51,7 +51,7 @@ const containerVariants = {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 25 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
   exit: { opacity: 0, scale: 0.97, transition: { duration: 0.25 } },
 };
 
@@ -67,7 +67,7 @@ const ShopCard = ({ product }: { product: Product }) => {
       <Link to={`/product/${product.slug || product.id}`} className="group block">
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
           <motion.img
-            src={product.images[0]}
+            src={product.images?.[0] || product.image || ""}
             alt={product.name}
             className="w-full h-full object-cover"
             loading="lazy"
@@ -97,14 +97,9 @@ const ShopCard = ({ product }: { product: Product }) => {
             Extrait de Parfum
           </p>
           <p className="text-sm font-body text-foreground/70 pt-0.5">
-            {product.sizes.length > 1
-              ? `From \u20B9${product.sizes[0].price.toLocaleString("en-IN")}`
-              : `\u20B9${product.sizes[0].price.toLocaleString("en-IN")}`}
-            {product.sizes.length > 1 && (
-              <span className="text-muted-foreground text-[10px] ml-1.5">
-                +{product.sizes.length - 1} size{product.sizes.length > 2 ? "s" : ""}
-              </span>
-            )}
+            {product.price > 0
+              ? `From \u20B9${product.price.toLocaleString("en-IN")}`
+              : ""}
           </p>
         </div>
       </Link>

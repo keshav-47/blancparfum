@@ -38,7 +38,7 @@ const HorizontalProductScroll = () => {
               <Link to={`/product/${product.slug || product.id}`} className="group block">
                 <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-4">
                   <motion.img
-                    src={product.images[0]}
+                    src={product.images?.[0] || product.image || ""}
                     alt={product.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -57,7 +57,7 @@ const HorizontalProductScroll = () => {
                     {product.tagline}
                   </p>
                   <p className="text-sm font-body text-foreground/70">
-                    From {"\u20B9"}{product.sizes[0]?.price.toLocaleString("en-IN")}
+                    From {"\u20B9"}{(product.sizes?.[0]?.price ?? product.price).toLocaleString("en-IN")}
                   </p>
                 </div>
               </Link>

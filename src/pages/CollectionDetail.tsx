@@ -51,14 +51,14 @@ const CollectionDetail = () => {
   const otherCollections = collections.filter((c) => c.id !== collection.id).slice(0, 3);
 
   const handleQuickAdd = async (product: Product) => {
-    if (!product.sizes[0]) return;
+    if (!product.sizes?.[0] && !product.price) return;
     try {
       await dispatch(addItemToCart({
         productId: product.id,
         name: product.name,
-        image: product.images[0] || "",
-        size: product.sizes[0].ml,
-        price: product.sizes[0].price,
+        image: product.images?.[0] || product.image || "",
+        size: product.sizes?.[0]?.ml ?? 30,
+        price: product.sizes?.[0]?.price ?? product.price,
         quantity: 1,
       })).unwrap();
       toast({ title: `${product.name} added to cart` });
@@ -136,7 +136,7 @@ const CollectionDetail = () => {
                   <Link to={`/product/${product.slug || product.id}`} className="block">
                     <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
                       <motion.img
-                        src={product.images[0]}
+                        src={product.images?.[0] || product.image || ""}
                         alt={product.name}
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -163,7 +163,7 @@ const CollectionDetail = () => {
                       {product.tagline}
                     </p>
                     <p className="text-sm font-body text-foreground/70">
-                      From {"\u20B9"}{product.sizes[0]?.price.toLocaleString("en-IN")}
+                      From {"\u20B9"}{(product.sizes?.[0]?.price ?? product.price).toLocaleString("en-IN")}
                     </p>
                   </Link>
                 </div>
