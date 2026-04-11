@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Minus, Plus, ArrowLeft, ShoppingBag } from "lucide-react";
@@ -9,16 +9,44 @@ import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { addItemToCart } from "@/store/slices/cartSlice";
 import { toast } from "@/hooks/use-toast";
+import apiClient from "@/api/apiClient";
+import type { Product } from "@/types";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const products = useAppSelector((state) => state.products.items);
-  const product = products.find((p) => p.id === id || p.slug === id);
 
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+
+  // Fetch full product details from API
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    apiClient.get<Product>(`/products/${id}`)
+      .then((res) => setProduct(res.data))
+      .catch(() => setProduct(null))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  // Related products from the card list (lightweight)
+  const related = product
+    ? products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 3)
+    : [];
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+        </div>
+      </Layout>
+    );
+  }
 
   if (!product) {
     return (
@@ -31,8 +59,7 @@ const ProductDetail = () => {
     );
   }
 
-  const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 3);
-  const currentSize = product.sizes[selectedSize];
+  const currentSize = product.sizes?.[selectedSize];
 
   const handleAddToCart = async () => {
     try {
@@ -55,7 +82,7 @@ const ProductDetail = () => {
     <Layout>
       <SEO
         title={product.name}
-        description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM. From \u20B9${product.sizes[0].price}.`}
+        description={product.tagline || `${product.name} — Extrait de Parfum by BLANC PARFUM.${product.sizes?.[0] ? ` From \u20B9${product.sizes[0].price}.` : ""}`}
         canonical={`/product/${product.slug || product.id}`}
         type="product"
         image={product.images[0]}

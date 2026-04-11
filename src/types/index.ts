@@ -11,7 +11,8 @@ export interface Product {
   tagline: string;
   price: number;
   category: "men" | "women" | "unisex";
-  images: string[];
+  image?: string;          // from card API (single)
+  images: string[];        // from detail API (array)
   sizes: ProductSize[];
   description: string;
   notes: {

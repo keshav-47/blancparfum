@@ -18,10 +18,31 @@ const initialState: ProductsState = {
   filter: "all",
 };
 
+// Card response from lightweight API
+interface ProductCardAPI {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string;
+  price: number;
+  category: "men" | "women" | "unisex";
+  image: string | null;
+  isNew: boolean;
+  isFeatured: boolean;
+}
+
 export const fetchProducts = createAsyncThunk("products/fetchAll", async (_, { rejectWithValue }) => {
   try {
-    const response = await apiClient.get<Product[]>("/products");
-    return response.data;
+    const response = await apiClient.get<ProductCardAPI[]>("/products");
+    // Normalize card response to Product shape
+    return response.data.map((card): Product => ({
+      ...card,
+      tagline: card.tagline || "",
+      images: card.image ? [card.image] : [],
+      sizes: [],
+      description: "",
+      notes: { top: [], heart: [], base: [] },
+    }));
   } catch {
     return rejectWithValue("Failed to fetch products");
   }
