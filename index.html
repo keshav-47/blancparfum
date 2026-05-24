@@ -26,6 +26,22 @@
     <meta name="twitter:description" content="Discover handcrafted Extrait de Parfum by BLANC PARFUM. Luxury niche fragrances crafted in India with the world's rarest ingredients." />
     <meta name="twitter:image" content="https://blancparfum.in/og-image.png" />
 
+    <style>
+      /* Pre-mount skeleton — replaced by React on first render */
+      .bp-boot { min-height: 100vh; background: #fff; color: #141414; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .bp-boot-nav { position: fixed; top: 0; left: 0; right: 0; height: 64px; background: #fff; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 50; }
+      .bp-boot-brand { font-family: 'Cormorant Garamond', serif; font-weight: 500; letter-spacing: 0.18em; font-size: 18px; }
+      .bp-boot-main { padding-top: 64px; }
+      .bp-boot-hero { width: 100%; height: 60vh; background: linear-gradient(110deg, #ededed 8%, #f7f7f7 18%, #ededed 33%); background-size: 200% 100%; animation: bp-pulse 1.4s linear infinite; }
+      .bp-boot-grid { max-width: 1280px; margin: 0 auto; padding: 56px 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      @media (min-width: 768px) { .bp-boot-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 64px 32px; } }
+      .bp-boot-card { aspect-ratio: 3 / 4; background: linear-gradient(110deg, #ededed 8%, #f7f7f7 18%, #ededed 33%); background-size: 200% 100%; animation: bp-pulse 1.4s linear infinite; border-radius: 6px; }
+      .bp-boot-card:nth-child(2) { animation-delay: 0.15s; }
+      .bp-boot-card:nth-child(3) { animation-delay: 0.3s; }
+      .bp-boot-card:nth-child(4) { animation-delay: 0.45s; }
+      @keyframes bp-pulse { to { background-position: -200% 0; } }
+    </style>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -51,7 +67,22 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="bp-boot">
+        <div class="bp-boot-nav">
+          <div class="bp-boot-brand">BLANC PARFUM</div>
+        </div>
+        <div class="bp-boot-main">
+          <div class="bp-boot-hero"></div>
+          <div class="bp-boot-grid">
+            <div class="bp-boot-card"></div>
+            <div class="bp-boot-card"></div>
+            <div class="bp-boot-card"></div>
+            <div class="bp-boot-card"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

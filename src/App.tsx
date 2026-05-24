@@ -8,8 +8,9 @@ import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { store } from "@/store";
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import Lenis from "lenis";
+import RouteFallback from "@/components/RouteFallback";
 
 // Global Lenis instance
 let lenisInstance: Lenis | null = null;
@@ -47,31 +48,41 @@ const ScrollToTop = () => {
   }, [pathname]);
   return null;
 };
-import Index from "./pages/Index";
-import ProductDetail from "./pages/ProductDetail";
-import CustomPerfume from "./pages/CustomPerfume";
-import Cart from "./pages/Cart";
-import Profile from "./pages/Profile";
-import Login from "./pages/Login";
-import CompleteProfile from "./pages/CompleteProfile";
-import Shop from "./pages/Shop";
-import CollectionDetail from "./pages/CollectionDetail";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Pricing from "./pages/Pricing";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import RefundPolicy from "./pages/RefundPolicy";
-import NotFound from "./pages/NotFound";
-import AdminGuard from "./components/admin/AdminGuard";
-import AdminLayout from "./components/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminProducts from "./pages/admin/Products";
-import AdminCollections from "./pages/admin/Collections";
-import AdminOrders from "./pages/admin/Orders";
-import AdminCustomRequests from "./pages/admin/CustomRequests";
 
-const queryClient = new QueryClient();
+const Index = lazy(() => import("./pages/Index"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const CustomPerfume = lazy(() => import("./pages/CustomPerfume"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Login = lazy(() => import("./pages/Login"));
+const CompleteProfile = lazy(() => import("./pages/CompleteProfile"));
+const Shop = lazy(() => import("./pages/Shop"));
+const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminGuard = lazy(() => import("./components/admin/AdminGuard"));
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminProducts = lazy(() => import("./pages/admin/Products"));
+const AdminCollections = lazy(() => import("./pages/admin/Collections"));
+const AdminOrders = lazy(() => import("./pages/admin/Orders"));
+const AdminCustomRequests = lazy(() => import("./pages/admin/CustomRequests"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <Provider store={store}>
@@ -83,34 +94,36 @@ const App = () => (
           <BrowserRouter>
             <SmoothScroll />
             <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/collection/:slug" element={<CollectionDetail />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/custom" element={<CustomPerfume />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/complete-profile" element={<CompleteProfile />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              {/* Admin routes — guarded by role check */}
-              <Route element={<AdminGuard />}>
-                <Route element={<AdminLayout />}>
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/products" element={<AdminProducts />} />
-                  <Route path="/admin/collections" element={<AdminCollections />} />
-                  <Route path="/admin/orders" element={<AdminOrders />} />
-                  <Route path="/admin/custom-requests" element={<AdminCustomRequests />} />
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/collection/:slug" element={<CollectionDetail />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/custom" element={<CustomPerfume />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/complete-profile" element={<CompleteProfile />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                {/* Admin routes — guarded by role check */}
+                <Route element={<AdminGuard />}>
+                  <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/products" element={<AdminProducts />} />
+                    <Route path="/admin/collections" element={<AdminCollections />} />
+                    <Route path="/admin/orders" element={<AdminOrders />} />
+                    <Route path="/admin/custom-requests" element={<AdminCustomRequests />} />
+                  </Route>
                 </Route>
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
           <Analytics />
           <SpeedInsights />
