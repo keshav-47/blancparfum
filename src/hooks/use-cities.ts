@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 // In-memory cache — persists across component mounts within the same session
 const cache: Record<string, string[]> = {};
@@ -28,9 +28,6 @@ function fetchCities(state: string): Promise<string[]> {
   pendingRequests[state] = promise;
   return promise;
 }
-
-// Preload all Indian states on first import
-const preloaded = useRef ? false : false; // guard for module-level
 
 export function preloadAllCities(states: readonly string[]) {
   states.forEach((s) => fetchCities(s));

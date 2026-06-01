@@ -48,7 +48,14 @@ const SEO = ({
       <meta name="twitter:image" content={image} />
 
       {jsonLd && (
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <script type="application/ld+json">
+          {/* Escape HTML-significant chars so a product name/tagline containing
+              "</script>" cannot break out of this block (stored XSS guard). */}
+          {JSON.stringify(jsonLd)
+            .replace(/</g, "\\u003c")
+            .replace(/>/g, "\\u003e")
+            .replace(/&/g, "\\u0026")}
+        </script>
       )}
     </Helmet>
   );
