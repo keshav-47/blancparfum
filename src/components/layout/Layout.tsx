@@ -16,14 +16,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       <Navbar />
-      <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="flex-1 pt-16"
-      >
+      {/* Page entrance is handled globally by the route transition in App.tsx. */}
+      <main className="flex-1 pt-16">
         {children}
-      </motion.main>
+      </main>
       <Footer />
 
       {/* Back to top */}
