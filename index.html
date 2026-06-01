@@ -27,18 +27,35 @@
     <meta name="twitter:image" content="https://blancparfum.in/og-image.png" />
 
     <style>
-      /* Pre-mount skeleton — replaced by React on first render */
-      .bp-boot { min-height: 100vh; background: #fff; color: #141414; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-      .bp-boot-nav { position: fixed; top: 0; left: 0; right: 0; height: 64px; background: #fff; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 50; }
-      .bp-boot-brand { font-family: 'Cormorant Garamond', serif; font-weight: 500; letter-spacing: 0.18em; font-size: 18px; }
-      .bp-boot-main { padding-top: 64px; }
-      .bp-boot-hero { width: 100%; height: 60vh; background: linear-gradient(110deg, #ededed 8%, #f7f7f7 18%, #ededed 33%); background-size: 200% 100%; animation: bp-pulse 1.4s linear infinite; }
-      .bp-boot-grid { max-width: 1280px; margin: 0 auto; padding: 56px 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-      @media (min-width: 768px) { .bp-boot-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 64px 32px; } }
-      .bp-boot-card { aspect-ratio: 3 / 4; background: linear-gradient(110deg, #ededed 8%, #f7f7f7 18%, #ededed 33%); background-size: 200% 100%; animation: bp-pulse 1.4s linear infinite; border-radius: 6px; }
-      .bp-boot-card:nth-child(2) { animation-delay: 0.15s; }
-      .bp-boot-card:nth-child(3) { animation-delay: 0.3s; }
-      .bp-boot-card:nth-child(4) { animation-delay: 0.45s; }
+      /* Pre-mount, route-aware skeleton — replaced by React on first render */
+      .bp-boot { min-height: 100vh; background: #fff; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .bp-nav { position: fixed; top: 0; left: 0; right: 0; height: 64px; background: #fff; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 50; }
+      .bp-brand { font-family: 'Cormorant Garamond', serif; font-weight: 500; letter-spacing: 0.18em; font-size: 18px; color: #141414; }
+      .bp-nav-links { display: none; gap: 24px; }
+      .bp-icons { display: flex; gap: 12px; }
+      .bp-main { padding-top: 64px; }
+      .bp-wrap { max-width: 1280px; margin: 0 auto; padding: 32px 16px; }
+      .bp-skel { background: linear-gradient(110deg, #ededed 8%, #f6f6f6 18%, #ededed 33%); background-size: 200% 100%; animation: bp-pulse 1.4s linear infinite; border-radius: 6px; }
+      .bp-hero { width: 100%; height: 80vh; }
+      .bp-hero-sm { width: 100%; height: 45vh; }
+      .bp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .bp-grid3 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .bp-card { aspect-ratio: 3 / 4; }
+      .bp-line { height: 14px; border-radius: 4px; }
+      .bp-pills { display: flex; gap: 10px; }
+      .bp-pill { height: 34px; width: 72px; border-radius: 999px; flex: 0 0 auto; }
+      .bp-two { display: grid; grid-template-columns: 1fr; gap: 32px; }
+      .bp-img { aspect-ratio: 3 / 4; border-radius: 12px; }
+      .bp-btn { height: 52px; border-radius: 999px; }
+      .bp-col { display: flex; flex-direction: column; }
+      @media (min-width: 768px) {
+        .bp-nav-links { display: flex; }
+        .bp-nav { padding-left: 32px; padding-right: 32px; }
+        .bp-wrap { padding: 48px 32px; }
+        .bp-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .bp-two { grid-template-columns: 1fr 1fr; gap: 64px; }
+      }
+      @media (min-width: 1024px) { .bp-grid3 { grid-template-columns: repeat(3, 1fr); gap: 24px; } }
       @keyframes bp-pulse { to { background-position: -200% 0; } }
     </style>
 
@@ -67,22 +84,66 @@
     </script>
   </head>
   <body>
-    <div id="root">
-      <div class="bp-boot">
-        <div class="bp-boot-nav">
-          <div class="bp-boot-brand">BLANC PARFUM</div>
-        </div>
-        <div class="bp-boot-main">
-          <div class="bp-boot-hero"></div>
-          <div class="bp-boot-grid">
-            <div class="bp-boot-card"></div>
-            <div class="bp-boot-card"></div>
-            <div class="bp-boot-card"></div>
-            <div class="bp-boot-card"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div id="root"></div>
+    <script>
+      /* Route-aware pre-mount skeleton: pick the shape matching the URL so a
+         hard refresh on any page shows the right layout (not a generic one).
+         React replaces #root on mount. */
+      (function () {
+        var root = document.getElementById("root");
+        if (!root) return;
+        var p = location.pathname;
+        function rep(n, s) { var o = ""; for (var i = 0; i < n; i++) o += s; return o; }
+        function cards(n, cls) { return '<div class="' + cls + '">' + rep(n, '<div class="bp-skel bp-card"></div>') + "</div>"; }
+        var center = "display:flex;flex-direction:column;align-items:center;gap:12px;";
+        var nav =
+          '<div class="bp-nav"><div class="bp-brand">BLANC PARFUM</div>' +
+          '<div class="bp-nav-links">' + rep(4, '<div class="bp-skel bp-line" style="width:46px"></div>') + "</div>" +
+          '<div class="bp-icons">' + rep(2, '<div class="bp-skel" style="width:28px;height:28px;border-radius:999px"></div>') + "</div></div>";
+        var body;
+        if (p === "/") {
+          body =
+            '<div class="bp-skel bp-hero"></div><div class="bp-wrap">' +
+            '<div style="' + center + 'margin-bottom:32px"><div class="bp-skel bp-line" style="width:120px"></div><div class="bp-skel bp-line" style="width:260px;max-width:80%;height:28px"></div></div>' +
+            cards(4, "bp-grid") + "</div>";
+        } else if (p.indexOf("/product/") === 0) {
+          body =
+            '<div class="bp-wrap"><div class="bp-skel bp-line" style="width:110px;margin-bottom:36px"></div>' +
+            '<div class="bp-two"><div class="bp-skel bp-img"></div>' +
+            '<div class="bp-col" style="gap:16px">' +
+            '<div class="bp-skel bp-line" style="width:120px"></div>' +
+            '<div class="bp-skel bp-line" style="width:70%;height:34px"></div>' +
+            '<div class="bp-skel bp-line" style="width:45%"></div>' +
+            '<div class="bp-skel bp-line" style="width:100px;height:26px"></div>' +
+            '<div class="bp-pills">' + rep(3, '<div class="bp-skel bp-pill"></div>') + "</div>" +
+            '<div class="bp-skel bp-btn"></div></div></div></div>";
+        } else if (p.indexOf("/shop") === 0) {
+          body =
+            '<div class="bp-skel bp-hero-sm"></div><div class="bp-wrap">' +
+            '<div class="bp-pills" style="margin-bottom:24px;overflow:hidden">' + rep(5, '<div class="bp-skel bp-pill"></div>') + "</div>" +
+            cards(6, "bp-grid3") + "</div>";
+        } else if (p.indexOf("/collection/") === 0) {
+          body =
+            '<div class="bp-wrap"><div style="' + center + 'margin-bottom:40px"><div class="bp-skel bp-line" style="width:90px"></div><div class="bp-skel bp-line" style="width:240px;max-width:80%;height:32px"></div></div>' +
+            cards(6, "bp-grid3") + "</div>";
+        } else if (p.indexOf("/cart") === 0) {
+          body =
+            '<div class="bp-wrap"><div class="bp-skel bp-line" style="width:160px;height:28px;margin-bottom:32px"></div>' +
+            rep(3, '<div style="display:flex;gap:16px;margin-bottom:24px;border-bottom:1px solid #eee;padding-bottom:24px"><div class="bp-skel" style="width:90px;height:110px;border-radius:8px;flex:0 0 auto"></div><div class="bp-col" style="flex:1;gap:10px"><div class="bp-skel bp-line" style="width:160px"></div><div class="bp-skel bp-line" style="width:90px"></div><div class="bp-skel" style="width:110px;height:32px;border-radius:999px"></div></div></div>') +
+            "</div>";
+        } else if (p.indexOf("/profile") === 0) {
+          body =
+            '<div class="bp-wrap"><div style="display:flex;gap:16px;align-items:center;margin-bottom:36px"><div class="bp-skel" style="width:64px;height:64px;border-radius:999px;flex:0 0 auto"></div><div class="bp-col" style="gap:10px"><div class="bp-skel bp-line" style="width:160px"></div><div class="bp-skel bp-line" style="width:200px"></div></div></div>' +
+            rep(3, '<div class="bp-skel" style="height:96px;border-radius:8px;margin-bottom:16px"></div>') + "</div>";
+        } else {
+          body =
+            '<div class="bp-wrap" style="max-width:760px">' +
+            '<div class="bp-skel bp-line" style="width:50%;height:30px;margin-bottom:24px"></div>' +
+            rep(5, '<div class="bp-skel bp-line" style="width:100%;margin-bottom:14px"></div>') + "</div>";
+        }
+        root.innerHTML = '<div class="bp-boot">' + nav + '<div class="bp-main">' + body + "</div></div>";
+      })();
+    </script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
