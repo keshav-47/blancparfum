@@ -6,7 +6,7 @@ import FeaturedCollections from "@/components/home/FeaturedCollections";
 import ProductGrid from "@/components/home/ProductGrid";
 import HorizontalProductScroll from "@/components/home/HorizontalProductScroll";
 import StatsBand from "@/components/home/StatsBand";
-import BottleShowcase from "@/components/home/BottleShowcase";
+import ScrollStory from "@/components/home/ScrollStory";
 import SEO from "@/components/SEO";
 import { HomeSkeleton } from "@/components/skeletons/PageSkeletons";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -68,8 +68,8 @@ const Index = () => {
         <HeroCarousel />
         <BrandMarquee />
         <HorizontalProductScroll />
+        <ScrollStory />
         <FeaturedCollections />
-        <BottleShowcase />
         <StatsBand />
         <ProductGrid />
       </main>
