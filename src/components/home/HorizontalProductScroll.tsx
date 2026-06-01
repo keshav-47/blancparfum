@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import Magnetic from "@/components/animations/Magnetic";
+import TiltCard from "@/components/animations/TiltCard";
 import { useAppSelector } from "@/store/hooks";
 
 const HorizontalProductScroll = () => {
@@ -16,12 +18,14 @@ const HorizontalProductScroll = () => {
           <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-2">Featured</p>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-light">Signature Scents</h2>
         </div>
-        <Link
-          to="/shop"
-          className="group inline-flex items-center gap-2 text-[11px] font-body font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-        >
-          View All <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-        </Link>
+        <Magnetic className="flex-shrink-0">
+          <Link
+            to="/shop"
+            className="group inline-flex items-center gap-2 text-[11px] font-body font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View All <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </Magnetic>
       </div>
 
       <div className="relative">
@@ -39,6 +43,7 @@ const HorizontalProductScroll = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.08, duration: 0.5 }}
             >
+              <TiltCard>
               <Link to={`/product/${product.slug || product.id}`} className="group block">
                 <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-4">
                   <motion.img
@@ -71,6 +76,7 @@ const HorizontalProductScroll = () => {
                   </p>
                 </div>
               </Link>
+              </TiltCard>
             </motion.div>
           ))}
           </div>

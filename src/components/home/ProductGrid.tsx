@@ -5,6 +5,8 @@ import { ArrowRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TextReveal from "@/components/animations/TextReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
+import Magnetic from "@/components/animations/Magnetic";
+import TiltCard from "@/components/animations/TiltCard";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { setFilter } from "@/store/slices/productsSlice";
 import { addItemToCart } from "@/store/slices/cartSlice";
@@ -36,6 +38,7 @@ const MistCard = ({ product, index, dispatch }: { product: any; index: number; d
         filter: { duration: 1.4, delay: index * 0.15 },
       }}
     >
+      <TiltCard>
       <div className="group relative">
         <Link to={`/product/${product.slug || product.id}`} className="block">
           <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
@@ -88,6 +91,7 @@ const MistCard = ({ product, index, dispatch }: { product: any; index: number; d
           </p>
         </Link>
       </div>
+      </TiltCard>
     </motion.div>
   );
 };
@@ -145,12 +149,14 @@ const ProductGrid = () => {
               Our Fragrances
             </TextReveal>
           </div>
-          <Link
-            to="/shop"
-            className="group inline-flex items-center gap-2 text-[11px] font-body font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            View All <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-          </Link>
+          <Magnetic>
+            <Link
+              to="/shop"
+              className="group inline-flex items-center gap-2 text-[11px] font-body font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              View All <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </Magnetic>
         </div>
 
         {/* Filters */}
@@ -182,14 +188,16 @@ const ProductGrid = () => {
 
         {hasMore && (
           <div className="text-center mt-16">
-            <Button
-              variant="outline"
-              onClick={() => navigate(filter === "all" ? "/shop" : `/shop?category=${filter}`)}
-              className="rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium px-10 h-11 gap-2"
-            >
-              View All {filter !== "all" ? filters.find(f => f.key === filter)?.label : ""} Fragrances
-              <ArrowRight size={13} />
-            </Button>
+            <Magnetic strength={0.35}>
+              <Button
+                variant="outline"
+                onClick={() => navigate(filter === "all" ? "/shop" : `/shop?category=${filter}`)}
+                className="rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium px-10 h-11 gap-2"
+              >
+                View All {filter !== "all" ? filters.find(f => f.key === filter)?.label : ""} Fragrances
+                <ArrowRight size={13} />
+              </Button>
+            </Magnetic>
           </div>
         )}
       </div>

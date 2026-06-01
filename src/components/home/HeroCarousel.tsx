@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import Magnetic from "@/components/animations/Magnetic";
 
 const slides = [
   {
@@ -100,16 +101,18 @@ const HeroCarousel = () => {
                   </span>
                 ))}
               </h1>
-              <button
-                onClick={() => {
-                  const f = slides[current].filter;
-                  navigate(f === "all" ? "/shop" : `/shop?category=${f}`);
-                }}
-                className="group inline-flex items-center gap-3 text-[11px] font-body font-medium uppercase tracking-[0.25em] text-white/80 hover:text-white transition-colors duration-300"
-              >
-                {slides[current].cta}
-                <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
-              </button>
+              <Magnetic strength={0.4}>
+                <button
+                  onClick={() => {
+                    const f = slides[current].filter;
+                    navigate(f === "all" ? "/shop" : `/shop?category=${f}`);
+                  }}
+                  className="group inline-flex items-center gap-3 text-[11px] font-body font-medium uppercase tracking-[0.25em] text-white/80 hover:text-white transition-colors duration-300"
+                >
+                  {slides[current].cta}
+                  <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </button>
+              </Magnetic>
             </motion.div>
           </AnimatePresence>
         </div>
