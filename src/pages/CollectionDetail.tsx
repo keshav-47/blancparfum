@@ -8,6 +8,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { fetchProducts, fetchCollections } from "@/store/slices/productsSlice";
 import { addItemToCart } from "@/store/slices/cartSlice";
 import { toast } from "@/hooks/use-toast";
+import { CollectionDetailSkeleton } from "@/components/skeletons/PageSkeletons";
 import type { Product } from "@/types";
 
 const containerVariants: Variants = {
@@ -23,7 +24,7 @@ const cardVariants: Variants = {
 const CollectionDetail = () => {
   const { slug } = useParams();
   const dispatch = useAppDispatch();
-  const { items: products, collections } = useAppSelector((s) => s.products);
+  const { items: products, collections, loading } = useAppSelector((s) => s.products);
 
   useEffect(() => {
     if (!products.length) dispatch(fetchProducts());
@@ -31,6 +32,15 @@ const CollectionDetail = () => {
   }, [dispatch, products.length, collections.length]);
 
   const collection = collections.find((c) => c.slug === slug || c.id === slug);
+
+  // Data still arriving — show the matching skeleton instead of flashing "not found".
+  if (!collection && (loading || collections.length === 0)) {
+    return (
+      <Layout>
+        <CollectionDetailSkeleton />
+      </Layout>
+    );
+  }
 
   if (!collection) {
     return (

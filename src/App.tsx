@@ -8,9 +8,18 @@ import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { store } from "@/store";
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
 import Lenis from "lenis";
-import RouteFallback from "@/components/RouteFallback";
+import {
+  SkeletonShell,
+  HomeSkeleton,
+  ShopSkeleton,
+  ProductDetailSkeleton,
+  CollectionDetailSkeleton,
+  CartSkeleton,
+  ProfileSkeleton,
+  PageSkeleton,
+} from "@/components/skeletons/PageSkeletons";
 
 // Global Lenis instance
 let lenisInstance: Lenis | null = null;
@@ -84,6 +93,12 @@ const queryClient = new QueryClient({
   },
 });
 
+// Wrap a lazy page in a Suspense whose fallback is a skeleton matching that
+// page's layout, so the route-chunk load shows the right shape (not a generic one).
+const route = (node: ReactNode, skeleton: ReactNode) => (
+  <Suspense fallback={<SkeletonShell>{skeleton}</SkeletonShell>}>{node}</Suspense>
+);
+
 const App = () => (
   <Provider store={store}>
     <HelmetProvider>
@@ -94,36 +109,34 @@ const App = () => (
           <BrowserRouter>
             <SmoothScroll />
             <ScrollToTop />
-            <Suspense fallback={<RouteFallback />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/collection/:slug" element={<CollectionDetail />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/custom" element={<CustomPerfume />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/complete-profile" element={<CompleteProfile />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/refund-policy" element={<RefundPolicy />} />
-                {/* Admin routes — guarded by role check */}
-                <Route element={<AdminGuard />}>
-                  <Route element={<AdminLayout />}>
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/admin/products" element={<AdminProducts />} />
-                    <Route path="/admin/collections" element={<AdminCollections />} />
-                    <Route path="/admin/orders" element={<AdminOrders />} />
-                    <Route path="/admin/custom-requests" element={<AdminCustomRequests />} />
-                  </Route>
+            <Routes>
+              <Route path="/" element={route(<Index />, <HomeSkeleton />)} />
+              <Route path="/shop" element={route(<Shop />, <ShopSkeleton />)} />
+              <Route path="/collection/:slug" element={route(<CollectionDetail />, <CollectionDetailSkeleton />)} />
+              <Route path="/product/:id" element={route(<ProductDetail />, <ProductDetailSkeleton />)} />
+              <Route path="/custom" element={route(<CustomPerfume />, <PageSkeleton />)} />
+              <Route path="/cart" element={route(<Cart />, <CartSkeleton />)} />
+              <Route path="/about" element={route(<About />, <PageSkeleton />)} />
+              <Route path="/contact" element={route(<Contact />, <PageSkeleton />)} />
+              <Route path="/pricing" element={route(<Pricing />, <PageSkeleton />)} />
+              <Route path="/login" element={route(<Login />, <PageSkeleton />)} />
+              <Route path="/complete-profile" element={route(<CompleteProfile />, <PageSkeleton />)} />
+              <Route path="/profile" element={route(<Profile />, <ProfileSkeleton />)} />
+              <Route path="/privacy" element={route(<Privacy />, <PageSkeleton />)} />
+              <Route path="/terms" element={route(<Terms />, <PageSkeleton />)} />
+              <Route path="/refund-policy" element={route(<RefundPolicy />, <PageSkeleton />)} />
+              {/* Admin routes — guarded by role check */}
+              <Route element={route(<AdminGuard />, <PageSkeleton />)}>
+                <Route element={route(<AdminLayout />, <PageSkeleton />)}>
+                  <Route path="/admin" element={route(<AdminDashboard />, <PageSkeleton />)} />
+                  <Route path="/admin/products" element={route(<AdminProducts />, <PageSkeleton />)} />
+                  <Route path="/admin/collections" element={route(<AdminCollections />, <PageSkeleton />)} />
+                  <Route path="/admin/orders" element={route(<AdminOrders />, <PageSkeleton />)} />
+                  <Route path="/admin/custom-requests" element={route(<AdminCustomRequests />, <PageSkeleton />)} />
                 </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+              </Route>
+              <Route path="*" element={route(<NotFound />, <PageSkeleton />)} />
+            </Routes>
           </BrowserRouter>
           <Analytics />
           <SpeedInsights />

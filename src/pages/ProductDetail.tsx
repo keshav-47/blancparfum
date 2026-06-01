@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
+import { ProductDetailSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { addItemToCart } from "@/store/slices/cartSlice";
 import { toast } from "@/hooks/use-toast";
@@ -41,9 +42,7 @@ const ProductDetail = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
-        </div>
+        <ProductDetailSkeleton />
       </Layout>
     );
   }

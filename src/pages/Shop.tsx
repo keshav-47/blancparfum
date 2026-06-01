@@ -6,6 +6,7 @@ import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { fetchProducts, setFilter } from "@/store/slices/productsSlice";
+import { ProductGridSkeleton } from "@/components/skeletons/PageSkeletons";
 import type { Product } from "@/types";
 
 const filters = [
@@ -110,7 +111,7 @@ const ShopCard = ({ product }: { product: Product }) => {
 const Shop = () => {
   const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { items } = useAppSelector((state) => state.products);
+  const { items, loading } = useAppSelector((state) => state.products);
   const [query, setQuery] = useState("");
 
   const category = searchParams.get("category") || "all";
@@ -231,34 +232,40 @@ const Shop = () => {
 
       {/* Product grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-16 md:py-20">
-        <AnimatePresence mode="wait">
-          {filtered.length === 0 ? (
-            <motion.p
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-muted-foreground py-24 font-body"
-            >
-              No fragrances found in this category.
-            </motion.p>
-          ) : (
-            <motion.div
-              key={category}
-              variants={containerVariants}
-              initial="hidden"
-              animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-14 md:gap-x-8 md:gap-y-16"
-            >
-              {filtered.map((product) => (
-                <ShopCard key={product.id} product={product} />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {loading && items.length === 0 ? (
+          <ProductGridSkeleton count={6} />
+        ) : (
+          <>
+            <AnimatePresence mode="wait">
+              {filtered.length === 0 ? (
+                <motion.p
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center text-muted-foreground py-24 font-body"
+                >
+                  No fragrances found in this category.
+                </motion.p>
+              ) : (
+                <motion.div
+                  key={category}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-14 md:gap-x-8 md:gap-y-16"
+                >
+                  {filtered.map((product) => (
+                    <ShopCard key={product.id} product={product} />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        <p className="text-center text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body mt-16 pt-8 border-t border-border">
-          {filtered.length} fragrance{filtered.length !== 1 ? "s" : ""}
-        </p>
+            <p className="text-center text-[11px] text-muted-foreground uppercase tracking-[0.15em] font-body mt-16 pt-8 border-t border-border">
+              {filtered.length} fragrance{filtered.length !== 1 ? "s" : ""}
+            </p>
+          </>
+        )}
       </div>
     </Layout>
   );
