@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -12,23 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
  */
 
 const CONTAINER = "max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20";
-
-/** Fake navbar + main, used to wrap a skeleton as a Suspense fallback. */
-export const SkeletonShell = ({ children }: { children: ReactNode }) => (
-  <div className="min-h-screen flex flex-col overflow-x-hidden">
-    <div className="fixed top-0 inset-x-0 h-16 z-50 bg-background border-b border-border flex items-center justify-between px-4 sm:px-6 md:px-12 lg:px-20">
-      <Skeleton className="h-5 w-32" />
-      <div className="hidden md:flex gap-6">
-        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-3.5 w-12" />)}
-      </div>
-      <div className="flex gap-3">
-        <Skeleton className="h-7 w-7 rounded-full" />
-        <Skeleton className="h-7 w-7 rounded-full" />
-      </div>
-    </div>
-    <main className="flex-1 pt-16">{children}</main>
-  </div>
-);
 
 /** Reusable 3-up product card grid (matches Shop/Collection/Home cards). */
 export const ProductGridSkeleton = ({ count = 6 }: { count?: number }) => (

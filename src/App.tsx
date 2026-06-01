@@ -7,12 +7,11 @@ import { Provider } from "react-redux";
 import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { store } from "@/store";
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
 import Lenis from "lenis";
+import RootLayout from "@/components/layout/RootLayout";
 import {
-  SkeletonShell,
   HomeSkeleton,
   ShopSkeleton,
   ProductDetailSkeleton,
@@ -95,62 +94,11 @@ const queryClient = new QueryClient({
 });
 
 // Wrap a lazy page in a Suspense whose fallback is a skeleton matching that
-// page's layout, so the route-chunk load shows the right shape (not a generic one).
+// page's layout. The fallback renders inside RootLayout's main (below the
+// persistent navbar), so it's a content-only skeleton — no chrome of its own.
 const route = (node: ReactNode, skeleton: ReactNode) => (
-  <Suspense fallback={<SkeletonShell>{skeleton}</SkeletonShell>}>{node}</Suspense>
+  <Suspense fallback={skeleton}>{node}</Suspense>
 );
-
-// Subtle cross-dissolve between pages. Pure opacity (no transform) so the
-// fixed navbar isn't affected by a transform-based containing block.
-const pageVariants: Variants = {
-  initial: { opacity: 0 },
-  enter: { opacity: 1, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
-  exit: { opacity: 0, transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } },
-};
-
-const AnimatedRoutes = () => {
-  const location = useLocation();
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        variants={pageVariants}
-        initial="initial"
-        animate="enter"
-        exit="exit"
-      >
-        <Routes location={location}>
-          <Route path="/" element={route(<Index />, <HomeSkeleton />)} />
-          <Route path="/shop" element={route(<Shop />, <ShopSkeleton />)} />
-          <Route path="/collection/:slug" element={route(<CollectionDetail />, <CollectionDetailSkeleton />)} />
-          <Route path="/product/:id" element={route(<ProductDetail />, <ProductDetailSkeleton />)} />
-          <Route path="/custom" element={route(<CustomPerfume />, <PageSkeleton />)} />
-          <Route path="/cart" element={route(<Cart />, <CartSkeleton />)} />
-          <Route path="/about" element={route(<About />, <PageSkeleton />)} />
-          <Route path="/contact" element={route(<Contact />, <PageSkeleton />)} />
-          <Route path="/pricing" element={route(<Pricing />, <PageSkeleton />)} />
-          <Route path="/login" element={route(<Login />, <PageSkeleton />)} />
-          <Route path="/complete-profile" element={route(<CompleteProfile />, <PageSkeleton />)} />
-          <Route path="/profile" element={route(<Profile />, <ProfileSkeleton />)} />
-          <Route path="/privacy" element={route(<Privacy />, <PageSkeleton />)} />
-          <Route path="/terms" element={route(<Terms />, <PageSkeleton />)} />
-          <Route path="/refund-policy" element={route(<RefundPolicy />, <PageSkeleton />)} />
-          {/* Admin routes — guarded by role check */}
-          <Route element={route(<AdminGuard />, <PageSkeleton />)}>
-            <Route element={route(<AdminLayout />, <PageSkeleton />)}>
-              <Route path="/admin" element={route(<AdminDashboard />, <PageSkeleton />)} />
-              <Route path="/admin/products" element={route(<AdminProducts />, <PageSkeleton />)} />
-              <Route path="/admin/collections" element={route(<AdminCollections />, <PageSkeleton />)} />
-              <Route path="/admin/orders" element={route(<AdminOrders />, <PageSkeleton />)} />
-              <Route path="/admin/custom-requests" element={route(<AdminCustomRequests />, <PageSkeleton />)} />
-            </Route>
-          </Route>
-          <Route path="*" element={route(<NotFound />, <PageSkeleton />)} />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
-  );
-};
 
 const App = () => (
   <Provider store={store}>
@@ -162,7 +110,38 @@ const App = () => (
           <BrowserRouter>
             <SmoothScroll />
             <ScrollToTop />
-            <AnimatedRoutes />
+            <Routes>
+              {/* Public routes share a persistent shell: the navbar/footer stay
+                  mounted and only the page content cross-dissolves. */}
+              <Route element={<RootLayout />}>
+                <Route path="/" element={route(<Index />, <HomeSkeleton />)} />
+                <Route path="/shop" element={route(<Shop />, <ShopSkeleton />)} />
+                <Route path="/collection/:slug" element={route(<CollectionDetail />, <CollectionDetailSkeleton />)} />
+                <Route path="/product/:id" element={route(<ProductDetail />, <ProductDetailSkeleton />)} />
+                <Route path="/custom" element={route(<CustomPerfume />, <PageSkeleton />)} />
+                <Route path="/cart" element={route(<Cart />, <CartSkeleton />)} />
+                <Route path="/about" element={route(<About />, <PageSkeleton />)} />
+                <Route path="/contact" element={route(<Contact />, <PageSkeleton />)} />
+                <Route path="/pricing" element={route(<Pricing />, <PageSkeleton />)} />
+                <Route path="/login" element={route(<Login />, <PageSkeleton />)} />
+                <Route path="/complete-profile" element={route(<CompleteProfile />, <PageSkeleton />)} />
+                <Route path="/profile" element={route(<Profile />, <ProfileSkeleton />)} />
+                <Route path="/privacy" element={route(<Privacy />, <PageSkeleton />)} />
+                <Route path="/terms" element={route(<Terms />, <PageSkeleton />)} />
+                <Route path="/refund-policy" element={route(<RefundPolicy />, <PageSkeleton />)} />
+                <Route path="*" element={route(<NotFound />, <PageSkeleton />)} />
+              </Route>
+              {/* Admin routes — own sidebar chrome (AdminLayout), guarded by role. */}
+              <Route element={route(<AdminGuard />, <PageSkeleton />)}>
+                <Route element={route(<AdminLayout />, <PageSkeleton />)}>
+                  <Route path="/admin" element={route(<AdminDashboard />, <PageSkeleton />)} />
+                  <Route path="/admin/products" element={route(<AdminProducts />, <PageSkeleton />)} />
+                  <Route path="/admin/collections" element={route(<AdminCollections />, <PageSkeleton />)} />
+                  <Route path="/admin/orders" element={route(<AdminOrders />, <PageSkeleton />)} />
+                  <Route path="/admin/custom-requests" element={route(<AdminCustomRequests />, <PageSkeleton />)} />
+                </Route>
+              </Route>
+            </Routes>
           </BrowserRouter>
           <Analytics />
           <SpeedInsights />
