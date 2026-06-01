@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import AddressForm, { emptyAddress } from "@/components/AddressForm";
+import { CartSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { removeItemFromCart, updateItemQuantity, clearCart, fetchServerCart } from "@/store/slices/cartSlice";
 import { fetchUserProfile, addAddress } from "@/store/slices/userSlice";
@@ -27,7 +28,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { items } = useAppSelector((s) => s.cart);
+  const { items, loading } = useAppSelector((s) => s.cart);
   const { isAuthenticated, user } = useAppSelector((s) => s.auth);
   const { profile } = useAppSelector((s) => s.user);
 
@@ -134,6 +135,16 @@ const Cart = () => {
           <h2 className="font-display text-2xl mb-2">Confirming Your Order</h2>
           <p className="text-muted-foreground font-body text-sm">Please wait while we verify your payment...</p>
         </div>
+      </Layout>
+    );
+  }
+
+  // Authenticated users: show the cart skeleton while the server cart loads,
+  // instead of briefly flashing the "empty cart" state.
+  if (loading && items.length === 0) {
+    return (
+      <Layout>
+        <CartSkeleton />
       </Layout>
     );
   }

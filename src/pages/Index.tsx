@@ -6,16 +6,27 @@ import FeaturedCollections from "@/components/home/FeaturedCollections";
 import ProductGrid from "@/components/home/ProductGrid";
 import HorizontalProductScroll from "@/components/home/HorizontalProductScroll";
 import SEO from "@/components/SEO";
-import { useAppDispatch } from "@/store/hooks";
+import { HomeSkeleton } from "@/components/skeletons/PageSkeletons";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProducts, fetchCollections } from "@/store/slices/productsSlice";
 
 const Index = () => {
   const dispatch = useAppDispatch();
+  const { items, loading } = useAppSelector((s) => s.products);
 
   useEffect(() => {
     dispatch(fetchProducts());
     dispatch(fetchCollections());
   }, [dispatch]);
+
+  // First load: show the home skeleton until the product data arrives.
+  if (loading && items.length === 0) {
+    return (
+      <Layout>
+        <HomeSkeleton />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
 import AddressForm, { emptyAddress } from "@/components/AddressForm";
+import { ProfileSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { fetchUserProfile, fetchOrders, updateProfile, addAddress, updateAddress, deleteAddress } from "@/store/slices/userSlice";
 import { fetchCustomRequests } from "@/store/slices/customRequestsSlice";
@@ -143,6 +144,15 @@ const Profile = () => {
   };
 
   if (!isAuthenticated) return null;
+
+  // First load: show the profile skeleton while the profile is being fetched.
+  if (userLoading && !profile) {
+    return (
+      <Layout>
+        <ProfileSkeleton />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

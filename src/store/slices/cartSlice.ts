@@ -6,10 +6,12 @@ import { logout } from "./authSlice";
 
 interface CartState {
   items: CartItem[];
+  loading: boolean;
 }
 
 const initialState: CartState = {
   items: [],
+  loading: false,
 };
 
 // Map server response item → local CartItem
@@ -128,9 +130,12 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Fetch server cart
+      .addCase(fetchServerCart.pending, (state) => { state.loading = true; })
       .addCase(fetchServerCart.fulfilled, (state, action) => {
+        state.loading = false;
         if (action.payload) state.items = action.payload;
       })
+      .addCase(fetchServerCart.rejected, (state) => { state.loading = false; })
       // Add item
       .addCase(addItemToCart.fulfilled, (state, action) => {
         if (action.payload.serverItems) {
