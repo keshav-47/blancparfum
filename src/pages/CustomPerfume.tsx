@@ -59,6 +59,10 @@ const CustomPerfume = () => {
       navigate("/login?returnTo=/custom");
       return;
     }
+    if (!intensity) {
+      toast({ title: "Please select an intensity" });
+      return;
+    }
     dispatch(submitCustomRequest({
       scentFamilies: selectedFamilies,
       occasion,
