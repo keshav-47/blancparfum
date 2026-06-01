@@ -9,9 +9,15 @@ const phrases = [
   "Since 2024",
 ];
 
+const fadeMask =
+  "linear-gradient(to right, transparent, #000 8%, #000 92%, transparent)";
+
 const BrandMarquee = () => (
-  <section className="border-y border-border/50 py-4 overflow-hidden bg-secondary/30">
-    <div className="flex animate-marquee whitespace-nowrap">
+  <section
+    className="border-y border-border/50 py-4 overflow-hidden bg-secondary/30"
+    style={{ maskImage: fadeMask, WebkitMaskImage: fadeMask }}
+  >
+    <div className="flex animate-marquee whitespace-nowrap hover:[animation-play-state:paused] motion-reduce:animate-none">
       {[...phrases, ...phrases].map((p, i) => (
         <span
           key={i}

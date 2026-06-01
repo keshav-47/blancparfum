@@ -24,8 +24,12 @@ const HorizontalProductScroll = () => {
         </Link>
       </div>
 
-      <div className="overflow-x-auto overflow-y-visible scrollbar-hide">
-        <div className="flex gap-4 md:gap-6 px-4 sm:px-6 md:px-12 lg:px-20 pb-2" style={{ width: "max-content" }}>
+      <div className="relative">
+        {/* Edge fades so cards melt into the page at the rail's edges */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 md:w-20 bg-gradient-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 md:w-20 bg-gradient-to-l from-background to-transparent" />
+        <div className="overflow-x-auto overflow-y-visible scrollbar-hide">
+          <div className="flex gap-4 md:gap-6 px-4 sm:px-6 md:px-12 lg:px-20 pb-2" style={{ width: "max-content" }}>
           {featured.map((product, i) => (
             <motion.div
               key={product.id}
@@ -50,6 +54,12 @@ const HorizontalProductScroll = () => {
                       New
                     </span>
                   )}
+                  {/* Hover affordance */}
+                  <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-black/60 via-black/25 to-transparent p-5 pt-12">
+                    <span className="inline-flex items-center gap-1.5 text-white/90 text-[10px] font-body font-medium uppercase tracking-[0.15em]">
+                      Discover <ArrowRight size={11} />
+                    </span>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-display text-lg tracking-wide">{product.name}</h3>
@@ -63,6 +73,7 @@ const HorizontalProductScroll = () => {
               </Link>
             </motion.div>
           ))}
+          </div>
         </div>
       </div>
     </section>
