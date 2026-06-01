@@ -6,7 +6,7 @@ import BottleSVG from "./BottleSVG";
 import Magnetic from "@/components/animations/Magnetic";
 
 const NOTES = ["Bergamot", "Taif Rose", "Oud", "Amber", "Vetiver"];
-const RADIUS = 178;
+const RADIUS = 160;
 
 /** A scent-note chip orbiting on the ring, kept upright as the ring rotates. */
 const OrbitNote = ({ label, angle, ringRotate }: { label: string; angle: number; ringRotate: MotionValue<number> }) => {
@@ -23,12 +23,12 @@ const OrbitNote = ({ label, angle, ringRotate }: { label: string; angle: number;
   );
 };
 
-/** A bottle in the finale line-up that slides out from centre. */
-const FanBottle = ({ offset, spread, opacity }: { offset: number; spread: MotionValue<number>; opacity: MotionValue<number> }) => {
-  const x = useTransform(spread, [0, 1], [0, offset]);
+/** A bottle in the finale line-up that slides out from centre (responsive vw offset). */
+const SideBottle = ({ offsetVw, out, opacity }: { offsetVw: number; out: MotionValue<number>; opacity: MotionValue<number> }) => {
+  const x = useTransform(out, [0, 1], ["0vw", `${offsetVw}vw`]);
   return (
     <motion.div style={{ x, opacity }} className="absolute">
-      <BottleSVG uid={`fan${offset}`} className="h-[26vh] max-h-[230px] w-auto opacity-90" />
+      <BottleSVG uid={`s${offsetVw}`} className="h-[22vh] max-h-[210px] w-auto" />
     </motion.div>
   );
 };
@@ -37,33 +37,33 @@ const ScrollStory = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
 
-  // Central bottle — fades in, then shrinks into the centre of the finale line-up
-  const bottleOpacity = useTransform(scrollYProgress, [0, 0.12], [0, 1]);
-  const bottleScale = useTransform(scrollYProgress, [0, 0.25, 0.74, 0.9], [0.72, 1, 1, 0.46]);
-  const bottleY = useTransform(scrollYProgress, [0, 0.15], [60, 0]);
-  const bottleRotate = useTransform(scrollYProgress, [0.28, 0.66, 0.9], [-5, 5, 0]);
-  const fill = useTransform(scrollYProgress, [0.14, 0.52], [0, 1]);
+  // Central bottle — always on screen; fades in, fills, then settles small for the finale.
+  const bottleOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+  const bottleScale = useTransform(scrollYProgress, [0, 0.18, 0.62, 0.76], [0.82, 1, 1, 0.6]);
+  const bottleY = useTransform(scrollYProgress, [0, 0.12], [50, 0]);
+  const bottleRotate = useTransform(scrollYProgress, [0.2, 0.58, 0.76], [-4, 4, 0]);
+  const fill = useTransform(scrollYProgress, [0.08, 0.46], [0, 1]);
 
-  // Orbiting notes (phase 2)
-  const ringRotate = useTransform(scrollYProgress, [0.2, 0.7], [-25, 35]);
-  const ringOpacity = useTransform(scrollYProgress, [0.28, 0.38, 0.6, 0.68], [0, 1, 1, 0]);
+  // Orbiting notes (mid phase)
+  const ringRotate = useTransform(scrollYProgress, [0.16, 0.64], [-22, 30]);
+  const ringOpacity = useTransform(scrollYProgress, [0.22, 0.32, 0.52, 0.6], [0, 1, 1, 0]);
 
-  // Text phases
-  const t1 = useTransform(scrollYProgress, [0.02, 0.1, 0.22, 0.3], [0, 1, 1, 0]);
-  const t2 = useTransform(scrollYProgress, [0.36, 0.44, 0.56, 0.64], [0, 1, 1, 0]);
-  const t3 = useTransform(scrollYProgress, [0.74, 0.84, 1, 1], [0, 1, 1, 1]);
-  const t1y = useTransform(scrollYProgress, [0.02, 0.3], [20, -20]);
-  const t2y = useTransform(scrollYProgress, [0.36, 0.64], [20, -20]);
+  // Finale line-up
+  const sideOut = useTransform(scrollYProgress, [0.62, 0.92], [0, 1]);
+  const sideOpacity = useTransform(scrollYProgress, [0.62, 0.78], [0, 1]);
 
-  // Finale fan of bottles
-  const fanOpacity = useTransform(scrollYProgress, [0.74, 0.86], [0, 1]);
-  const fanSpread = useTransform(scrollYProgress, [0.74, 0.98], [0, 1]);
+  // Text phases (continuous — one is always visible)
+  const t1 = useTransform(scrollYProgress, [0.02, 0.08, 0.2, 0.27], [0, 1, 1, 0]);
+  const t2 = useTransform(scrollYProgress, [0.3, 0.38, 0.5, 0.58], [0, 1, 1, 0]);
+  const t3 = useTransform(scrollYProgress, [0.64, 0.74, 1, 1], [0, 1, 1, 1]);
+  const t1y = useTransform(scrollYProgress, [0.02, 0.27], [16, -16]);
+  const t2y = useTransform(scrollYProgress, [0.3, 0.58], [16, -16]);
 
   return (
-    <section ref={ref} className="relative h-[360vh]">
+    <section ref={ref} className="relative h-[240vh] bg-background">
       <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
         {/* Accent glow */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-[70vw] max-w-[640px] max-h-[640px] rounded-full bg-accent/10 blur-[130px]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-[70vw] max-w-[600px] max-h-[600px] rounded-full bg-accent/10 blur-[130px]" />
 
         {/* Orbiting scent notes */}
         <motion.div style={{ rotate: ringRotate, opacity: ringOpacity }} className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -74,27 +74,27 @@ const ScrollStory = () => {
           </div>
         </motion.div>
 
-        {/* Central bottle */}
-        <motion.div style={{ opacity: bottleOpacity, scale: bottleScale, y: bottleY, rotate: bottleRotate }} className="relative z-10">
-          <BottleSVG fill={fill} uid="hero" className="h-[56vh] max-h-[520px] w-auto drop-shadow-2xl" />
-        </motion.div>
-
-        {/* Finale: a line-up of bottles fanning out */}
+        {/* Finale line-up (slides out from behind the central bottle) */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <FanBottle offset={-300} spread={fanSpread} opacity={fanOpacity} />
-          <FanBottle offset={-150} spread={fanSpread} opacity={fanOpacity} />
-          <FanBottle offset={150} spread={fanSpread} opacity={fanOpacity} />
-          <FanBottle offset={300} spread={fanSpread} opacity={fanOpacity} />
+          <SideBottle offsetVw={-34} out={sideOut} opacity={sideOpacity} />
+          <SideBottle offsetVw={-17} out={sideOut} opacity={sideOpacity} />
+          <SideBottle offsetVw={17} out={sideOut} opacity={sideOpacity} />
+          <SideBottle offsetVw={34} out={sideOut} opacity={sideOpacity} />
         </div>
 
+        {/* Central bottle */}
+        <motion.div style={{ opacity: bottleOpacity, scale: bottleScale, y: bottleY, rotate: bottleRotate }} className="relative z-10">
+          <BottleSVG fill={fill} uid="hero" className="h-[46vh] max-h-[440px] w-auto drop-shadow-2xl" />
+        </motion.div>
+
         {/* Text phases */}
-        <motion.p style={{ opacity: t1, y: t1y }} className="absolute bottom-[16%] left-0 right-0 text-center px-6 font-display text-3xl md:text-5xl font-light">
+        <motion.p style={{ opacity: t1, y: t1y }} className="absolute bottom-[12%] left-0 right-0 text-center px-6 font-display text-3xl md:text-5xl font-light">
           Composed, drop by drop
         </motion.p>
-        <motion.p style={{ opacity: t2, y: t2y }} className="absolute bottom-[16%] left-0 right-0 text-center px-6 font-display text-3xl md:text-5xl font-light">
+        <motion.p style={{ opacity: t2, y: t2y }} className="absolute bottom-[12%] left-0 right-0 text-center px-6 font-display text-3xl md:text-5xl font-light">
           Aged until it <span className="text-accent">lingers</span>
         </motion.p>
-        <motion.div style={{ opacity: t3 }} className="absolute bottom-[12%] left-0 right-0 flex flex-col items-center gap-6 px-6 text-center">
+        <motion.div style={{ opacity: t3 }} className="absolute bottom-[10%] left-0 right-0 flex flex-col items-center gap-5 px-6 text-center">
           <h2 className="font-display text-4xl md:text-6xl font-light">The BLANC Collection</h2>
           <Magnetic strength={0.35}>
             <Link
@@ -108,7 +108,7 @@ const ScrollStory = () => {
         </motion.div>
 
         {/* Scroll hint (start only) */}
-        <motion.div style={{ opacity: t1 }} className="absolute top-8 left-1/2 -translate-x-1/2 text-[9px] font-body uppercase tracking-[0.35em] text-muted-foreground">
+        <motion.div style={{ opacity: t1 }} className="absolute top-6 left-1/2 -translate-x-1/2 text-[9px] font-body uppercase tracking-[0.35em] text-muted-foreground">
           Scroll to discover
         </motion.div>
       </div>
