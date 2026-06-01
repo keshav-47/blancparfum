@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
-import BottleSVG from "./BottleSVG";
+import BottlePhoto from "./BottlePhoto";
 import Magnetic from "@/components/animations/Magnetic";
 
 const NOTES = ["Bergamot", "Taif Rose", "Oud", "Amber", "Vetiver"];
@@ -28,7 +28,7 @@ const SideBottle = ({ offsetVw, out, opacity }: { offsetVw: number; out: MotionV
   const x = useTransform(out, [0, 1], ["0vw", `${offsetVw}vw`]);
   return (
     <motion.div style={{ x, opacity }} className="absolute">
-      <BottleSVG uid={`s${offsetVw}`} className="h-[22vh] max-h-[210px] w-auto" />
+      <BottlePhoto className="h-[24vh] max-h-[230px] w-auto object-contain" />
     </motion.div>
   );
 };
@@ -42,7 +42,6 @@ const ScrollStory = () => {
   const bottleScale = useTransform(scrollYProgress, [0, 0.18, 0.62, 0.76], [0.82, 1, 1, 0.6]);
   const bottleY = useTransform(scrollYProgress, [0, 0.12], [50, 0]);
   const bottleRotate = useTransform(scrollYProgress, [0.2, 0.58, 0.76], [-4, 4, 0]);
-  const fill = useTransform(scrollYProgress, [0.08, 0.46], [0, 1]);
 
   // Orbiting notes (mid phase)
   const ringRotate = useTransform(scrollYProgress, [0.16, 0.64], [-22, 30]);
@@ -84,7 +83,7 @@ const ScrollStory = () => {
 
         {/* Central bottle */}
         <motion.div style={{ opacity: bottleOpacity, scale: bottleScale, y: bottleY, rotate: bottleRotate }} className="relative z-10">
-          <BottleSVG fill={fill} uid="hero" className="h-[46vh] max-h-[440px] w-auto drop-shadow-2xl" />
+          <BottlePhoto className="h-[50vh] max-h-[480px] w-auto object-contain" />
         </motion.div>
 
         {/* Text phases */}
