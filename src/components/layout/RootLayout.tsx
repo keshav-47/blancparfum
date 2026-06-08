@@ -28,6 +28,9 @@ const RootLayout = () => {
   const dispatch = useAppDispatch();
   const [showTop, setShowTop] = useState(false);
   const chatOpen = useAppSelector((s) => s.assistant.open);
+  // Home leads with a full-bleed hero, so the floating header overlays it; every
+  // other page needs top room to clear the floating header.
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 500);
@@ -35,10 +38,14 @@ const RootLayout = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Shared "floating 3D" surface for the corner buttons (raised, lifts on hover).
+  const floatBtn =
+    "bg-white text-foreground border border-border ring-1 ring-inset ring-white/60 shadow-[0_10px_26px_-8px_rgba(0,0,0,0.3),0_3px_8px_-3px_rgba(0,0,0,0.14)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.38)] hover:bg-secondary transition-all duration-300";
+
   return (
     <div className="min-h-screen flex flex-col overflow-x-clip">
       <Navbar />
-      <main className="flex-1 pt-16">
+      <main className={`flex-1 ${isHome ? "" : "pt-24"}`}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
@@ -66,14 +73,14 @@ const RootLayout = () => {
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               aria-label="Back to top"
-              className="w-12 h-12 rounded-full bg-white text-foreground border border-border flex items-center justify-center shadow-lg hover:bg-secondary transition-colors"
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${floatBtn}`}
             >
               <ArrowUp size={16} strokeWidth={2} />
             </button>
             <button
               onClick={() => dispatch(openChat())}
               aria-label="Ask the scent concierge"
-              className="flex items-center gap-2.5 h-12 pl-3 pr-4 sm:pr-5 rounded-full bg-white text-foreground border border-border shadow-lg hover:bg-secondary transition-colors"
+              className={`flex items-center gap-2.5 h-12 pl-3 pr-4 sm:pr-5 rounded-full ${floatBtn}`}
             >
               <img src="/favicon.png" alt="BLANC" className="h-7 w-7 object-contain" />
               <span className="hidden sm:inline text-[11px] font-body font-medium uppercase tracking-[0.18em]">Ask concierge</span>

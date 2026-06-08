@@ -31,8 +31,8 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <nav className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
+    <header className="fixed top-3 md:top-4 inset-x-0 z-50 px-3 sm:px-4 md:px-6 pointer-events-none">
+      <nav className="pointer-events-auto relative max-w-5xl mx-auto flex items-center justify-between h-14 md:h-16 px-5 md:px-8 rounded-full bg-background/85 backdrop-blur-xl border border-white/60 ring-1 ring-inset ring-white/40 shadow-[0_12px_34px_-12px_rgba(0,0,0,0.32),0_4px_12px_-4px_rgba(0,0,0,0.14)]">
         {/* Left nav */}
         <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
@@ -97,10 +97,10 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border/50 overflow-hidden"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="pointer-events-auto md:hidden mt-2 mx-1 rounded-2xl bg-background/95 backdrop-blur-xl border border-border/50 shadow-xl overflow-hidden"
           >
             <div className="flex flex-col items-center gap-6 py-8">
               {navLinks.map((link) => (
