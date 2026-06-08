@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { motion, useScroll, useTransform, useMotionValueEvent, useReducedMotion, type MotionValue } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, useReducedMotion, type MotionValue } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
 import type { Collection } from "@/types";
 
@@ -37,20 +37,18 @@ const CollectionPanel = ({
   const span = 1 / units;
   const center = (index + 1) * span;
 
-  // Each collection HOLDS fully visible across most of its window; the fade in/out
-  // is short and hold + fade === half a span, so adjacent panels meet at the
-  // boundary (both at 0) — the outgoing collection is gone before the incoming
-  // one appears (no two-up "double exposure"). The first stays solid from the top
-  // and the last stays solid until the section unpins.
-  const hold = span * 0.36;
-  const fade = span * 0.14;
+  // Each collection HOLDS fully visible across the middle of its window; the
+  // fades are longer now (smoother) but hold + fade still === half a span, so
+  // adjacent panels meet at the boundary (both at 0) — the outgoing collection
+  // is gone before the incoming one appears (no two-up "double exposure"). The
+  // first stays solid from the top and the last stays solid until the unpin.
+  const hold = span * 0.30;
+  const fade = span * 0.20;
+  // Shared keyframe window: fade-in · hold · fade-out.
+  const win = [center - hold - fade, center - hold, center + hold, center + hold + fade];
   const out0 = index === 0 ? 1 : 0;
   const outLast = index === total - 1 ? 1 : 0;
-  const opacity = useTransform(
-    progress,
-    [center - hold - fade, center - hold, center + hold, center + hold + fade],
-    [out0, 1, 1, outLast],
-  );
+  const opacity = useTransform(progress, win, [out0, 1, 1, outLast]);
 
   const ref = useRef<HTMLDivElement>(null);
   useMotionValueEvent(opacity, "change", (v) => {
@@ -63,23 +61,25 @@ const CollectionPanel = ({
   // Card motion: each collection RISES up from below as it fades in, holds at
   // rest, then continues up as it fades out — a bottom-to-top card. The first
   // doesn't rise in (already there at the top); the last doesn't rise out.
-  // (A transform MotionValue — unlike opacity — is safe on a motion element.)
-  const RISE = 80; // px
-  const yIn = index === 0 ? 0 : RISE;
-  const yOut = index === total - 1 ? 0 : -RISE;
-  const y = useTransform(
-    progress,
-    [center - hold - fade, center - hold, center + hold, center + hold + fade],
-    reduce ? [0, 0, 0, 0] : [yIn, 0, 0, yOut],
-  );
-  // Subtle image zoom for life (clipped inside its frame, so overlap-safe).
-  const imgScale = useTransform(progress, [center - span / 2, center + span / 2], reduce ? [1, 1] : [1.06, 1]);
+  // (Transform MotionValues — unlike opacity — are safe on a motion element.)
+  const RISE = 90; // px
+  const y = useTransform(progress, win, reduce ? [0, 0, 0, 0] : [index === 0 ? 0 : RISE, 0, 0, index === total - 1 ? 0 : -RISE]);
+
+  // 3D: the image frame tilts on its X axis as the card rises in / floats out
+  // (perspective gives it depth — a card lifting toward you), then sits flat
+  // during the hold. Plus a subtle zoom.
+  const TILT = 16; // deg
+  const rotateX = useTransform(progress, win, reduce ? [0, 0, 0, 0] : [index === 0 ? 0 : TILT, 0, 0, index === total - 1 ? 0 : -TILT]);
+  const imgScale = useTransform(progress, [center - span / 2, center + span / 2], reduce ? [1, 1] : [1.07, 1]);
 
   return (
     <div ref={ref} style={{ opacity: out0 }} className="absolute inset-0 flex items-center">
       <motion.div style={{ y }} className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-7 md:gap-14 items-center">
-        <div>
-          <div className="relative h-[34vh] md:h-[56vh] w-full overflow-hidden rounded-2xl bg-secondary shadow-2xl shadow-black/10">
+        <div style={{ perspective: 1200 }}>
+          <motion.div
+            style={{ rotateX, transformPerspective: 1200 }}
+            className="relative h-[34vh] md:h-[56vh] w-full overflow-hidden rounded-2xl bg-secondary shadow-2xl shadow-black/20 will-change-transform"
+          >
             <motion.img
               src={col.image}
               alt={col.name}
@@ -88,7 +88,7 @@ const CollectionPanel = ({
               className="absolute inset-0 w-full h-full object-cover will-change-transform"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
-          </div>
+          </motion.div>
         </div>
 
         <div className="md:pl-2">
@@ -122,6 +122,9 @@ const FeaturedCollections = () => {
   const reduce = !!useReducedMotion();
 
   const { scrollYProgress } = useScroll({ target: targetRef, offset: ["start start", "end end"] });
+  // A light spring smooths the scroll-linked motion (buttery rise / fade / tilt).
+  const sprung = useSpring(scrollYProgress, { stiffness: 110, damping: 30, mass: 0.3 });
+  const progress = reduce ? scrollYProgress : sprung;
 
   const total = collections.length;
   if (!total) return null;
@@ -140,7 +143,7 @@ const FeaturedCollections = () => {
         </div>
 
         {collections.map((col, i) => (
-          <CollectionPanel key={col.id} col={col} index={i} total={total} progress={scrollYProgress} reduce={reduce} />
+          <CollectionPanel key={col.id} col={col} index={i} total={total} progress={progress} reduce={reduce} />
         ))}
       </div>
     </div>
