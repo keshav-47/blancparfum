@@ -72,9 +72,9 @@ const CrossCard = ({
         <img src={card.image} alt={card.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
       </motion.div>
-      <div ref={capRef} style={{ opacity: 0 }} className="mt-3 flex items-baseline justify-between gap-2">
-        <span className="font-display text-sm md:text-base truncate">{card.name}</span>
-        {card.price ? <span className="text-[11px] font-body text-muted-foreground whitespace-nowrap">From ₹{card.price.toLocaleString("en-IN")}</span> : null}
+      <div ref={capRef} style={{ opacity: 0 }} className="mt-3 text-left">
+        <h4 className="font-display text-sm md:text-base truncate">{card.name}</h4>
+        {card.price ? <p className="text-[11px] font-body text-muted-foreground mt-0.5">From ₹{card.price.toLocaleString("en-IN")}</p> : null}
       </div>
     </Link>
   );
@@ -126,28 +126,25 @@ const AssistantHero = () => {
 
   return (
     <div ref={trackRef} className="relative" style={{ height: "220vh" }}>
-        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden border-t border-border/60 flex flex-col">
+        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden border-t border-border/60 flex flex-col items-center justify-center gap-7 md:gap-12 px-4 sm:px-6 md:px-12 lg:px-20">
           {/* Ambient wash */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-secondary/30 via-transparent to-secondary/20" />
           <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-accent/10 blur-[140px]" />
 
-          {/* "Signature Scents" heading — in normal flow at the top, so the grid
-              below can never overlap it at any width. */}
-          <div ref={headingRef} style={{ opacity: 0 }} className="relative z-20 shrink-0 pt-8 md:pt-10 pb-1 text-center px-4">
+          {/* "Signature Scents" heading — in flow, centred together with the grid */}
+          <div ref={headingRef} style={{ opacity: 0 }} className="relative z-20 shrink-0 text-center">
             <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-2">Featured</p>
             <h2 className="font-display text-3xl md:text-4xl font-light">Signature Scents</h2>
           </div>
 
-          {/* Stage for the concierge + the assembling grid (sits below the heading) */}
-          <div className="relative flex-1">
-            {/* Product cards — scattered around the concierge, assembling into a row */}
-            <div className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-6 md:px-12 lg:px-20">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full max-w-6xl">
-                {cards.map((card, i) => (
-                  <CrossCard key={card.id} card={card} scatter={SCATTER[i]} progress={progress} reduce={reduce} />
-                ))}
-              </div>
+          {/* Product cards — scattered around the concierge, assembling into a row */}
+          <div className="relative z-10 w-full max-w-6xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {cards.map((card, i) => (
+                <CrossCard key={card.id} card={card} scatter={SCATTER[i]} progress={progress} reduce={reduce} />
+              ))}
             </div>
+          </div>
 
             {/* Concierge — centred, fades + lifts as you scroll into the scents */}
             <motion.div
@@ -198,7 +195,6 @@ const AssistantHero = () => {
               </div>
             </div>
             </motion.div>
-          </div>
         </div>
       </div>
   );

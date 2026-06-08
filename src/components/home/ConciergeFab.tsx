@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openChat } from "@/store/slices/assistantSlice";
+import logo from "@/assets/blanc-logo.png";
 
 /**
  * Persistent concierge launcher, bottom-right on every page. On the home page it
@@ -41,10 +41,10 @@ const ConciergeFab = () => {
           transition={{ type: "spring", stiffness: 280, damping: 22 }}
           onClick={() => dispatch(openChat())}
           aria-label="Ask the scent concierge"
-          className="fixed bottom-6 right-6 z-[70] flex items-center gap-2.5 h-13 sm:h-14 pl-3.5 pr-2 sm:pr-5 rounded-full bg-foreground text-background shadow-2xl shadow-black/30 hover:scale-105 active:scale-95 transition-transform"
+          className="fixed bottom-6 right-6 z-[70] flex items-center gap-2.5 h-14 px-4 sm:pr-6 rounded-full bg-foreground text-background shadow-2xl shadow-black/30 hover:scale-105 active:scale-95 transition-transform"
         >
           <span className="relative flex items-center justify-center w-9 h-9 rounded-full bg-background/10">
-            <Sparkles size={17} />
+            <img src={logo} alt="BLANC" className="h-5 w-auto brightness-0 invert" />
             <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-background/30 animate-ping" />
           </span>
           <span className="hidden sm:inline text-[11px] font-body font-medium uppercase tracking-[0.18em] pr-1">Ask concierge</span>
