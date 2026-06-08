@@ -38,9 +38,10 @@ const RootLayout = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Shared "floating 3D" surface for the corner buttons (raised, lifts on hover).
+  // Shared "floating 3D" surface for the corner buttons (raised, lifts + flips
+  // to a dark fill on hover — like the "View all fragrances" button).
   const floatBtn =
-    "bg-white text-foreground border border-border ring-1 ring-inset ring-white/60 shadow-[0_10px_26px_-8px_rgba(0,0,0,0.3),0_3px_8px_-3px_rgba(0,0,0,0.14)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.38)] hover:bg-secondary transition-all duration-300";
+    "group bg-white text-foreground border border-border ring-1 ring-inset ring-white/60 shadow-[0_10px_26px_-8px_rgba(0,0,0,0.3),0_3px_8px_-3px_rgba(0,0,0,0.14)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.38)] hover:bg-foreground hover:text-background transition-all duration-300";
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-clip">
@@ -82,7 +83,7 @@ const RootLayout = () => {
               aria-label="Ask the scent concierge"
               className={`flex items-center gap-2.5 h-12 pl-3 pr-4 sm:pr-5 rounded-full ${floatBtn}`}
             >
-              <img src="/favicon.png" alt="BLANC" className="h-7 w-7 object-contain" />
+              <img src="/favicon.png" alt="BLANC" className="h-7 w-7 object-contain transition duration-300 group-hover:brightness-0 group-hover:invert" />
               <span className="hidden sm:inline text-[11px] font-body font-medium uppercase tracking-[0.18em]">Ask concierge</span>
             </button>
           </motion.div>

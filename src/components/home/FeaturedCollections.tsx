@@ -51,12 +51,17 @@ const CollectionPanel = ({
   const opacity = useTransform(progress, win, [out0, 1, 1, outLast]);
 
   const ref = useRef<HTMLDivElement>(null);
-  useMotionValueEvent(opacity, "change", (v) => {
-    if (ref.current) ref.current.style.opacity = v.toFixed(3);
-  });
+  // Only the visible panel should catch clicks — otherwise the stacked
+  // (invisible) panels on top swallow them and the "Explore" link is dead.
+  const apply = (v: number) => {
+    if (!ref.current) return;
+    ref.current.style.opacity = v.toFixed(3);
+    ref.current.style.pointerEvents = v > 0.5 ? "auto" : "none";
+  };
+  useMotionValueEvent(opacity, "change", apply);
   useEffect(() => {
-    if (ref.current) ref.current.style.opacity = opacity.get().toFixed(3);
-  }, [opacity]);
+    apply(opacity.get());
+  }, [opacity]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Card motion: each collection RISES up from below as it fades in, holds at
   // rest, then continues up as it fades out — a bottom-to-top card. The first
@@ -73,7 +78,7 @@ const CollectionPanel = ({
   const imgScale = useTransform(progress, [center - span / 2, center + span / 2], reduce ? [1, 1] : [1.07, 1]);
 
   return (
-    <div ref={ref} style={{ opacity: out0 }} className="absolute inset-0 flex items-center">
+    <div ref={ref} style={{ opacity: out0, pointerEvents: out0 > 0.5 ? "auto" : "none" }} className="absolute inset-0 flex items-center">
       <motion.div style={{ y }} className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-7 md:gap-14 items-center">
         <div style={{ perspective: 1200 }}>
           <motion.div
