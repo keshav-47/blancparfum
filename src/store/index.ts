@@ -5,6 +5,7 @@ import userReducer from "./slices/userSlice";
 import authReducer from "./slices/authSlice";
 import adminReducer from "./slices/adminSlice";
 import customRequestsReducer from "./slices/customRequestsSlice";
+import assistantReducer from "./slices/assistantSlice";
 import type { CartItem } from "@/types";
 
 const CART_KEY = "bp_cart";
@@ -26,6 +27,7 @@ export const store = configureStore({
     auth: authReducer,
     admin: adminReducer,
     customRequests: customRequestsReducer,
+    assistant: assistantReducer,
   },
   preloadedState: {
     cart: { items: loadCart() },

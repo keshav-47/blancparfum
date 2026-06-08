@@ -6,11 +6,13 @@ import FeaturedCollections from "@/components/home/FeaturedCollections";
 import ProductGrid from "@/components/home/ProductGrid";
 import HorizontalProductScroll from "@/components/home/HorizontalProductScroll";
 import StatsBand from "@/components/home/StatsBand";
+import AssistantHero from "@/components/home/AssistantHero";
 import SEO from "@/components/SEO";
 import { HomeSkeleton } from "@/components/skeletons/PageSkeletons";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProducts, fetchCollections } from "@/store/slices/productsSlice";
+import { setMode } from "@/store/slices/assistantSlice";
 
 // Smooth reading-progress bar tied to scroll.
 const ScrollProgress = () => {
@@ -27,6 +29,7 @@ const ScrollProgress = () => {
 const Index = () => {
   const dispatch = useAppDispatch();
   const { items, loading } = useAppSelector((s) => s.products);
+  const mode = useAppSelector((s) => s.assistant.mode);
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -64,7 +67,15 @@ const Index = () => {
       />
       <ScrollProgress />
       <main>
-        <HeroCarousel />
+        {mode === "concierge" ? <AssistantHero /> : <HeroCarousel />}
+        <div className="flex justify-center pb-4 -mt-2">
+          <button
+            onClick={() => dispatch(setMode(mode === "concierge" ? "browse" : "concierge"))}
+            className="text-[11px] font-body font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {mode === "concierge" ? "Browse normally →" : "← Ask the concierge"}
+          </button>
+        </div>
         <BrandMarquee />
         <HorizontalProductScroll />
         <FeaturedCollections />
