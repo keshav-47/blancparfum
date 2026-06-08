@@ -28,20 +28,23 @@ const CollectionPanel = ({
   progress: MotionValue<number>;
   reduce: boolean;
 }) => {
-  const span = 1 / total;
-  const start = index * span;
-  const end = (index + 1) * span;
+  // Map N collections across N+1 "units" of scroll so the first and last get a
+  // lead-in / lead-out and centre comfortably INSIDE the pinned range (centres
+  // at 1/(N+1) … N/(N+1)). Otherwise the first/last only peak at the exact
+  // instant the section pins/unpins, so scrolling up you miss #1 and scrolling
+  // down you miss the last.
+  const units = total + 1;
+  const span = 1 / units;
+  const center = (index + 1) * span;
   const imageLeft = index % 2 === 0;
 
-  // Cross-fade timing. Each collection HOLDS fully visible across most of its
-  // window; the fade in/out is short and the windows meet exactly at the
-  // boundary (hold + fade === half a span), so the outgoing collection is gone
-  // before the incoming one appears — no two-up "double exposure". The first
-  // stays solid from the very top and the last stays solid until the section
-  // unpins, so every collection (incl. #1 and the last) gets a full beat.
-  const center = (index + 0.5) * span;
-  const hold = span * 0.36; // half-width of the fully-visible hold
-  const fade = span * 0.14; // short fade; hold + fade === 0.5 * span (sequential, no overlap)
+  // Each collection HOLDS fully visible across most of its window; the fade in/out
+  // is short and hold + fade === half a span, so adjacent panels meet at the
+  // boundary (both at 0) — the outgoing collection is gone before the incoming
+  // one appears (no two-up "double exposure"). The first stays solid from the top
+  // and the last stays solid until the section unpins.
+  const hold = span * 0.36;
+  const fade = span * 0.14;
   const out0 = index === 0 ? 1 : 0;
   const outLast = index === total - 1 ? 1 : 0;
   const opacity = useTransform(
@@ -59,9 +62,11 @@ const CollectionPanel = ({
   }, [opacity]);
 
   // Gentle opposing drift through the panel window (transforms are safe).
-  const imgX = useTransform(progress, [start, end], reduce ? ["0%", "0%"] : imageLeft ? ["-5%", "5%"] : ["5%", "-5%"]);
-  const txtX = useTransform(progress, [start, end], reduce ? ["0%", "0%"] : imageLeft ? ["7%", "-7%"] : ["-7%", "7%"]);
-  const imgScale = useTransform(progress, [start, end], reduce ? [1, 1] : [1.08, 1]);
+  const dStart = center - span / 2;
+  const dEnd = center + span / 2;
+  const imgX = useTransform(progress, [dStart, dEnd], reduce ? ["0%", "0%"] : imageLeft ? ["-5%", "5%"] : ["5%", "-5%"]);
+  const txtX = useTransform(progress, [dStart, dEnd], reduce ? ["0%", "0%"] : imageLeft ? ["7%", "-7%"] : ["-7%", "7%"]);
+  const imgScale = useTransform(progress, [dStart, dEnd], reduce ? [1, 1] : [1.08, 1]);
 
   return (
     <div ref={ref} style={{ opacity: out0 }} className="absolute inset-0 flex items-center">
@@ -115,7 +120,7 @@ const FeaturedCollections = () => {
   if (!total) return null;
 
   return (
-    <div ref={targetRef} className="relative" style={{ height: `${total * 100}vh` }}>
+    <div ref={targetRef} className="relative" style={{ height: `${(total + 1) * 100}vh` }}>
       {/* Pin the stage below the fixed navbar (h-16) so content centres in the visible area. */}
       <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
         {/* Lightweight section label, top-left */}
