@@ -31,7 +31,7 @@ const RootLayout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
+    <div className="min-h-screen flex flex-col overflow-x-clip">
       <Navbar />
       <main className="flex-1 pt-16">
         <AnimatePresence mode="wait" initial={false}>

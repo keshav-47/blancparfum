@@ -53,7 +53,9 @@
   }
 
   html, body {
-    @apply overflow-x-hidden;
+    /* `clip` (not `hidden`) prevents a horizontal scrollbar WITHOUT turning the
+       document into a scroll container — otherwise `position: sticky` breaks. */
+    @apply overflow-x-clip;
   }
 
   body {
