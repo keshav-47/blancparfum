@@ -48,16 +48,15 @@ const Tile = ({
   const r = Math.floor(index / COLS);
   const dx = c - CC; // tile-widths from centre
   const dy = r - CR;
-  const order = REVEAL_ORDER[index];
+  const order = REVEAL_ORDER[index]; // kept for z-stacking (centre image on top)
 
-  // All tiles first STACK at the centre (behind the centre image), then fly out
-  // to their real grid slot — staggered centre-out, so they "emerge from behind"
-  // the first image rather than fading in independently.
-  const flyStart = order === 0 ? 1 : 0.18 + (order / (COUNT - 1)) * 0.58;
-  const x = useTransform(progress, [flyStart, flyStart + 0.16], reduce ? ["0%", "0%"] : [`${-dx * 100}%`, "0%"]);
-  const y = useTransform(progress, [flyStart, flyStart + 0.16], reduce ? ["0%", "0%"] : [`${-dy * 100}%`, "0%"]);
-  // The stack grows in at the centre first (so the headline reads, then one image).
-  const scale = useTransform(progress, [0.06, 0.16], reduce ? [1, 1] : [0, 1]);
+  // All tiles stack at the centre, then fly out TOGETHER (same range) to their
+  // real slots — so they spread out smoothly and simultaneously in every
+  // direction (diagonals, sides, top, bottom), not one-by-one.
+  const x = useTransform(progress, [0.22, 0.72], reduce ? ["0%", "0%"] : [`${-dx * 100}%`, "0%"]);
+  const y = useTransform(progress, [0.22, 0.72], reduce ? ["0%", "0%"] : [`${-dy * 100}%`, "0%"]);
+  // The stack grows in at the centre first (headline reads, then one image).
+  const scale = useTransform(progress, [0.06, 0.18], reduce ? [1, 1] : [0, 1]);
 
   return (
     <motion.div style={{ x, y, scale, zIndex: COUNT - order }} className="relative will-change-transform">
