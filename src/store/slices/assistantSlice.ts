@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { sendAssistantChat } from "@/api/assistantApi";
 import type { AssistantMessage, AssistantAction } from "@/api/assistantApi";
 import type { RootState } from "@/store";
+import { logout } from "./authSlice";
 
 type Mode = "concierge" | "browse";
 
@@ -74,6 +75,14 @@ const assistantSlice = createSlice({
       .addCase(submitMessage.rejected, (state, action) => {
         state.status = "error";
         state.error = (action.payload as string) || "Something went wrong.";
+      })
+      // Clear the conversation on logout (don't leak chat across sessions).
+      .addCase(logout, (state) => {
+        state.messages = [];
+        state.lastProductIds = [];
+        state.pendingAction = null;
+        state.status = "idle";
+        state.error = null;
       });
   },
 });
