@@ -36,7 +36,6 @@ const CollectionPanel = ({
   const units = total + 1;
   const span = 1 / units;
   const center = (index + 1) * span;
-  const imageLeft = index % 2 === 0;
 
   // Each collection HOLDS fully visible across most of its window; the fade in/out
   // is short and hold + fade === half a span, so adjacent panels meet at the
@@ -61,16 +60,25 @@ const CollectionPanel = ({
     if (ref.current) ref.current.style.opacity = opacity.get().toFixed(3);
   }, [opacity]);
 
-  // Subtle image zoom for life. No horizontal drift: image and text used to
-  // drift toward each other and, at a panel's extremes (e.g. the last panel at
-  // the very end of the scroll), the text slid behind the image and got clipped.
-  // Scale stays clipped inside the image frame, so it's overlap-safe.
+  // Card motion: each collection RISES up from below as it fades in, holds at
+  // rest, then continues up as it fades out — a bottom-to-top card. The first
+  // doesn't rise in (already there at the top); the last doesn't rise out.
+  // (A transform MotionValue — unlike opacity — is safe on a motion element.)
+  const RISE = 80; // px
+  const yIn = index === 0 ? 0 : RISE;
+  const yOut = index === total - 1 ? 0 : -RISE;
+  const y = useTransform(
+    progress,
+    [center - hold - fade, center - hold, center + hold, center + hold + fade],
+    reduce ? [0, 0, 0, 0] : [yIn, 0, 0, yOut],
+  );
+  // Subtle image zoom for life (clipped inside its frame, so overlap-safe).
   const imgScale = useTransform(progress, [center - span / 2, center + span / 2], reduce ? [1, 1] : [1.06, 1]);
 
   return (
     <div ref={ref} style={{ opacity: out0 }} className="absolute inset-0 flex items-center">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-7 md:gap-14 items-center">
-        <div className={imageLeft ? "md:order-1" : "md:order-2"}>
+      <motion.div style={{ y }} className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-7 md:gap-14 items-center">
+        <div>
           <div className="relative h-[34vh] md:h-[56vh] w-full overflow-hidden rounded-2xl bg-secondary shadow-2xl shadow-black/10">
             <motion.img
               src={col.image}
@@ -83,7 +91,7 @@ const CollectionPanel = ({
           </div>
         </div>
 
-        <div className={imageLeft ? "md:order-2 md:pl-2" : "md:order-1 md:pr-2"}>
+        <div className="md:pl-2">
           <p className="text-[11px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3 md:mb-4">
             {pad(index + 1)} — Collection
           </p>
@@ -103,7 +111,7 @@ const CollectionPanel = ({
             <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
