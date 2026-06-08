@@ -31,12 +31,24 @@ const CollectionPanel = ({
   const span = 1 / total;
   const start = index * span;
   const end = (index + 1) * span;
-  const fade = span * 0.32;
   const imageLeft = index % 2 === 0;
 
+  // Cross-fade timing. Each collection HOLDS fully visible across most of its
+  // window; the fade in/out is short and the windows meet exactly at the
+  // boundary (hold + fade === half a span), so the outgoing collection is gone
+  // before the incoming one appears — no two-up "double exposure". The first
+  // stays solid from the very top and the last stays solid until the section
+  // unpins, so every collection (incl. #1 and the last) gets a full beat.
+  const center = (index + 0.5) * span;
+  const hold = span * 0.36; // half-width of the fully-visible hold
+  const fade = span * 0.14; // short fade; hold + fade === 0.5 * span (sequential, no overlap)
   const out0 = index === 0 ? 1 : 0;
-  const out3 = index === total - 1 ? 1 : 0;
-  const opacity = useTransform(progress, [start - fade, start + fade, end - fade, end + fade], [out0, 1, 1, out3]);
+  const outLast = index === total - 1 ? 1 : 0;
+  const opacity = useTransform(
+    progress,
+    [center - hold - fade, center - hold, center + hold, center + hold + fade],
+    [out0, 1, 1, outLast],
+  );
 
   const ref = useRef<HTMLDivElement>(null);
   useMotionValueEvent(opacity, "change", (v) => {
