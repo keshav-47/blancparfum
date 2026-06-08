@@ -138,7 +138,7 @@ const AssistantHero = () => {
           </div>
 
           {/* Product cards — scattered around the concierge, assembling into a row */}
-          <div className="relative z-10 w-full max-w-7xl">
+          <div className="relative z-10 w-full max-w-[1600px]">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {cards.map((card, i) => (
                 <CrossCard key={card.id} card={card} scatter={SCATTER[i]} progress={progress} reduce={reduce} />

@@ -32,7 +32,7 @@ const Navbar = () => {
 
   return (
     <header className="fixed top-3 md:top-4 inset-x-0 z-50 px-3 sm:px-4 md:px-6 pointer-events-none">
-      <nav className="pointer-events-auto relative max-w-7xl mx-auto flex items-center justify-between h-14 md:h-16 px-6 md:px-10 rounded-full bg-background/85 backdrop-blur-xl border border-white/60 ring-1 ring-inset ring-white/40 shadow-[0_12px_34px_-12px_rgba(0,0,0,0.32),0_4px_12px_-4px_rgba(0,0,0,0.14)]">
+      <nav className="pointer-events-auto relative max-w-[1600px] mx-auto flex items-center justify-between h-14 md:h-16 px-6 md:px-10 rounded-full bg-background/85 backdrop-blur-xl border border-white/60 ring-1 ring-inset ring-white/40 shadow-[0_12px_34px_-12px_rgba(0,0,0,0.32),0_4px_12px_-4px_rgba(0,0,0,0.14)]">
         {/* Left nav */}
         <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
