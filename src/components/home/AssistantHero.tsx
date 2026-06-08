@@ -3,7 +3,6 @@ import { Send, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   motion,
-  AnimatePresence,
   useScroll,
   useSpring,
   useTransform,
@@ -14,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { submitMessage } from "@/store/slices/assistantSlice";
-import AssistantChat from "./AssistantChat";
 
 const EXAMPLES = [
   "Something fresh for summer",
@@ -26,13 +24,14 @@ const EXAMPLES = [
 // Each card's SCATTERED offset from its grid slot (vw/vh so it stays responsive).
 // At rest the cards sit at these offsets — spread around the centred concierge;
 // as you scroll they animate to 0 (their real grid slot) and rotate flat.
+// One row of cards (like the reference's "Featured Drops"), so the grid fits the
+// pinned stage and clears the heading. Each scatters to a corner around the
+// concierge at rest, then flies into its slot.
 const SCATTER = [
-  { x: "-30vw", y: "-32vh", rot: -14, scale: 1.18 },
-  { x: "31vw",  y: "-36vh", rot: 12,  scale: 1.24 },
-  { x: "-39vw", y: "-4vh",  rot: 9,   scale: 1.02 },
-  { x: "38vw",  y: "0vh",   rot: -10, scale: 1.08 },
-  { x: "-21vw", y: "31vh",  rot: 7,   scale: 0.96 },
-  { x: "23vw",  y: "35vh",  rot: -8,  scale: 1.0 },
+  { x: "-33vw", y: "-30vh", rot: -13, scale: 1.16 },
+  { x: "33vw",  y: "-33vh", rot: 12,  scale: 1.2 },
+  { x: "-34vw", y: "27vh",  rot: 8,   scale: 1.04 },
+  { x: "34vw",  y: "29vh",  rot: -9,  scale: 1.08 },
 ];
 
 interface CardData { id: string; slug?: string; name: string; price?: number; image: string; }
@@ -83,7 +82,7 @@ const CrossCard = ({
 
 const AssistantHero = () => {
   const dispatch = useAppDispatch();
-  const { messages, status } = useAppSelector((s) => s.assistant);
+  const status = useAppSelector((s) => s.assistant.status);
   const products = useAppSelector((s) => s.products.items);
   const [input, setInput] = useState("");
   const trackRef = useRef<HTMLDivElement>(null);
@@ -120,42 +119,42 @@ const AssistantHero = () => {
     dispatch(submitMessage(t));
   };
 
-  const active = messages.length > 0;
-
   const cards: CardData[] = products
     .filter((p) => p.images?.[0] || p.image)
     .slice(0, SCATTER.length)
     .map((p) => ({ id: p.id, slug: p.slug, name: p.name, price: p.price, image: (p.images?.[0] || p.image) as string }));
 
   return (
-    <>
-      <div ref={trackRef} className="relative" style={{ height: "220vh" }}>
-        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden border-t border-border/60">
+    <div ref={trackRef} className="relative" style={{ height: "220vh" }}>
+        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden border-t border-border/60 flex flex-col">
           {/* Ambient wash */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-secondary/30 via-transparent to-secondary/20" />
           <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-accent/10 blur-[140px]" />
 
-          {/* "Signature Scents" heading — revealed as the grid assembles */}
-          <div ref={headingRef} style={{ opacity: 0 }} className="absolute top-8 md:top-10 inset-x-0 z-20 text-center px-4">
+          {/* "Signature Scents" heading — in normal flow at the top, so the grid
+              below can never overlap it at any width. */}
+          <div ref={headingRef} style={{ opacity: 0 }} className="relative z-20 shrink-0 pt-8 md:pt-10 pb-1 text-center px-4">
             <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-2">Featured</p>
             <h2 className="font-display text-3xl md:text-4xl font-light">Signature Scents</h2>
           </div>
 
-          {/* Product cards — scattered around the concierge, assembling into a grid */}
-          <div className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-6 md:px-12 lg:px-20">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full max-w-5xl">
-              {cards.map((card, i) => (
-                <CrossCard key={card.id} card={card} scatter={SCATTER[i]} progress={progress} reduce={reduce} />
-              ))}
+          {/* Stage for the concierge + the assembling grid (sits below the heading) */}
+          <div className="relative flex-1">
+            {/* Product cards — scattered around the concierge, assembling into a row */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-6 md:px-12 lg:px-20">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full max-w-6xl">
+                {cards.map((card, i) => (
+                  <CrossCard key={card.id} card={card} scatter={SCATTER[i]} progress={progress} reduce={reduce} />
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Concierge — centred, fades + lifts as you scroll into the scents */}
-          <motion.div
-            ref={conciergeRef}
-            style={{ scale: cScale, y: cY }}
-            className="absolute inset-0 z-30 flex items-center justify-center px-4"
-          >
+            {/* Concierge — centred, fades + lifts as you scroll into the scents */}
+            <motion.div
+              ref={conciergeRef}
+              style={{ scale: cScale, y: cY }}
+              className="absolute inset-0 z-30 flex items-center justify-center px-4"
+            >
             <div className="w-full max-w-2xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 backdrop-blur px-4 py-1.5 mb-6">
                 <Sparkles size={13} className="text-accent" />
@@ -198,13 +197,10 @@ const AssistantHero = () => {
                 ))}
               </div>
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
-
-      {/* Full-screen conversation, mounted on the first prompt. */}
-      <AnimatePresence>{active && <AssistantChat key="concierge-chat" />}</AnimatePresence>
-    </>
   );
 };
 

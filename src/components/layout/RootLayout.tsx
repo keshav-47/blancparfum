@@ -4,6 +4,9 @@ import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import ConciergeFab from "@/components/home/ConciergeFab";
+import AssistantChat from "@/components/home/AssistantChat";
+import { useAppSelector } from "@/store/hooks";
 
 /**
  * Persistent shell for all public routes. Navbar and Footer render once and
@@ -23,6 +26,7 @@ const RootLayout = () => {
   const location = useLocation();
   const outlet = useOutlet();
   const [showTop, setShowTop] = useState(false);
+  const chatOpen = useAppSelector((s) => s.assistant.open);
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 500);
@@ -48,7 +52,7 @@ const RootLayout = () => {
       </main>
       <Footer />
 
-      {/* Back to top */}
+      {/* Back to top — sits above the concierge launcher */}
       <AnimatePresence>
         {showTop && (
           <motion.button
@@ -56,13 +60,17 @@ const RootLayout = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bottom-20 right-4 z-[90] w-10 h-10 rounded-full bg-white text-foreground border border-border flex items-center justify-center shadow-lg hover:bg-secondary transition-colors"
+            className="fixed bottom-24 right-6 z-[90] w-10 h-10 rounded-full bg-white text-foreground border border-border flex items-center justify-center shadow-lg hover:bg-secondary transition-colors"
             aria-label="Back to top"
           >
             <ArrowUp size={16} strokeWidth={2} />
           </motion.button>
         )}
       </AnimatePresence>
+
+      {/* Persistent concierge launcher + the full-screen chat (global, any page) */}
+      <ConciergeFab />
+      <AnimatePresence>{chatOpen && <AssistantChat key="global-chat" />}</AnimatePresence>
     </div>
   );
 };

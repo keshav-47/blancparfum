@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItemToCart } from "@/store/slices/cartSlice";
-import { clearPendingAction, pushAssistantNote } from "@/store/slices/assistantSlice";
+import { clearPendingAction, pushAssistantNote, closeChat } from "@/store/slices/assistantSlice";
 import { toast } from "@/hooks/use-toast";
 import AddressConfirm from "./AddressConfirm";
 
@@ -66,7 +66,7 @@ const AssistantActionBar = () => {
       <Wrap>
         <p className="text-sm font-body mb-3">Ready to checkout?</p>
         <div className="flex gap-2">
-          <Button onClick={() => { dismiss(); navigate("/cart"); }} className={btn}>Go to cart</Button>
+          <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/cart"); }} className={btn}>Go to cart</Button>
           <Button variant="outline" onClick={dismiss} className={btn}>Not now</Button>
         </div>
       </Wrap>
@@ -78,7 +78,7 @@ const AssistantActionBar = () => {
       <Wrap>
         <p className="text-sm font-body mb-3">You'll need to sign in to continue.</p>
         <div className="flex gap-2">
-          <Button onClick={() => { dismiss(); navigate("/login?returnTo=/"); }} className={btn}>Sign in</Button>
+          <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/login?returnTo=/"); }} className={btn}>Sign in</Button>
           <Button variant="outline" onClick={dismiss} className={btn}>Not now</Button>
         </div>
       </Wrap>

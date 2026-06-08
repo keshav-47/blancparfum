@@ -10,6 +10,7 @@ interface AssistantState {
   pendingAction: AssistantAction | null;
   status: "idle" | "loading" | "error";
   error: string | null;
+  open: boolean; // is the full-screen concierge chat open (global, any page)
 }
 
 const initialState: AssistantState = {
@@ -18,6 +19,7 @@ const initialState: AssistantState = {
   pendingAction: null,
   status: "idle",
   error: null,
+  open: false,
 };
 
 export const submitMessage = createAsyncThunk(
@@ -39,6 +41,8 @@ const assistantSlice = createSlice({
   name: "assistant",
   initialState,
   reducers: {
+    openChat: (state) => { state.open = true; },
+    closeChat: (state) => { state.open = false; },
     clearPendingAction: (state) => { state.pendingAction = null; },
     pushAssistantNote: (state, action: PayloadAction<string>) => {
       state.messages.push({ role: "assistant", content: action.payload });
@@ -58,6 +62,7 @@ const assistantSlice = createSlice({
         state.status = "loading";
         state.error = null;
         state.pendingAction = null;
+        state.open = true; // sending (e.g. from the hero) opens the full-screen chat
         state.messages.push({ role: "user", content: action.meta.arg });
       })
       .addCase(submitMessage.fulfilled, (state, action) => {
@@ -78,9 +83,10 @@ const assistantSlice = createSlice({
         state.pendingAction = null;
         state.status = "idle";
         state.error = null;
+        state.open = false;
       });
   },
 });
 
-export const { clearPendingAction, pushAssistantNote, dismissError, resetChat } = assistantSlice.actions;
+export const { openChat, closeChat, clearPendingAction, pushAssistantNote, dismissError, resetChat } = assistantSlice.actions;
 export default assistantSlice.reducer;

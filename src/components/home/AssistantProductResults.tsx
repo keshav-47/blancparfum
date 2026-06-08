@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
-import { useAppSelector } from "@/store/hooks";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { closeChat } from "@/store/slices/assistantSlice";
 
 const AssistantProductResults = () => {
   const ids = useAppSelector((s) => s.assistant.lastProductIds);
   const items = useAppSelector((s) => s.products.items);
+  const dispatch = useAppDispatch();
 
   if (!ids.length) return null;
   const products = ids.map((id) => items.find((p) => p.id === id)).filter(Boolean);
@@ -12,7 +14,7 @@ const AssistantProductResults = () => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
       {products.map((p) => p && (
-        <Link key={p.id} to={`/product/${p.slug || p.id}`} className="group block text-left">
+        <Link key={p.id} to={`/product/${p.slug || p.id}`} onClick={() => dispatch(closeChat())} className="group block text-left">
           <div className="aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-2">
             <img
               src={p.images?.[0] || p.image || ""}

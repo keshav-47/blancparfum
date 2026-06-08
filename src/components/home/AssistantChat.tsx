@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Send, X, Sparkles, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { submitMessage, resetChat } from "@/store/slices/assistantSlice";
+import { submitMessage, resetChat, closeChat } from "@/store/slices/assistantSlice";
 import AssistantMessageList from "./AssistantMessageList";
 import AssistantProductResults from "./AssistantProductResults";
 import AssistantActionBar from "./AssistantActionBar";
@@ -86,7 +86,7 @@ const AssistantChat = () => {
             <Plus size={13} /> New chat
           </button>
           <button
-            onClick={() => dispatch(resetChat())}
+            onClick={() => dispatch(closeChat())}
             aria-label="Close concierge"
             className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
