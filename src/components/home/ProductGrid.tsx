@@ -58,7 +58,7 @@ const Tile = ({
 
   return (
     <motion.div style={{ x, y, scale, zIndex: COUNT - order }} className="relative will-change-transform">
-      <Link to={`/product/${slug}`} className="group block w-full h-full overflow-hidden rounded-lg md:rounded-xl shadow-xl shadow-black/30">
+      <Link to={`/product/${slug}`} className="group block w-full h-full overflow-hidden rounded-lg md:rounded-xl shadow-lg shadow-black/15">
         <img
           src={src}
           alt=""
@@ -94,32 +94,39 @@ const ProductGrid = () => {
   });
 
   return (
-    <section id="product-grid" ref={trackRef} className="relative bg-foreground" style={{ height: "340vh" }}>
-      <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
-        {/* Collage: tiles stack at the centre, then fly out to fill the screen */}
-        <div className="absolute inset-0 grid grid-cols-5 auto-rows-fr gap-2 md:gap-3 p-2 md:p-3">
-          {tiles.map((t, i) => (
-            <Tile key={i} src={t.src} slug={t.slug} index={i} progress={progress} reduce={reduce} />
-          ))}
-        </div>
+    <>
+      <section id="product-grid" ref={trackRef} className="relative bg-background" style={{ height: "340vh" }}>
+        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
+          {/* Collage: tiles stack at the centre then fly out — capped to the header width */}
+          <div className="absolute inset-0 flex justify-center px-3 sm:px-4 md:px-6">
+            <div className="w-full max-w-[1600px] h-full grid grid-cols-5 auto-rows-fr gap-2 md:gap-3 py-3">
+              {tiles.map((t, i) => (
+                <Tile key={i} src={t.src} slug={t.slug} index={i} progress={progress} reduce={reduce} />
+              ))}
+            </div>
+          </div>
 
-        {/* Headline — shown first, fades as the images spread */}
-        <div ref={headRef} className="absolute inset-0 z-30 flex flex-col items-center justify-center text-center px-6 pointer-events-none">
-          <p className="text-[11px] font-body font-medium uppercase tracking-[0.35em] text-accent mb-4">Discover</p>
-          <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-light text-background leading-[1.02]">
-            Our Fragrances
-          </h2>
+          {/* Headline — shown first, fades as the images spread */}
+          <div ref={headRef} className="absolute inset-0 z-30 flex flex-col items-center justify-center text-center px-6 pointer-events-none">
+            <p className="text-[11px] font-body font-medium uppercase tracking-[0.35em] text-accent mb-4">Discover</p>
+            <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-light text-foreground leading-[1.02]">
+              Our Fragrances
+            </h2>
+          </div>
         </div>
+      </section>
 
-        {/* View all */}
+      {/* View all — below the section, also giving breathing room before the footer */}
+      <div className="bg-background flex justify-center py-16 md:py-24">
         <Link
           to="/shop"
-          className="absolute bottom-7 left-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 text-[11px] font-body font-medium uppercase tracking-[0.2em] text-background/85 hover:text-background bg-foreground/40 backdrop-blur px-5 py-2.5 rounded-full border border-background/20 transition-colors"
+          className="group inline-flex items-center gap-2.5 text-[11px] font-body font-medium uppercase tracking-[0.2em] text-foreground border border-foreground/25 rounded-full px-9 py-3.5 hover:bg-foreground hover:text-background transition-colors"
         >
-          View all fragrances →
+          View all fragrances
+          <span className="transition-transform group-hover:translate-x-1">→</span>
         </Link>
       </div>
-    </section>
+    </>
   );
 };
 
