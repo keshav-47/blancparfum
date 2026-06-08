@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
 import {
   motion,
   useScroll,
@@ -30,12 +31,14 @@ const REVEAL_ORDER = (() => {
 
 const Tile = ({
   src,
+  name,
   slug,
   index,
   progress,
   reduce,
 }: {
   src: string;
+  name: string;
   slug: string;
   index: number;
   progress: MotionValue<number>;
@@ -58,13 +61,21 @@ const Tile = ({
 
   return (
     <motion.div style={{ x, y, scale, zIndex: COUNT - order }} className="relative will-change-transform">
-      <Link to={`/product/${slug}`} className="group block w-full h-full overflow-hidden rounded-lg md:rounded-xl shadow-lg shadow-black/15">
+      <Link to={`/product/${slug}`} className="group relative block w-full h-full overflow-hidden rounded-lg md:rounded-xl shadow-lg shadow-black/15">
         <img
           src={src}
-          alt=""
+          alt={name}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
         />
+        {/* Name + hover affordance */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500" />
+        <div className="absolute inset-x-0 bottom-0 p-3 md:p-4 flex items-center justify-between gap-2">
+          <span className="font-display text-xs md:text-sm text-white leading-tight truncate transition-transform duration-500 group-hover:-translate-y-0.5">
+            {name}
+          </span>
+          <ArrowUpRight size={15} className="shrink-0 text-white opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500" />
+        </div>
       </Link>
     </motion.div>
   );
@@ -90,18 +101,20 @@ const ProductGrid = () => {
   if (!withImg.length) return null;
   const tiles = Array.from({ length: COUNT }, (_, i) => {
     const p = withImg[i % withImg.length];
-    return { src: (p.images?.[0] || p.image) as string, slug: p.slug || p.id };
+    return { src: (p.images?.[0] || p.image) as string, name: p.name, slug: p.slug || p.id };
   });
 
   return (
     <>
       <section id="product-grid" ref={trackRef} className="relative bg-background" style={{ height: "340vh" }}>
-        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Pinned below the floating header (top-24) with a shorter stage, so the
+            top row clears the header and the tiles are a touch smaller. */}
+        <div className="sticky top-24 h-[calc(100vh-12rem)] overflow-hidden">
           {/* Collage: tiles stack at the centre then fly out — capped to the header width */}
           <div className="absolute inset-0 flex justify-center px-3 sm:px-4 md:px-6">
-            <div className="w-full max-w-[1600px] h-full grid grid-cols-5 auto-rows-fr gap-2 md:gap-3 py-3">
+            <div className="w-full max-w-[1600px] h-full grid grid-cols-5 auto-rows-fr gap-3 md:gap-4">
               {tiles.map((t, i) => (
-                <Tile key={i} src={t.src} slug={t.slug} index={i} progress={progress} reduce={reduce} />
+                <Tile key={i} src={t.src} name={t.name} slug={t.slug} index={i} progress={progress} reduce={reduce} />
               ))}
             </div>
           </div>
