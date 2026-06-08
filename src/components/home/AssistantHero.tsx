@@ -32,8 +32,8 @@ const AssistantHero = () => {
     <>
       {/* Resting state — the home hero invites the first prompt. Stays in flow so
           the page layout is stable when the full-screen chat closes. */}
-      <section className="relative min-h-[88vh] flex flex-col items-center justify-center px-4 sm:px-6 md:px-12 lg:px-20 pt-24 pb-14 overflow-hidden">
-        <div className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full bg-accent/10 blur-[130px]" />
+      <section className="relative min-h-[68vh] flex flex-col items-center justify-center px-4 sm:px-6 md:px-12 lg:px-20 py-24 md:py-28 overflow-hidden border-t border-border/60">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full bg-accent/10 blur-[130px]" />
 
         <div className="relative w-full max-w-2xl mx-auto text-center">
           <p className="text-[11px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-4">Your Scent Concierge</p>

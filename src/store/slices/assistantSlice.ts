@@ -4,15 +4,12 @@ import type { AssistantMessage, AssistantAction } from "@/api/assistantApi";
 import type { RootState } from "@/store";
 import { logout } from "./authSlice";
 
-type Mode = "concierge" | "browse";
-
 interface AssistantState {
   messages: AssistantMessage[];
   lastProductIds: string[];
   pendingAction: AssistantAction | null;
   status: "idle" | "loading" | "error";
   error: string | null;
-  mode: Mode;
 }
 
 const initialState: AssistantState = {
@@ -21,7 +18,6 @@ const initialState: AssistantState = {
   pendingAction: null,
   status: "idle",
   error: null,
-  mode: "concierge",
 };
 
 export const submitMessage = createAsyncThunk(
@@ -43,7 +39,6 @@ const assistantSlice = createSlice({
   name: "assistant",
   initialState,
   reducers: {
-    setMode: (state, action: PayloadAction<Mode>) => { state.mode = action.payload; },
     clearPendingAction: (state) => { state.pendingAction = null; },
     pushAssistantNote: (state, action: PayloadAction<string>) => {
       state.messages.push({ role: "assistant", content: action.payload });
@@ -87,5 +82,5 @@ const assistantSlice = createSlice({
   },
 });
 
-export const { setMode, clearPendingAction, pushAssistantNote, dismissError, resetChat } = assistantSlice.actions;
+export const { clearPendingAction, pushAssistantNote, dismissError, resetChat } = assistantSlice.actions;
 export default assistantSlice.reducer;
