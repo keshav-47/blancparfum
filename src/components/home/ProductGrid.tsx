@@ -1,205 +1,123 @@
 import { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { ArrowRight, ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import TextReveal from "@/components/animations/TextReveal";
-import ScrollReveal from "@/components/animations/ScrollReveal";
-import Magnetic from "@/components/animations/Magnetic";
-import TiltCard from "@/components/animations/TiltCard";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { setFilter } from "@/store/slices/productsSlice";
-import { addItemToCart } from "@/store/slices/cartSlice";
-import { toast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import {
+  motion,
+  useScroll,
+  useSpring,
+  useTransform,
+  useMotionValueEvent,
+  useReducedMotion,
+  type MotionValue,
+} from "framer-motion";
+import { useAppSelector } from "@/store/hooks";
 
-const LIMIT = 6;
+const COLS = 5;
+const ROWS = 3;
+const COUNT = COLS * ROWS; // 15
+const CC = Math.floor((COLS - 1) / 2); // centre column
+const CR = Math.floor((ROWS - 1) / 2); // centre row
 
-const filters = [
-  { key: "all", label: "All" },
-  { key: "women", label: "Women" },
-  { key: "men", label: "Men" },
-  { key: "unisex", label: "Unisex" },
-  { key: "new", label: "New" },
-];
+// Reveal order: centre tile first, then spreading outward.
+const REVEAL_ORDER = (() => {
+  const ranked = Array.from({ length: COUNT }, (_, i) => ({
+    i,
+    d: Math.abs(Math.floor(i / COLS) - CR) + Math.abs((i % COLS) - CC),
+  })).sort((a, b) => a.d - b.d);
+  const order = new Array<number>(COUNT);
+  ranked.forEach((t, rank) => (order[t.i] = rank));
+  return order;
+})();
 
-const MistCard = ({ product, index, dispatch }: { product: any; index: number; dispatch: any }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.15 });
+const Tile = ({
+  src,
+  slug,
+  index,
+  progress,
+  reduce,
+}: {
+  src: string;
+  slug: string;
+  index: number;
+  progress: MotionValue<number>;
+  reduce: boolean;
+}) => {
+  const c = index % COLS;
+  const r = Math.floor(index / COLS);
+  const dx = c - CC; // tile-widths from centre
+  const dy = r - CR;
+  const order = REVEAL_ORDER[index];
+
+  // All tiles first STACK at the centre (behind the centre image), then fly out
+  // to their real grid slot — staggered centre-out, so they "emerge from behind"
+  // the first image rather than fading in independently.
+  const flyStart = order === 0 ? 1 : 0.18 + (order / (COUNT - 1)) * 0.58;
+  const x = useTransform(progress, [flyStart, flyStart + 0.16], reduce ? ["0%", "0%"] : [`${-dx * 100}%`, "0%"]);
+  const y = useTransform(progress, [flyStart, flyStart + 0.16], reduce ? ["0%", "0%"] : [`${-dy * 100}%`, "0%"]);
+  // The stack grows in at the centre first (so the headline reads, then one image).
+  const scale = useTransform(progress, [0.06, 0.16], reduce ? [1, 1] : [0, 1]);
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, filter: "blur(20px)", y: 40, scale: 0.92 }}
-      animate={isInView ? { opacity: 1, filter: "blur(0px)", y: 0, scale: 1 } : {}}
-      transition={{
-        duration: 1.2,
-        delay: index * 0.15,
-        ease: [0.21, 0.47, 0.32, 0.98],
-        filter: { duration: 1.4, delay: index * 0.15 },
-      }}
-    >
-      <TiltCard>
-      <div className="group relative">
-        <Link to={`/product/${product.slug || product.id}`} className="block">
-          <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-lg mb-5">
-            <motion.img
-              src={product.images?.[0] || product.image || ""}
-              alt={product.name}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              whileHover={{ scale: 1.04 }}
-              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-            />
-            {product.isNew && (
-              <span className="absolute top-4 left-4 text-[10px] font-body font-medium uppercase tracking-[0.15em] bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full border border-foreground/20">
-                New
-              </span>
-            )}
-          </div>
-        </Link>
-        {/* Quick add */}
-        <button
-          onClick={async (e) => {
-            e.preventDefault();
-            if (!product.sizes?.[0] && !product.price) return;
-            try {
-              await dispatch(addItemToCart({
-                productId: product.id,
-                name: product.name,
-                image: product.images?.[0] || product.image || "",
-                size: product.sizes?.[0]?.ml ?? 30,
-                price: product.sizes?.[0]?.price ?? product.price,
-                quantity: 1,
-              })).unwrap();
-              toast({ title: `${product.name} added to cart` });
-            } catch (err: unknown) {
-              const msg = typeof err === "string" ? err : "Failed to add";
-              toast({ title: msg, variant: "destructive" });
-            }
-          }}
-          className="absolute bottom-[88px] left-1/2 -translate-x-1/2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-foreground text-background rounded-full px-5 py-2.5 text-[10px] font-body font-medium uppercase tracking-[0.15em] flex items-center gap-2 hover:bg-foreground/90 shadow-lg"
-        >
-          <ShoppingBag size={12} strokeWidth={2} /> Quick Add
-        </button>
-        <Link to={`/product/${product.slug || product.id}`} className="block text-center space-y-1.5">
-          <h3 className="font-display text-xl tracking-wider">{product.name}</h3>
-          <p className="text-[11px] font-body text-muted-foreground uppercase tracking-[0.15em]">
-            {product.tagline}
-          </p>
-          <p className="text-sm font-body text-foreground/70">
-            From {"\u20B9"}{(product.sizes?.[0]?.price ?? product.price).toLocaleString("en-IN")}
-          </p>
-        </Link>
-      </div>
-      </TiltCard>
+    <motion.div style={{ x, y, scale, zIndex: COUNT - order }} className="relative will-change-transform">
+      <Link to={`/product/${slug}`} className="group block w-full h-full overflow-hidden rounded-lg md:rounded-xl shadow-xl shadow-black/30">
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      </Link>
     </motion.div>
   );
 };
 
 const ProductGrid = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const { items, filter } = useAppSelector((state) => state.products);
-  const sectionRef = useRef(null);
+  const products = useAppSelector((s) => s.products.items);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const headRef = useRef<HTMLDivElement>(null);
+  const reduce = !!useReducedMotion();
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "start center"],
+  const { scrollYProgress } = useScroll({ target: trackRef, offset: ["start start", "end end"] });
+  const sprung = useSpring(scrollYProgress, { stiffness: 100, damping: 30, mass: 0.3 });
+  const progress = reduce ? scrollYProgress : sprung;
+
+  // Headline reads first, recedes as the collage spreads over it.
+  const headOpacity = useTransform(progress, [0.05, 0.26], [1, 0]);
+  useMotionValueEvent(headOpacity, "change", (v) => {
+    if (headRef.current) headRef.current.style.opacity = v.toFixed(3);
   });
 
-  // Golden mist fog that clears as user scrolls
-  const fogOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [0.8, 0.3, 0]);
-  const fogBlur = useTransform(scrollYProgress, [0, 1], [8, 0]);
-  const fogScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.3]);
-
-  const allFiltered = items.filter((p) => {
-    if (filter === "all") return true;
-    if (filter === "new") return p.isNew;
-    return p.category === filter;
+  const withImg = products.filter((p) => p.images?.[0] || p.image);
+  if (!withImg.length) return null;
+  const tiles = Array.from({ length: COUNT }, (_, i) => {
+    const p = withImg[i % withImg.length];
+    return { src: (p.images?.[0] || p.image) as string, slug: p.slug || p.id };
   });
-  const filtered = allFiltered.slice(0, LIMIT);
-  const hasMore = allFiltered.length > LIMIT;
 
   return (
-    <section id="product-grid" ref={sectionRef} className="py-24 md:py-32 relative">
-      {/* Golden mist overlay that clears on scroll */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{ opacity: fogOpacity }}
-      >
-        <motion.div
-          className="w-full h-full"
-          style={{
-            scale: fogScale,
-            background: "radial-gradient(ellipse at center, rgba(184,134,11,0.08) 0%, rgba(184,134,11,0.03) 40%, transparent 70%)",
-          }}
-        />
-      </motion.div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 relative z-20">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-          <div>
-            <ScrollReveal>
-              <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">
-                Discover
-              </p>
-            </ScrollReveal>
-            <TextReveal as="h2" className="font-display text-4xl md:text-5xl font-light">
-              Our Fragrances
-            </TextReveal>
-          </div>
-          <Magnetic>
-            <Link
-              to="/shop"
-              className="group inline-flex items-center gap-2 text-[11px] font-body font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              View All <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </Magnetic>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-2 sm:gap-3 mb-12 overflow-x-auto scrollbar-hide pb-1">
-          {filters.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => dispatch(setFilter(f.key))}
-              className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-4 sm:px-5 py-2 sm:py-2.5 rounded-full whitespace-nowrap flex-shrink-0 transition-all duration-300 ${
-                filter === f.key
-                  ? "bg-foreground text-background"
-                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-              }`}
-            >
-              {f.label}
-            </button>
+    <section id="product-grid" ref={trackRef} className="relative bg-foreground" style={{ height: "340vh" }}>
+      <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Collage: tiles stack at the centre, then fly out to fill the screen */}
+        <div className="absolute inset-0 grid grid-cols-5 auto-rows-fr gap-2 md:gap-3 p-2 md:p-3">
+          {tiles.map((t, i) => (
+            <Tile key={i} src={t.src} slug={t.slug} index={i} progress={progress} reduce={reduce} />
           ))}
         </div>
 
-        {/* Grid — cards emerge from mist */}
-        <div
-          key={filter}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-14 md:gap-x-8 md:gap-y-16"
+        {/* Headline — shown first, fades as the images spread */}
+        <div ref={headRef} className="absolute inset-0 z-30 flex flex-col items-center justify-center text-center px-6 pointer-events-none">
+          <p className="text-[11px] font-body font-medium uppercase tracking-[0.35em] text-accent mb-4">Discover</p>
+          <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-light text-background leading-[1.02]">
+            Our Fragrances
+          </h2>
+        </div>
+
+        {/* View all */}
+        <Link
+          to="/shop"
+          className="absolute bottom-7 left-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 text-[11px] font-body font-medium uppercase tracking-[0.2em] text-background/85 hover:text-background bg-foreground/40 backdrop-blur px-5 py-2.5 rounded-full border border-background/20 transition-colors"
         >
-          {filtered.map((product, i) => (
-            <MistCard key={product.id} product={product} index={i} dispatch={dispatch} />
-          ))}
-        </div>
-
-        {hasMore && (
-          <div className="text-center mt-16">
-            <Magnetic strength={0.35}>
-              <Button
-                variant="outline"
-                onClick={() => navigate(filter === "all" ? "/shop" : `/shop?category=${filter}`)}
-                className="rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium px-10 h-11 gap-2"
-              >
-                View All {filter !== "all" ? filters.find(f => f.key === filter)?.label : ""} Fragrances
-                <ArrowRight size={13} />
-              </Button>
-            </Magnetic>
-          </div>
-        )}
+          View all fragrances →
+        </Link>
       </div>
     </section>
   );

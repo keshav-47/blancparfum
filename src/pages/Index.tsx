@@ -6,7 +6,6 @@ import FeaturedCollections from "@/components/home/FeaturedCollections";
 import ProductGrid from "@/components/home/ProductGrid";
 import StatsBand from "@/components/home/StatsBand";
 import AssistantHero from "@/components/home/AssistantHero";
-import ScentShowcase from "@/components/home/ScentShowcase";
 import SEO from "@/components/SEO";
 import { HomeSkeleton } from "@/components/skeletons/PageSkeletons";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -70,7 +69,6 @@ const Index = () => {
         <AssistantHero />
         <FeaturedCollections />
         <StatsBand />
-        <ScentShowcase />
         <ProductGrid />
       </main>
     </Layout>
