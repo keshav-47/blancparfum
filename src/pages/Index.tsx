@@ -66,8 +66,8 @@ const Index = () => {
       <ScrollProgress />
       <main>
         <HeroCarousel />
-        <AssistantHero />
         <BrandMarquee />
+        <AssistantHero />
         <HorizontalProductScroll />
         <FeaturedCollections />
         <StatsBand />
