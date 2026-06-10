@@ -12,6 +12,7 @@ import {
 } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { submitMessage } from "@/store/slices/assistantSlice";
 
 const EXAMPLES = [
@@ -89,6 +90,7 @@ const AssistantHero = () => {
   const conciergeRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const reduce = !!useReducedMotion();
+  const isMobile = useIsMobile();
 
   const { scrollYProgress } = useScroll({ target: trackRef, offset: ["start start", "end end"] });
   const sprung = useSpring(scrollYProgress, { stiffness: 110, damping: 30, mass: 0.3 });
@@ -125,7 +127,9 @@ const AssistantHero = () => {
     .map((p) => ({ id: p.id, slug: p.slug, name: p.name, price: p.price, image: (p.images?.[0] || p.image) as string }));
 
   return (
-    <div ref={trackRef} className="relative" style={{ height: "220vh" }}>
+    // Mobile: short track so one swipe carries the scatter→assemble; desktop keeps
+    // the longer cinematic scrub.
+    <div ref={trackRef} className="relative" style={{ height: isMobile ? "150vh" : "220vh" }}>
         <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden border-t border-border/60 flex flex-col items-center justify-center gap-7 md:gap-12 px-4 sm:px-6 md:px-12 lg:px-20">
           {/* Ambient wash */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-secondary/30 via-transparent to-secondary/20" />

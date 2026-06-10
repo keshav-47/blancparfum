@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, useReducedMotion, type MotionValue } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { Collection } from "@/types";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -125,6 +126,7 @@ const FeaturedCollections = () => {
   const collections = useAppSelector((s) => s.products.collections);
   const targetRef = useRef<HTMLDivElement>(null);
   const reduce = !!useReducedMotion();
+  const isMobile = useIsMobile();
 
   const { scrollYProgress } = useScroll({ target: targetRef, offset: ["start start", "end end"] });
   // A light spring smooths the scroll-linked motion (buttery rise / fade / tilt).
@@ -135,7 +137,9 @@ const FeaturedCollections = () => {
   if (!total) return null;
 
   return (
-    <div ref={targetRef} className="relative" style={{ height: `${(total + 1) * 100}vh` }}>
+    // Mobile gets a much shorter unit so one swipe ≈ one collection; desktop keeps
+    // the longer cinematic scrub.
+    <div ref={targetRef} className="relative" style={{ height: `${(total + 1) * (isMobile ? 62 : 100)}vh` }}>
       {/* Pin the stage below the fixed navbar (h-16) so content centres in the visible area. */}
       <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
         {/* Lightweight section label, top-left */}

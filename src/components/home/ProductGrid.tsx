@@ -11,29 +11,16 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const COLS = 5;
-const ROWS = 3;
-const COUNT = COLS * ROWS; // 15
-const CC = Math.floor((COLS - 1) / 2); // centre column
-const CR = Math.floor((ROWS - 1) / 2); // centre row
-
-// Reveal order: centre tile first, then spreading outward.
-const REVEAL_ORDER = (() => {
-  const ranked = Array.from({ length: COUNT }, (_, i) => ({
-    i,
-    d: Math.abs(Math.floor(i / COLS) - CR) + Math.abs((i % COLS) - CC),
-  })).sort((a, b) => a.d - b.d);
-  const order = new Array<number>(COUNT);
-  ranked.forEach((t, rank) => (order[t.i] = rank));
-  return order;
-})();
+const COUNT = 15; // 5×3 on desktop, 3×5 on mobile
 
 const Tile = ({
   src,
   name,
   slug,
   index,
+  cols,
   progress,
   reduce,
 }: {
@@ -41,14 +28,13 @@ const Tile = ({
   name: string;
   slug: string;
   index: number;
+  cols: number;
   progress: MotionValue<number>;
   reduce: boolean;
 }) => {
-  const c = index % COLS;
-  const r = Math.floor(index / COLS);
-  const dx = c - CC; // tile-widths from centre
-  const dy = r - CR;
-  const order = REVEAL_ORDER[index]; // kept for z-stacking (centre image on top)
+  const rows = COUNT / cols;
+  const dx = (index % cols) - Math.floor((cols - 1) / 2); // tile-widths from centre
+  const dy = Math.floor(index / cols) - Math.floor((rows - 1) / 2);
 
   // All tiles stack at the centre, then fly out TOGETHER (same range) to their
   // real slots — so they spread out smoothly and simultaneously in every
@@ -59,7 +45,10 @@ const Tile = ({
   const scale = useTransform(progress, [0.06, 0.18], reduce ? [1, 1] : [0, 1]);
 
   return (
-    <motion.div style={{ x, y, scale, zIndex: COUNT - order }} className="relative will-change-transform">
+    <motion.div
+      style={{ x, y, scale, zIndex: COUNT - (Math.abs(dx) + Math.abs(dy)) }}
+      className="relative will-change-transform"
+    >
       <Link to={`/product/${slug}`} className="group relative block w-full h-full overflow-hidden rounded-lg md:rounded-xl shadow-lg shadow-black/15">
         <img
           src={src}
@@ -85,6 +74,10 @@ const ProductGrid = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
   const reduce = !!useReducedMotion();
+  const isMobile = useIsMobile();
+  // Mobile: 3×5 layout (bigger tiles) and a much shorter track so roughly one
+  // swipe carries the whole grow + fly-out; desktop keeps the long cinematic scrub.
+  const cols = isMobile ? 3 : 5;
 
   const { scrollYProgress } = useScroll({ target: trackRef, offset: ["start start", "end end"] });
   const sprung = useSpring(scrollYProgress, { stiffness: 100, damping: 30, mass: 0.3 });
@@ -105,15 +98,15 @@ const ProductGrid = () => {
 
   return (
     <>
-      <section id="product-grid" ref={trackRef} className="relative bg-background" style={{ height: "340vh" }}>
+      <section id="product-grid" ref={trackRef} className="relative bg-background" style={{ height: isMobile ? "170vh" : "340vh" }}>
         {/* Pinned below the floating header (top-24) with a shorter stage, so the
             top row clears the header and the tiles are a touch smaller. */}
-        <div className="sticky top-24 h-[calc(100vh-12rem)] overflow-hidden">
+        <div className="sticky top-20 md:top-24 h-[calc(100vh-9rem)] md:h-[calc(100vh-12rem)] overflow-hidden">
           {/* Collage: tiles stack at the centre then fly out — capped to the header width */}
           <div className="absolute inset-0 flex justify-center px-3 sm:px-4 md:px-6">
-            <div className="w-full max-w-[1600px] h-full grid grid-cols-5 auto-rows-fr gap-3 md:gap-4">
+            <div className="w-full max-w-[1600px] h-full grid grid-cols-3 md:grid-cols-5 auto-rows-fr gap-2 md:gap-4">
               {tiles.map((t, i) => (
-                <Tile key={i} src={t.src} name={t.name} slug={t.slug} index={i} progress={progress} reduce={reduce} />
+                <Tile key={i} src={t.src} name={t.name} slug={t.slug} index={i} cols={cols} progress={progress} reduce={reduce} />
               ))}
             </div>
           </div>
