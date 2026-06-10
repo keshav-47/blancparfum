@@ -28,6 +28,7 @@ const Tile = ({
   slug,
   index,
   cols,
+  gap,
   progress,
   reduce,
 }: {
@@ -36,6 +37,7 @@ const Tile = ({
   slug: string;
   index: number;
   cols: number;
+  gap: number;
   progress: MotionValue<number>;
   reduce: boolean;
 }) => {
@@ -49,18 +51,26 @@ const Tile = ({
   // Far enough below the pinned stage to be fully off-screen for this row.
   const below = `${(rows - r) * 100 + 30}%`;
 
+  // Stack offset to the EXACT centre cell. Translate % is relative to the tile's
+  // own size, but neighbouring cells are a tile + the grid gap apart — without
+  // the px correction the stack lands offset by the gap and the second image
+  // never fully covers the first.
+  const stackX = `calc(${-dx * 100}% + ${-dx * gap}px)`;
+  const stackY = `calc(${-dy * 100}% + ${-dy * gap}px)`;
+  const settled = "calc(0% + 0px)";
+
   // Beat B: the second image rises and lands EXACTLY on the centre cell — on
   // top of the first, fully covering it (like the reference). Beat C then flies
   // it to its own slot, revealing the first beneath, while the rest burst out.
   const x = useTransform(
     progress,
     isFirst ? PHASE_A : PHASE_C,
-    reduce || isFirst ? ["0%", "0%"] : [`${-dx * 100}%`, "0%"],
+    reduce || isFirst ? [settled, settled] : [stackX, settled],
   );
   const y = useTransform(
     progress,
     isFirst ? PHASE_A : isSecond ? PHASE_B : PHASE_C,
-    reduce ? ["0%", "0%"] : isFirst || isSecond ? [below, "0%"] : [`${-dy * 100}%`, "0%"],
+    reduce ? ["0%", "0%"] : isFirst || isSecond ? [below, "0%"] : [stackY, settled],
   );
   // The rest stay hidden (scale 0) behind the stack until just before beat C.
   const scale = useTransform(
@@ -103,6 +113,7 @@ const ProductGrid = () => {
   // Mobile: 3×5 layout (bigger tiles) and a much shorter track so roughly one
   // swipe carries the whole grow + fly-out; desktop keeps the long cinematic scrub.
   const cols = isMobile ? 3 : 5;
+  const gap = isMobile ? 8 : 16; // must match the grid's gap-2 / md:gap-4
 
   // RAW progress, no spring — a spring lags fast scrolls, so the stage could
   // unpin before the lagged value finished the burst (Lenis already smooths).
@@ -133,7 +144,7 @@ const ProductGrid = () => {
           <div className="absolute inset-0 flex justify-center px-3 sm:px-4 md:px-6">
             <div className="w-full max-w-[1600px] h-full grid grid-cols-3 md:grid-cols-5 auto-rows-fr gap-2 md:gap-4">
               {tiles.map((t, i) => (
-                <Tile key={i} src={t.src} name={t.name} slug={t.slug} index={i} cols={cols} progress={progress} reduce={reduce} />
+                <Tile key={i} src={t.src} name={t.name} slug={t.slug} index={i} cols={cols} gap={gap} progress={progress} reduce={reduce} />
               ))}
             </div>
           </div>
