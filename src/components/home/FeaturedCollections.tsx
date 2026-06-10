@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, useReducedMotion, type MotionValue } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
-import { useIsMobile } from "@/hooks/use-mobile";
 import type { Collection } from "@/types";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -101,7 +100,7 @@ const CollectionPanel = ({
           <p className="text-[11px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3 md:mb-4">
             {pad(index + 1)} — Collection
           </p>
-          <h3 className="font-display text-3xl md:text-6xl font-light leading-[1.03] mb-4 md:mb-5">{col.name}</h3>
+          <h3 className="font-display text-3xl md:text-6xl font-semibold leading-[1.03] mb-4 md:mb-5">{col.name}</h3>
           {col.description && (
             <p className="font-body text-sm md:text-base text-muted-foreground max-w-md mb-6 md:mb-8 leading-relaxed">
               {col.description}
@@ -126,7 +125,6 @@ const FeaturedCollections = () => {
   const collections = useAppSelector((s) => s.products.collections);
   const targetRef = useRef<HTMLDivElement>(null);
   const reduce = !!useReducedMotion();
-  const isMobile = useIsMobile();
 
   const { scrollYProgress } = useScroll({ target: targetRef, offset: ["start start", "end end"] });
   // A light spring smooths the scroll-linked motion (buttery rise / fade / tilt).
@@ -137,9 +135,9 @@ const FeaturedCollections = () => {
   if (!total) return null;
 
   return (
-    // Mobile gets a much shorter unit so one swipe ≈ one collection; desktop keeps
-    // the longer cinematic scrub.
-    <div ref={targetRef} className="relative" style={{ height: `${(total + 1) * (isMobile ? 62 : 100)}vh` }}>
+    // ~100vh per collection unit ≈ one swipe per collection on phones (62vh let a
+    // single flick blow through several), and a comfortable scrub on desktop.
+    <div ref={targetRef} className="relative" style={{ height: `${(total + 1) * 100}vh` }}>
       {/* Pin the stage below the fixed navbar (h-16) so content centres in the visible area. */}
       <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
         {/* Lightweight section label, top-left */}

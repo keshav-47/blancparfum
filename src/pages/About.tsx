@@ -83,7 +83,7 @@ const About = () => (
               <AnimatedCounter
                 target={stat.value}
                 suffix={stat.suffix}
-                className="font-display text-4xl md:text-5xl font-light tabular-nums"
+                className="font-display text-4xl md:text-5xl font-semibold tabular-nums"
               />
               <p className="mt-2 text-[10px] font-body font-medium uppercase tracking-[0.25em] text-muted-foreground">
                 {stat.label}
@@ -108,7 +108,7 @@ const About = () => (
             <ScrollReveal direction="right">
               <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent">Heritage</p>
             </ScrollReveal>
-            <TextReveal as="h2" className="font-display text-3xl md:text-4xl font-light" delay={0.1}>
+            <TextReveal as="h2" className="font-display text-3xl md:text-4xl font-semibold" delay={0.1}>
               Rooted in Tradition
             </TextReveal>
             <ScrollReveal delay={0.2} direction="right">
@@ -139,7 +139,7 @@ const About = () => (
         <ScrollReveal>
           <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Why BLANC</p>
         </ScrollReveal>
-        <TextReveal as="h2" className="font-display text-3xl md:text-4xl font-light">
+        <TextReveal as="h2" className="font-display text-3xl md:text-4xl font-semibold">
           What Sets Us Apart
         </TextReveal>
       </div>
@@ -192,7 +192,7 @@ const About = () => (
           <ScrollReveal>
             <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Location</p>
           </ScrollReveal>
-          <TextReveal as="h2" className="font-display text-3xl md:text-4xl font-light flex items-center justify-center gap-3">
+          <TextReveal as="h2" className="font-display text-3xl md:text-4xl font-semibold flex items-center justify-center gap-3">
             Visit Us
           </TextReveal>
         </div>

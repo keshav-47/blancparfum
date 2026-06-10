@@ -189,7 +189,7 @@ const CollectionDetail = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20">
             <div className="text-center mb-12">
               <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Discover</p>
-              <h2 className="font-display text-3xl md:text-4xl font-light">Explore More Collections</h2>
+              <h2 className="font-display text-3xl md:text-4xl font-semibold">Explore More Collections</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {otherCollections.map((col) => (

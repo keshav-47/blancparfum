@@ -155,9 +155,9 @@ const ProductDetail = () => {
               <p className="text-[11px] font-body font-medium uppercase tracking-[0.2em] text-muted-foreground mb-2">
                 Extrait de Parfum
               </p>
-              <h1 className="font-display text-4xl md:text-5xl font-light mb-2">{product.name}</h1>
+              <h1 className="font-display text-4xl md:text-5xl font-semibold mb-2">{product.name}</h1>
               <p className="text-sm text-muted-foreground font-body mb-8">{product.tagline}</p>
-              <p className="font-body text-2xl font-light mb-10">
+              <p className="font-body text-2xl font-semibold mb-10">
                 {"\u20B9"}{currentSize.price.toLocaleString("en-IN")}
               </p>
 
@@ -276,7 +276,7 @@ const ProductDetail = () => {
           <section className="mt-28">
             <div className="text-center mb-14">
               <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Discover More</p>
-              <h2 className="font-display text-3xl md:text-4xl font-light">You May Also Like</h2>
+              <h2 className="font-display text-3xl md:text-4xl font-semibold">You May Also Like</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {related.map((p) => (

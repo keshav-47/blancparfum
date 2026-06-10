@@ -138,7 +138,7 @@ const AssistantHero = () => {
           {/* "Signature Scents" heading — in flow, centred together with the grid */}
           <div ref={headingRef} style={{ opacity: 0 }} className="relative z-20 shrink-0 text-center">
             <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-2">Featured</p>
-            <h2 className="font-display text-3xl md:text-4xl font-light">Signature Scents</h2>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold">Signature Scents</h2>
           </div>
 
           {/* Product cards — scattered around the concierge, assembling into a row */}
@@ -161,7 +161,7 @@ const AssistantHero = () => {
                 <Sparkles size={13} className="text-accent" />
                 <span className="text-[10px] font-body font-medium uppercase tracking-[0.25em] text-foreground/70">AI Scent Concierge</span>
               </div>
-              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-light leading-[1.04] mb-5">
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-semibold leading-[1.04] mb-5">
                 Find your <span className="italic">signature</span>
               </h1>
               <p className="font-body text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">

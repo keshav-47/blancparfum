@@ -14,7 +14,7 @@ const Contact = () => (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pt-28 pb-20">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Get in Touch</p>
-        <h1 className="font-display text-4xl md:text-5xl font-light mb-6">Contact Us</h1>
+        <h1 className="font-display text-4xl md:text-5xl font-semibold mb-6">Contact Us</h1>
         <p className="text-muted-foreground font-body text-sm leading-relaxed max-w-xl mb-14">
           We'd love to hear from you. Whether you have a question about your order, need help with a bespoke fragrance, or just want to say hello — reach out.
         </p>

@@ -19,7 +19,7 @@ const StatsBand = () => {
             <AnimatedCounter
               target={s.value}
               suffix={s.suffix}
-              className="font-display text-4xl md:text-6xl font-light text-foreground"
+              className="font-display text-4xl md:text-6xl font-semibold text-foreground"
             />
             <p className="mt-2 md:mt-3 text-[10px] md:text-[11px] font-body font-medium uppercase tracking-[0.18em] md:tracking-[0.2em] text-muted-foreground">
               {s.label}

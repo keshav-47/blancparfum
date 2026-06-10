@@ -177,7 +177,7 @@ const Cart = () => {
           <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" /> Continue Shopping
         </Link>
 
-        <h1 className="font-display text-4xl font-light mb-10">Shopping Cart</h1>
+        <h1 className="font-display text-4xl font-semibold mb-10">Shopping Cart</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Items */}

@@ -87,7 +87,7 @@ const HeroCarousel = () => {
                 {slides[current].label}
               </p>
               {/* Headline — masked per-line rise */}
-              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] mb-8 whitespace-pre-line break-words">
+              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-white leading-[0.95] mb-8 whitespace-pre-line break-words">
                 {slides[current].title.split("\n").map((line, i) => (
                   <span key={i} className="block overflow-hidden">
                     <motion.span

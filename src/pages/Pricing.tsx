@@ -44,7 +44,7 @@ const Pricing = () => (
         <ScrollReveal>
           <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Pricing</p>
         </ScrollReveal>
-        <TextReveal as="h1" className="font-display text-4xl md:text-5xl font-light mb-4">
+        <TextReveal as="h1" className="font-display text-4xl md:text-5xl font-semibold mb-4">
           Simple, Transparent Pricing
         </TextReveal>
         <motion.p
@@ -74,7 +74,7 @@ const Pricing = () => (
               )}
               <p className="text-[11px] font-body font-medium uppercase tracking-[0.2em] text-muted-foreground">{size.ml}</p>
               <h3 className="font-display text-2xl mt-1 mb-2">{size.label}</h3>
-              <p className="font-display text-3xl font-light mb-1">{size.price}</p>
+              <p className="font-display text-3xl font-semibold mb-1">{size.price}</p>
               <p className="text-xs text-muted-foreground font-body mb-6">{size.description}</p>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {size.features.map((f) => (
@@ -101,11 +101,11 @@ const Pricing = () => (
       <ScrollReveal>
         <div className="rounded-2xl border border-border p-8 md:p-12 text-center">
           <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Bespoke</p>
-          <h2 className="font-display text-3xl font-light mb-3">Custom Fragrance</h2>
+          <h2 className="font-display text-3xl font-semibold mb-3">Custom Fragrance</h2>
           <p className="text-muted-foreground font-body text-sm max-w-md mx-auto mb-2">
             Work with our master perfumers to create a scent that is uniquely yours.
           </p>
-          <p className="font-display text-2xl font-light mb-6">Starting from ₹4,999</p>
+          <p className="font-display text-2xl font-semibold mb-6">Starting from ₹4,999</p>
           <p className="text-xs text-muted-foreground font-body mb-6">Consultation is free. Price varies based on ingredients and complexity.</p>
           <Link to="/custom">
             <Button variant="outline" className="rounded-full uppercase tracking-[0.15em] text-[11px] font-body font-medium h-11 px-8 gap-2">

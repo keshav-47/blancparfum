@@ -8,7 +8,7 @@ const Privacy = () => (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 pt-28 pb-20">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <p className="text-[10px] font-body font-medium uppercase tracking-[0.3em] text-accent mb-3">Legal</p>
-        <h1 className="font-display text-4xl md:text-5xl font-light mb-10">Privacy Policy</h1>
+        <h1 className="font-display text-4xl md:text-5xl font-semibold mb-10">Privacy Policy</h1>
 
         <div className="space-y-8 font-body text-sm text-muted-foreground leading-relaxed">
           <p>Last updated: April 2026</p>

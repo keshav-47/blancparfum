@@ -15,6 +15,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const COUNT = 15; // 5×3 on desktop, 3×5 on mobile
 
+// Three staged beats (one per swipe):
+//   A — the first (centre) image rises in from the bottom of the screen.
+//   B — a second image rises in from the bottom, stacking beside it.
+//   C — every remaining tile bursts out from BEHIND the stack to its grid slot.
+const PHASE_A: [number, number] = [0.05, 0.3];
+const PHASE_B: [number, number] = [0.38, 0.6];
+const PHASE_C: [number, number] = [0.68, 0.95];
+
 const Tile = ({
   src,
   name,
@@ -33,22 +41,36 @@ const Tile = ({
   reduce: boolean;
 }) => {
   const rows = COUNT / cols;
+  const r = Math.floor(index / cols);
   const dx = (index % cols) - Math.floor((cols - 1) / 2); // tile-widths from centre
-  const dy = Math.floor(index / cols) - Math.floor((rows - 1) / 2);
+  const dy = r - Math.floor((rows - 1) / 2);
 
-  // All tiles stack at the centre, then fly out TOGETHER (same range) to their
-  // real slots — so they spread out smoothly and simultaneously in every
-  // direction (diagonals, sides, top, bottom), not one-by-one.
-  const x = useTransform(progress, [0.22, 0.72], reduce ? ["0%", "0%"] : [`${-dx * 100}%`, "0%"]);
-  const y = useTransform(progress, [0.22, 0.72], reduce ? ["0%", "0%"] : [`${-dy * 100}%`, "0%"]);
-  // The stack grows in at the centre first (headline reads, then one image).
-  const scale = useTransform(progress, [0.06, 0.18], reduce ? [1, 1] : [0, 1]);
+  const isFirst = dx === 0 && dy === 0; // centre tile — beat A
+  const isSecond = dx === 1 && dy === 0; // right of centre — beat B
+  // Far enough below the pinned stage to be fully off-screen for this row.
+  const below = `${(rows - r) * 100 + 30}%`;
+
+  const x = useTransform(
+    progress,
+    isFirst ? PHASE_A : PHASE_C,
+    reduce || isFirst ? ["0%", "0%"] : [isSecond ? "-90%" : `${-dx * 100}%`, "0%"],
+  );
+  const y = useTransform(
+    progress,
+    isFirst ? PHASE_A : isSecond ? PHASE_B : PHASE_C,
+    reduce ? ["0%", "0%"] : isFirst || isSecond ? [below, "0%"] : [`${-dy * 100}%`, "0%"],
+  );
+  // The rest stay hidden (scale 0) behind the stack until just before beat C.
+  const scale = useTransform(
+    progress,
+    [PHASE_C[0] - 0.06, PHASE_C[0] - 0.01],
+    reduce || isFirst || isSecond ? [1, 1] : [0, 1],
+  );
+
+  const z = isFirst ? COUNT + 2 : isSecond ? COUNT + 1 : COUNT - (Math.abs(dx) + Math.abs(dy));
 
   return (
-    <motion.div
-      style={{ x, y, scale, zIndex: COUNT - (Math.abs(dx) + Math.abs(dy)) }}
-      className="relative will-change-transform"
-    >
+    <motion.div style={{ x, y, scale, zIndex: z }} className="relative will-change-transform">
       <Link to={`/product/${slug}`} className="group relative block w-full h-full overflow-hidden rounded-lg md:rounded-xl shadow-lg shadow-black/15">
         <img
           src={src}
@@ -98,7 +120,9 @@ const ProductGrid = () => {
 
   return (
     <>
-      <section id="product-grid" ref={trackRef} className="relative bg-background" style={{ height: isMobile ? "170vh" : "340vh" }}>
+      {/* Track sized so each beat (first image · second image · burst) gets
+          roughly one swipe on mobile and a comfortable scrub on desktop. */}
+      <section id="product-grid" ref={trackRef} className="relative bg-background" style={{ height: isMobile ? "300vh" : "360vh" }}>
         {/* Pinned below the floating header (top-24) with a shorter stage, so the
             top row clears the header and the tiles are a touch smaller. */}
         <div className="sticky top-20 md:top-24 h-[calc(100vh-9rem)] md:h-[calc(100vh-12rem)] overflow-hidden">
@@ -111,12 +135,19 @@ const ProductGrid = () => {
             </div>
           </div>
 
-          {/* Headline — shown first, fades as the images spread */}
+          {/* Headline — shown first, fades as the first image rises */}
           <div ref={headRef} className="absolute inset-0 z-30 flex flex-col items-center justify-center text-center px-6 pointer-events-none">
-            <p className="text-[11px] font-body font-medium uppercase tracking-[0.35em] text-accent mb-4">Discover</p>
-            <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-light text-foreground leading-[1.02]">
-              Our Fragrances
+            <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+              <span className="h-px w-10 md:w-16 bg-accent" />
+              <p className="text-[11px] md:text-xs font-body font-bold uppercase tracking-[0.45em] text-accent">Discover</p>
+              <span className="h-px w-10 md:w-16 bg-accent" />
+            </div>
+            <h2 className="font-display font-bold text-5xl md:text-7xl lg:text-8xl text-foreground leading-[1.02]">
+              Our <span className="italic text-accent">Fragrances</span>
             </h2>
+            <p className="mt-4 md:mt-6 max-w-md md:max-w-lg font-body text-sm md:text-lg text-muted-foreground">
+              Handcrafted extraits, each with a story to tell — keep scrolling to unveil them.
+            </p>
           </div>
         </div>
       </section>
