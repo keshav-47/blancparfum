@@ -4,7 +4,6 @@ import { ArrowUpRight } from "lucide-react";
 import {
   motion,
   useScroll,
-  useSpring,
   useTransform,
   useMotionValueEvent,
   useReducedMotion,
@@ -50,10 +49,13 @@ const Tile = ({
   // Far enough below the pinned stage to be fully off-screen for this row.
   const below = `${(rows - r) * 100 + 30}%`;
 
+  // Beat B: the second image rises and lands EXACTLY on the centre cell — on
+  // top of the first, fully covering it (like the reference). Beat C then flies
+  // it to its own slot, revealing the first beneath, while the rest burst out.
   const x = useTransform(
     progress,
     isFirst ? PHASE_A : PHASE_C,
-    reduce || isFirst ? ["0%", "0%"] : [isSecond ? "-90%" : `${-dx * 100}%`, "0%"],
+    reduce || isFirst ? ["0%", "0%"] : [`${-dx * 100}%`, "0%"],
   );
   const y = useTransform(
     progress,
@@ -67,7 +69,8 @@ const Tile = ({
     reduce || isFirst || isSecond ? [1, 1] : [0, 1],
   );
 
-  const z = isFirst ? COUNT + 2 : isSecond ? COUNT + 1 : COUNT - (Math.abs(dx) + Math.abs(dy));
+  // Second ABOVE first (it covers it during beat B); the rest stack beneath.
+  const z = isSecond ? COUNT + 3 : isFirst ? COUNT + 2 : COUNT - (Math.abs(dx) + Math.abs(dy));
 
   return (
     <motion.div style={{ x, y, scale, zIndex: z }} className="relative will-change-transform">
@@ -101,9 +104,9 @@ const ProductGrid = () => {
   // swipe carries the whole grow + fly-out; desktop keeps the long cinematic scrub.
   const cols = isMobile ? 3 : 5;
 
-  const { scrollYProgress } = useScroll({ target: trackRef, offset: ["start start", "end end"] });
-  const sprung = useSpring(scrollYProgress, { stiffness: 100, damping: 30, mass: 0.3 });
-  const progress = reduce ? scrollYProgress : sprung;
+  // RAW progress, no spring — a spring lags fast scrolls, so the stage could
+  // unpin before the lagged value finished the burst (Lenis already smooths).
+  const { scrollYProgress: progress } = useScroll({ target: trackRef, offset: ["start start", "end end"] });
 
   // Headline reads first, recedes as the collage spreads over it.
   const headOpacity = useTransform(progress, [0.05, 0.26], [1, 0]);

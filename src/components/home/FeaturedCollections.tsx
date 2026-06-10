@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, useReducedMotion, type MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValueEvent, useReducedMotion, type MotionValue } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
 import type { Collection } from "@/types";
 
@@ -126,18 +126,19 @@ const FeaturedCollections = () => {
   const targetRef = useRef<HTMLDivElement>(null);
   const reduce = !!useReducedMotion();
 
-  const { scrollYProgress } = useScroll({ target: targetRef, offset: ["start start", "end end"] });
-  // A light spring smooths the scroll-linked motion (buttery rise / fade / tilt).
-  const sprung = useSpring(scrollYProgress, { stiffness: 110, damping: 30, mass: 0.3 });
-  const progress = reduce ? scrollYProgress : sprung;
+  // RAW progress, no spring: a spring lags behind fast scrolls, so the stage
+  // could unpin while the lagged value was still mid-sequence — the last
+  // collection never appeared and earlier ones cut out early. Lenis already
+  // smooths the scroll itself; the wide fades keep the cross-fade soft.
+  const { scrollYProgress: progress } = useScroll({ target: targetRef, offset: ["start start", "end end"] });
 
   const total = collections.length;
   if (!total) return null;
 
   return (
-    // ~100vh per collection unit ≈ one swipe per collection on phones (62vh let a
-    // single flick blow through several), and a comfortable scrub on desktop.
-    <div ref={targetRef} className="relative" style={{ height: `${(total + 1) * 100}vh` }}>
+    // Track sized so each collection unit gets ~one full viewport of scrub
+    // (track = stage + units * 100vh) — one swipe per collection.
+    <div ref={targetRef} className="relative" style={{ height: `${(total + 2) * 100}vh` }}>
       {/* Pin the stage below the fixed navbar (h-16) so content centres in the visible area. */}
       <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
         {/* Lightweight section label, top-left */}

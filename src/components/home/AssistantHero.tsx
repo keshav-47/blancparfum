@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import {
   motion,
   useScroll,
-  useSpring,
   useTransform,
   useMotionValueEvent,
   useReducedMotion,
@@ -92,9 +91,9 @@ const AssistantHero = () => {
   const reduce = !!useReducedMotion();
   const isMobile = useIsMobile();
 
-  const { scrollYProgress } = useScroll({ target: trackRef, offset: ["start start", "end end"] });
-  const sprung = useSpring(scrollYProgress, { stiffness: 110, damping: 30, mass: 0.3 });
-  const progress = reduce ? scrollYProgress : sprung;
+  // RAW progress, no spring — a spring lags fast scrolls so late keyframes
+  // (card landings, heading fade-in) could miss before the stage unpins.
+  const { scrollYProgress: progress } = useScroll({ target: trackRef, offset: ["start start", "end end"] });
 
   // Concierge: lifts + scales away as the cards assemble. Opacity is imperative
   // (an opacity MotionValue on a motion element collides with the page-transition
