@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { addItemToCart } from "@/store/slices/cartSlice";
+import { addItemToCart, removeItemFromCart } from "@/store/slices/cartSlice";
 import { clearPendingAction, pushAssistantNote, closeChat, continueChat, submitMessage } from "@/store/slices/assistantSlice";
 import { toast } from "@/hooks/use-toast";
 import AddressConfirm from "./AddressConfirm";
@@ -82,6 +82,38 @@ const AssistantActionBar = () => {
         <div className="flex gap-2">
           <Button onClick={confirm} disabled={busy} className={btn}>{busy ? "Adding…" : "Add to cart"}</Button>
           <Button variant="outline" onClick={() => decline("No problem — want me to suggest something else, or a different size?")} className={btn}>Not now</Button>
+        </div>
+      </Wrap>
+    );
+  }
+
+  if (action.type === "remove_from_cart") {
+    const size = action.sizeMl ?? 0;
+    const inCart = cartItems.find((i) => i.productId === action.productId && (size === 0 || i.size === size));
+    const name = product?.name ?? inCart?.name ?? "that fragrance";
+    const ml = action.sizeMl ?? inCart?.size;
+    const remove = async () => {
+      setBusy(true);
+      try {
+        await dispatch(removeItemFromCart({ productId: action.productId!, size: ml ?? inCart?.size ?? 0 })).unwrap();
+        toast({ title: `${name} removed from cart` });
+        dispatch(clearPendingAction());
+        dispatch(pushAssistantNote(`Removed ${name}${ml ? ` (${ml}ml)` : ""} from your cart.`));
+        dispatch(continueChat());
+      } catch (err: unknown) {
+        toast({ title: typeof err === "string" ? err : "Couldn't remove item", variant: "destructive" });
+      } finally {
+        setBusy(false);
+      }
+    };
+    return (
+      <Wrap>
+        <p className="text-sm font-body mb-3">
+          Remove <span className="font-medium">{name}</span>{ml ? ` (${ml}ml)` : ""} from your cart?
+        </p>
+        <div className="flex gap-2">
+          <Button onClick={remove} disabled={busy} className={btn}>{busy ? "Removing…" : "Remove"}</Button>
+          <Button variant="outline" onClick={() => decline("Okay — I'll keep it in your cart. Anything else?")} className={btn}>Keep it</Button>
         </div>
       </Wrap>
     );

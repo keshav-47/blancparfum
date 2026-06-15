@@ -9,6 +9,7 @@ export interface AssistantMessage {
 export type AssistantActionType =
   | "none"
   | "add_to_cart"
+  | "remove_from_cart"
   | "view_cart"
   | "sign_in"
   | "add_address"
