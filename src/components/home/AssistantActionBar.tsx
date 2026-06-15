@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItemToCart } from "@/store/slices/cartSlice";
-import { clearPendingAction, pushAssistantNote, closeChat } from "@/store/slices/assistantSlice";
+import { clearPendingAction, pushAssistantNote, closeChat, continueChat } from "@/store/slices/assistantSlice";
 import { toast } from "@/hooks/use-toast";
 import AddressConfirm from "./AddressConfirm";
 import AssistantCheckout from "./AssistantCheckout";
@@ -39,8 +39,11 @@ const AssistantActionBar = () => {
           quantity: action.quantity ?? 1,
         })).unwrap();
         toast({ title: `${product?.name ?? "Item"} added to cart` });
-        dispatch(pushAssistantNote("Added to your cart — anything else?"));
         dispatch(clearPendingAction());
+        // Record the add as a turn, then let the concierge decide the next step
+        // (e.g. continue to placing the order) instead of dead-ending at "anything else?".
+        dispatch(pushAssistantNote(`Added ${product?.name ?? "it"}${action.sizeMl ? ` (${action.sizeMl}ml)` : ""} to your cart.`));
+        dispatch(continueChat());
       } catch (err: unknown) {
         toast({ title: typeof err === "string" ? err : "Couldn't add to cart", variant: "destructive" });
       } finally {
