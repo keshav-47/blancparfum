@@ -1,45 +1,60 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { dismissError } from "@/store/slices/assistantSlice";
+import MessageBubble from "./concierge/MessageBubble";
+import TypingIndicator from "./concierge/TypingIndicator";
 
-const AssistantMessageList = () => {
+const AssistantMessageList = ({ onStreamReveal }: { onStreamReveal?: () => void }) => {
   const { messages, status, error } = useAppSelector((s) => s.assistant);
   const dispatch = useAppDispatch();
+  // Messages that have finished revealing — they render full text instantly so we
+  // never re-animate old turns when the list re-renders. Keyed by array index, so
+  // it MUST be cleared when the conversation resets ("New chat" empties messages
+  // without unmounting this component) — otherwise the new chat's reused low
+  // indices collide with stale ones and the streaming reveal silently stops.
+  const seen = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    if (messages.length === 0) seen.current.clear();
+  }, [messages.length]);
+
+  // The newest assistant message is the only one that streams.
+  let newestAssistant = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === "assistant") { newestAssistant = i; break; }
+  }
 
   return (
-    <div className="space-y-3">
-      {messages.map((m, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
-        >
-          <div
-            className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm font-body leading-relaxed ${
-              m.role === "user" ? "bg-foreground text-background" : "bg-secondary text-foreground"
-            }`}
-          >
-            {m.content}
-          </div>
-        </motion.div>
-      ))}
+    <div className="space-y-3.5">
+      {messages.map((m, i) => {
+        const isAssistant = m.role === "assistant";
+        // Avatar only on the first of a consecutive assistant run (less clutter).
+        const showAvatar = isAssistant && (i === 0 || messages[i - 1].role !== "assistant");
+        const streaming = isAssistant && i === newestAssistant && status !== "loading" && !seen.current.has(i);
+        return (
+          <MessageBubble
+            key={i}
+            role={m.role}
+            content={m.content}
+            streaming={streaming}
+            showAvatar={showAvatar}
+            onReveal={onStreamReveal}
+            onDone={() => seen.current.add(i)}
+          />
+        );
+      })}
 
-      {status === "loading" && (
-        <div className="flex justify-start">
-          <div className="bg-secondary rounded-2xl px-4 py-3 flex gap-1">
-            {[0, 150, 300].map((d) => (
-              <span key={d} className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: `${d}ms` }} />
-            ))}
-          </div>
-        </div>
-      )}
+      {status === "loading" && <TypingIndicator />}
 
       {error && (
-        <div className="text-center text-[12px] text-destructive font-body py-1">
-          {error}{" "}
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-center gap-2 text-[12px] text-destructive font-body py-1 text-center"
+        >
+          <span>{error}</span>
           <button onClick={() => dispatch(dismissError())} className="underline hover:no-underline">dismiss</button>
-        </div>
+        </motion.div>
       )}
     </div>
   );

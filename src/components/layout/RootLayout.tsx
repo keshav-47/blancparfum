@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useOutlet, useLocation, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -30,6 +30,7 @@ const RootLayout = () => {
   const [showTop, setShowTop] = useState(false);
   const chatOpen = useAppSelector((s) => s.assistant.open);
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
+  const reduce = useReducedMotion();
 
   // After a sign-in round-trip the Sign in button returns to "?concierge=open";
   // re-open the chat (the conversation is still in Redux — no reload happened).
@@ -38,15 +39,15 @@ const RootLayout = () => {
   useEffect(() => {
     if (searchParams.get("concierge") !== "open") return;
     dispatch(openChat());
-    // Wait until the sign-in has propagated before greeting + stripping the flag,
-    // so we never miss the welcome on a slow auth update (the effect re-runs when
-    // isAuthenticated flips). Once handled, drop the flag so it can't re-fire.
-    if (!isAuthenticated) return;
-    dispatch(clearPendingAction());
-    dispatch(pushAssistantNote("You're signed in — welcome to BLANC PARFUM. ✨"));
-    // Re-drive the flow: let the now-authenticated agent propose the next step
-    // (e.g. re-show the place-order card) instead of leaving a bare question.
-    dispatch(continueChat());
+    // Greet + re-drive the flow only when signed in (after the sign-in round-trip
+    // auth is already set before we navigate here). Always strip the flag so it
+    // can't re-open the chat on later navigations (incl. for a guest who backed
+    // out of sign-in).
+    if (isAuthenticated) {
+      dispatch(clearPendingAction());
+      dispatch(pushAssistantNote("You're signed in — welcome to BLANC PARFUM. ✨"));
+      dispatch(continueChat());
+    }
     const next = new URLSearchParams(searchParams);
     next.delete("concierge");
     setSearchParams(next, { replace: true });
@@ -101,14 +102,25 @@ const RootLayout = () => {
             >
               <ArrowUp size={16} strokeWidth={2} />
             </button>
-            <button
-              onClick={() => dispatch(openChat())}
-              aria-label="Ask the scent concierge"
-              className={`flex items-center gap-2.5 h-12 pl-3 pr-4 sm:pr-5 rounded-full ${floatBtn}`}
-            >
-              <img src="/favicon.png" alt="BLANC" className="h-7 w-7 object-contain transition duration-300 group-hover:brightness-0 group-hover:invert" />
-              <span className="hidden sm:inline text-[11px] font-body font-medium uppercase tracking-[0.18em]">Ask concierge</span>
-            </button>
+            <span className="relative inline-flex">
+              {/* Soft gold "ping" halo so the launcher hints it's alive */}
+              {!reduce && (
+                <motion.span
+                  aria-hidden
+                  className="absolute inset-0 rounded-full bg-accent/30"
+                  animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                />
+              )}
+              <button
+                onClick={() => dispatch(openChat())}
+                aria-label="Ask the scent concierge"
+                className={`relative flex items-center gap-2.5 h-12 pl-3 pr-4 sm:pr-5 rounded-full ${floatBtn}`}
+              >
+                <img src="/favicon.png" alt="BLANC" className="h-7 w-7 object-contain transition duration-300 group-hover:brightness-0 group-hover:invert" />
+                <span className="hidden sm:inline text-[11px] font-body font-medium uppercase tracking-[0.18em]">Ask concierge</span>
+              </button>
+            </span>
           </motion.div>
         )}
       </AnimatePresence>

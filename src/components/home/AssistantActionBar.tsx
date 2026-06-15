@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MotionCard from "./concierge/MotionCard";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItemToCart, removeItemFromCart } from "@/store/slices/cartSlice";
 import { clearPendingAction, pushAssistantNote, closeChat, continueChat, submitMessage } from "@/store/slices/assistantSlice";
@@ -8,8 +10,10 @@ import { toast } from "@/hooks/use-toast";
 import AddressConfirm from "./AddressConfirm";
 import AssistantCheckout from "./AssistantCheckout";
 
-const Wrap = ({ children }: { children: ReactNode }) => (
-  <div className="mt-4 rounded-2xl border border-border bg-background/80 backdrop-blur p-4 text-left">{children}</div>
+const Wrap = ({ children }: { children: ReactNode }) => <MotionCard>{children}</MotionCard>;
+
+const Busy = ({ label }: { label: string }) => (
+  <span className="inline-flex items-center gap-1.5"><Loader2 size={13} className="animate-spin" /> {label}</span>
 );
 
 const btn = "rounded-full text-[11px] uppercase tracking-[0.15em] h-10 font-body font-medium";
@@ -80,7 +84,7 @@ const AssistantActionBar = () => {
           {action.unitPrice ? ` — ₹${action.unitPrice.toLocaleString("en-IN")}` : ""} to your cart?
         </p>
         <div className="flex gap-2">
-          <Button onClick={confirm} disabled={busy} className={btn}>{busy ? "Adding…" : "Add to cart"}</Button>
+          <Button onClick={confirm} disabled={busy} className={btn}>{busy ? <Busy label="Adding…" /> : "Add to cart"}</Button>
           <Button variant="outline" onClick={() => decline("No problem — want me to suggest something else, or a different size?")} className={btn}>Not now</Button>
         </div>
       </Wrap>
@@ -112,7 +116,7 @@ const AssistantActionBar = () => {
           Remove <span className="font-medium">{name}</span>{ml ? ` (${ml}ml)` : ""} from your cart?
         </p>
         <div className="flex gap-2">
-          <Button onClick={remove} disabled={busy} className={btn}>{busy ? "Removing…" : "Remove"}</Button>
+          <Button onClick={remove} disabled={busy} className={btn}>{busy ? <Busy label="Removing…" /> : "Remove"}</Button>
           <Button variant="outline" onClick={() => decline("Okay — I'll keep it in your cart. Anything else?")} className={btn}>Keep it</Button>
         </div>
       </Wrap>

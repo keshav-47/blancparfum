@@ -1,6 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import { ShoppingBag, MapPin, Plus, CheckCircle2, Loader2 } from "lucide-react";
+import MotionCard from "./concierge/MotionCard";
 import { Button } from "@/components/ui/button";
 import AddressForm, { emptyAddress } from "@/components/AddressForm";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -15,9 +17,13 @@ import type { AssistantAction } from "@/api/assistantApi";
 const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 const btn = "rounded-full text-[11px] uppercase tracking-[0.15em] h-10 font-body font-medium";
 
-const Card = ({ children }: { children: ReactNode }) => (
-  <div className="mt-4 rounded-2xl border border-border bg-background/80 backdrop-blur p-4 text-left">{children}</div>
-);
+const Card = MotionCard;
+
+// Gold sparkle burst for the order-success moment (fixed angles → no randomness).
+const SPARKS = Array.from({ length: 12 }, (_, i) => {
+  const a = (i / 12) * Math.PI * 2;
+  return { x: Math.cos(a) * 34, y: Math.sin(a) * 34, d: 0.04 * i };
+});
 
 /**
  * The concierge's in-chat checkout: cart review + delivery address + "place order".
@@ -32,6 +38,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
   const items = useAppSelector((s) => s.cart.items);
   const profile = useAppSelector((s) => s.user.profile);
   const { placeOrder } = useCheckout();
+  const reduce = useReducedMotion();
 
   const addresses = profile?.addresses ?? [];
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -62,20 +69,46 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
   // Declines acknowledge + keep the chat alive rather than silently clearing the card.
   const decline = (msg: string) => { dispatch(pushAssistantNote(msg)); dispatch(clearPendingAction()); };
 
-  // ── Success ──────────────────────────────────────────────────────────────
+  // ── Success (a small celebration) ─────────────────────────────────────────
   if (phase === "done") {
     return (
       <Card>
-        <div className="flex items-center gap-2 mb-2 text-emerald-600">
-          <CheckCircle2 size={18} />
-          <p className="text-sm font-body font-semibold">Order confirmed</p>
+        <div className="flex flex-col items-center text-center py-2">
+          <div className="relative inline-flex items-center justify-center mb-3">
+            {!reduce && SPARKS.map((s, i) => (
+              <motion.span
+                key={i}
+                aria-hidden
+                className="absolute w-1 h-1 rounded-full bg-accent"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: [0, 1, 0], x: s.x, y: s.y, scale: [0, 1, 0.4] }}
+                transition={{ duration: 0.9, delay: 0.1 + s.d, ease: "easeOut" }}
+              />
+            ))}
+            <motion.span
+              initial={reduce ? false : { scale: 0, rotate: -25 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={reduce ? undefined : { type: "spring", stiffness: 300, damping: 14, delay: 0.05 }}
+              className="text-emerald-600"
+            >
+              <CheckCircle2 size={30} />
+            </motion.span>
+          </div>
+          <motion.p
+            initial={reduce ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="font-display text-xl mb-1"
+          >
+            Order confirmed
+          </motion.p>
+          <p className="text-sm font-body text-muted-foreground mb-4">
+            Payment received — thank you. You'll get a confirmation shortly.
+          </p>
+          <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/profile"); }} className={btn}>
+            View my orders
+          </Button>
         </div>
-        <p className="text-sm font-body text-muted-foreground mb-3">
-          Payment received — thank you! You'll get a confirmation shortly.
-        </p>
-        <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/profile"); }} className={btn}>
-          View my orders
-        </Button>
       </Card>
     );
   }
@@ -169,8 +202,14 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
 
       {/* Cart summary */}
       <div className="space-y-2 mb-4">
-        {items.map((i) => (
-          <div key={`${i.productId}-${i.size}`} className="flex items-center gap-3">
+        {items.map((i, idx) => (
+          <motion.div
+            key={`${i.productId}-${i.size}`}
+            initial={reduce ? false : { opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: reduce ? 0 : idx * 0.05 }}
+            className="flex items-center gap-3"
+          >
             <div className="w-10 h-12 rounded-md bg-secondary overflow-hidden shrink-0">
               {i.image ? <img src={i.image} alt={i.name} className="w-full h-full object-cover" /> : null}
             </div>
@@ -179,7 +218,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
               <p className="text-[11px] font-body text-muted-foreground">{i.size}ml × {i.quantity}</p>
             </div>
             <p className="text-sm font-body font-medium whitespace-nowrap">{inr(i.price * i.quantity)}</p>
-          </div>
+          </motion.div>
         ))}
         <div className="flex justify-between text-sm font-body border-t border-border pt-2 mt-1">
           <span className="text-muted-foreground">Shipping</span>
