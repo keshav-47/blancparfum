@@ -79,7 +79,7 @@ const AssistantActionBar = () => {
       <Wrap>
         <p className="text-sm font-body mb-3">You'll need to sign in to continue.</p>
         <div className="flex gap-2">
-          <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/login?returnTo=/"); }} className={btn}>Sign in</Button>
+          <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} className={btn}>Sign in</Button>
           <Button variant="outline" onClick={dismiss} className={btn}>Not now</Button>
         </div>
       </Wrap>

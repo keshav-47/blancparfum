@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useOutlet, useLocation } from "react-router-dom";
+import { useOutlet, useLocation, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import Navbar from "./Navbar";
@@ -24,10 +24,23 @@ const pageVariants: Variants = {
 
 const RootLayout = () => {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const outlet = useOutlet();
   const dispatch = useAppDispatch();
   const [showTop, setShowTop] = useState(false);
   const chatOpen = useAppSelector((s) => s.assistant.open);
+
+  // After a sign-in round-trip the Sign in button returns to "?concierge=open";
+  // re-open the chat (the conversation is still in Redux — no reload happened)
+  // and strip the flag so it doesn't re-fire on later navigations.
+  useEffect(() => {
+    if (searchParams.get("concierge") === "open") {
+      dispatch(openChat());
+      const next = new URLSearchParams(searchParams);
+      next.delete("concierge");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams, dispatch]);
   // Home leads with a full-bleed hero, so the floating header overlays it; every
   // other page needs top room to clear the floating header.
   const isHome = location.pathname === "/";

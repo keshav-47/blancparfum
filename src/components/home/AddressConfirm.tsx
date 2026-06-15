@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import AddressForm, { emptyAddress } from "@/components/AddressForm";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addAddress, fetchUserProfile } from "@/store/slices/userSlice";
-import { clearPendingAction, pushAssistantNote } from "@/store/slices/assistantSlice";
+import { clearPendingAction, pushAssistantNote, closeChat } from "@/store/slices/assistantSlice";
 import { toast } from "@/hooks/use-toast";
 import type { Address } from "@/types";
 import type { AssistantAddressDraft } from "@/api/assistantApi";
@@ -36,7 +36,7 @@ const AddressConfirm = ({ draft }: { draft?: AssistantAddressDraft }) => {
       <div>
         <p className="text-sm font-body mb-3">Sign in to save your shipping address.</p>
         <Button
-          onClick={() => { dispatch(clearPendingAction()); navigate("/login?returnTo=/"); }}
+          onClick={() => { dispatch(clearPendingAction()); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }}
           className="rounded-full text-[11px] uppercase tracking-[0.15em] h-10 font-body font-medium"
         >
           Sign in

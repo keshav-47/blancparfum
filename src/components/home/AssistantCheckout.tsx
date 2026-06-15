@@ -83,7 +83,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
     return (
       <Card>
         <p className="text-sm font-body mb-3">Sign in to place your order.</p>
-        <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/login?returnTo=/"); }} className={btn}>
+        <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} className={btn}>
           Sign in
         </Button>
       </Card>
