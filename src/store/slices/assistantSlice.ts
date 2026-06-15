@@ -55,7 +55,11 @@ const assistantSlice = createSlice({
   reducers: {
     openChat: (state) => { state.open = true; },
     closeChat: (state) => { state.open = false; },
-    clearPendingAction: (state) => { state.pendingAction = null; },
+    // Resolving an action also clears the floating product card for that turn —
+    // otherwise the recommended-product image lingers at the bottom after the
+    // action card is gone (looks like the card "stayed there").
+    clearPendingAction: (state) => { state.pendingAction = null; state.lastProductIds = []; },
+    clearProductResults: (state) => { state.lastProductIds = []; },
     pushAssistantNote: (state, action: PayloadAction<string>) => {
       state.messages.push({ role: "assistant", content: action.payload });
     },
@@ -110,6 +114,6 @@ const assistantSlice = createSlice({
   },
 });
 
-export const { openChat, closeChat, clearPendingAction, pushAssistantNote, dismissError, resetChat } =
+export const { openChat, closeChat, clearPendingAction, clearProductResults, pushAssistantNote, dismissError, resetChat } =
   assistantSlice.actions;
 export default assistantSlice.reducer;

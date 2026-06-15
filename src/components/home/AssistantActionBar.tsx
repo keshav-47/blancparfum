@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItemToCart } from "@/store/slices/cartSlice";
-import { clearPendingAction, pushAssistantNote, closeChat, continueChat } from "@/store/slices/assistantSlice";
+import { clearPendingAction, pushAssistantNote, closeChat, continueChat, submitMessage } from "@/store/slices/assistantSlice";
 import { toast } from "@/hooks/use-toast";
 import AddressConfirm from "./AddressConfirm";
 import AssistantCheckout from "./AssistantCheckout";
@@ -19,6 +19,7 @@ const AssistantActionBar = () => {
   const navigate = useNavigate();
   const action = useAppSelector((s) => s.assistant.pendingAction);
   const items = useAppSelector((s) => s.products.items);
+  const cartItems = useAppSelector((s) => s.cart.items);
   const [busy, setBusy] = useState(false);
 
   if (!action || action.type === "none") return null;
@@ -53,6 +54,24 @@ const AssistantActionBar = () => {
         setBusy(false);
       }
     };
+    // Guard against the re-add loop: if the agent proposes adding an item that's
+    // already in the cart (e.g. right after we just added it), don't show another
+    // "Add to cart" card — nudge toward checkout instead.
+    const size = action.sizeMl ?? 30;
+    if (cartItems.some((i) => i.productId === action.productId && i.size === size)) {
+      return (
+        <Wrap>
+          <p className="text-sm font-body mb-3">
+            <span className="font-medium">{product?.name ?? "That fragrance"}</span>
+            {action.sizeMl ? ` (${action.sizeMl}ml)` : ""} is already in your cart. Ready to place your order?
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => dispatch(submitMessage("place my order"))} className={btn}>Place order</Button>
+            <Button variant="outline" onClick={() => decline("No problem — it's saved in your cart whenever you're ready. Anything else?")} className={btn}>Not now</Button>
+          </div>
+        </Wrap>
+      );
+    }
     return (
       <Wrap>
         <p className="text-sm font-body mb-3">

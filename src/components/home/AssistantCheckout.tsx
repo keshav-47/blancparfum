@@ -6,7 +6,7 @@ import AddressForm, { emptyAddress } from "@/components/AddressForm";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchUserProfile, addAddress, updateAddress } from "@/store/slices/userSlice";
 import { fetchServerCart } from "@/store/slices/cartSlice";
-import { clearPendingAction, pushAssistantNote, closeChat } from "@/store/slices/assistantSlice";
+import { clearPendingAction, clearProductResults, pushAssistantNote, closeChat } from "@/store/slices/assistantSlice";
 import { useCheckout } from "@/hooks/useCheckout";
 import { toast } from "@/hooks/use-toast";
 import type { Address } from "@/types";
@@ -145,6 +145,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
       onVerifying: () => setPhase("verifying"),
       onSuccess: () => {
         setPhase("done");
+        dispatch(clearProductResults()); // don't leave the product image under the success card
         dispatch(pushAssistantNote("Your order is confirmed — payment received. Anything else I can help you find?"));
         toast({ title: "Order placed!", description: "Thank you for your purchase." });
       },
