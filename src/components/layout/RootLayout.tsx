@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AssistantChat from "@/components/home/AssistantChat";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { openChat, clearPendingAction, pushAssistantNote } from "@/store/slices/assistantSlice";
+import { openChat, clearPendingAction, pushAssistantNote, continueChat } from "@/store/slices/assistantSlice";
 
 /**
  * Persistent shell for all public routes. Navbar and Footer render once and
@@ -44,7 +44,9 @@ const RootLayout = () => {
     if (!isAuthenticated) return;
     dispatch(clearPendingAction());
     dispatch(pushAssistantNote("You're signed in — welcome to BLANC PARFUM. ✨"));
-    dispatch(pushAssistantNote("We can pick up right where we left off — shall I help you place your order, or find a scent?"));
+    // Re-drive the flow: let the now-authenticated agent propose the next step
+    // (e.g. re-show the place-order card) instead of leaving a bare question.
+    dispatch(continueChat());
     const next = new URLSearchParams(searchParams);
     next.delete("concierge");
     setSearchParams(next, { replace: true });

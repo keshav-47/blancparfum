@@ -59,6 +59,8 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
   }, [addresses, action.addressId, selectedId]);
 
   const dismiss = () => dispatch(clearPendingAction());
+  // Declines acknowledge + keep the chat alive rather than silently clearing the card.
+  const decline = (msg: string) => { dispatch(pushAssistantNote(msg)); dispatch(clearPendingAction()); };
 
   // ── Success ──────────────────────────────────────────────────────────────
   if (phase === "done") {
@@ -83,9 +85,12 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
     return (
       <Card>
         <p className="text-sm font-body mb-3">Sign in to place your order.</p>
-        <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} className={btn}>
-          Sign in
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} className={btn}>
+            Sign in
+          </Button>
+          <Button variant="outline" onClick={() => decline("No worries — keep browsing, and sign in whenever you're ready to check out.")} className={btn}>Not now</Button>
+        </div>
       </Card>
     );
   }
@@ -99,7 +104,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
           <p className="text-sm font-body font-medium">Your cart is empty</p>
         </div>
         <p className="text-sm font-body text-muted-foreground mb-3">Tell me what you're after and I'll find your scent.</p>
-        <Button variant="outline" onClick={dismiss} className={btn}>Keep browsing</Button>
+        <Button variant="outline" onClick={() => decline("Sure — tell me a vibe (fresh, woody, a gift…) and I'll pull a few scents.")} className={btn}>Keep browsing</Button>
       </Card>
     );
   }
@@ -131,7 +136,12 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
     }
     setPhase("paying");
     placeOrder(selectedId, {
-      onDismiss: () => setPhase("idle"),
+      // Closing Razorpay without paying: snap the button back AND acknowledge in-chat
+      // (the card stays, so they can try again) — not a silent revert.
+      onDismiss: () => {
+        setPhase("idle");
+        dispatch(pushAssistantNote("Payment cancelled — no charge was made. Your order's still here whenever you'd like to try again."));
+      },
       onVerifying: () => setPhase("verifying"),
       onSuccess: () => {
         setPhase("done");
@@ -141,6 +151,8 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
       onError: (msg) => {
         setPhase("idle");
         toast({ title: msg, variant: "destructive" });
+        // Surface the failure in the transcript too (toasts fade) + offer a retry.
+        dispatch(pushAssistantNote(`I couldn't complete that — ${msg} Want to try placing the order again?`));
       },
     });
   };
@@ -190,9 +202,11 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
             onChange={setAddrForm}
             saving={saving}
             submitLabel="Save & use this address"
-            // Collapse back to the saved list when adding extra; dismiss the whole
-            // card when there are no addresses yet (otherwise this state has no exit).
-            onCancel={showForm && addresses.length > 0 ? () => setShowForm(false) : dismiss}
+            // Collapse back to the saved list when adding extra; when there are no
+            // addresses yet, back out of the whole card WITH an acknowledgement.
+            onCancel={showForm && addresses.length > 0
+              ? () => setShowForm(false)
+              : () => decline("No problem — I'll skip the address for now. Say \"place my order\" whenever you'd like to add one and check out.")}
             onSubmit={async () => {
               setSaving(true);
               try {
@@ -259,7 +273,17 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
               )}
             </Button>
           )}
-          {!placing && <Button variant="outline" onClick={dismiss} className={btn}>Not now</Button>}
+          {!placing && (
+            <Button
+              variant="outline"
+              onClick={() => decline(isSelectOnly
+                ? "No problem — I'll keep your current delivery address. Anything else?"
+                : "No problem — I've kept your cart. Say \"place my order\" whenever you're ready, or ask me anything else.")}
+              className={btn}
+            >
+              Not now
+            </Button>
+          )}
         </div>
       )}
       {!showForm && !isSelectOnly && (

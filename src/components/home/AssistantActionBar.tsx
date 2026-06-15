@@ -25,6 +25,9 @@ const AssistantActionBar = () => {
 
   const product = action.productId ? items.find((p) => p.id === action.productId) : undefined;
   const dismiss = () => dispatch(clearPendingAction());
+  // A decline should never leave the chat hanging — acknowledge it and keep the
+  // conversation alive (so the card doesn't just silently vanish into a dead-end).
+  const decline = (msg: string) => { dispatch(pushAssistantNote(msg)); dispatch(clearPendingAction()); };
 
   if (action.type === "add_to_cart") {
     const confirm = async () => {
@@ -59,7 +62,7 @@ const AssistantActionBar = () => {
         </p>
         <div className="flex gap-2">
           <Button onClick={confirm} disabled={busy} className={btn}>{busy ? "Adding…" : "Add to cart"}</Button>
-          <Button variant="outline" onClick={dismiss} className={btn}>Not now</Button>
+          <Button variant="outline" onClick={() => decline("No problem — want me to suggest something else, or a different size?")} className={btn}>Not now</Button>
         </div>
       </Wrap>
     );
@@ -71,7 +74,7 @@ const AssistantActionBar = () => {
         <p className="text-sm font-body mb-3">Ready to checkout?</p>
         <div className="flex gap-2">
           <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/cart"); }} className={btn}>Go to cart</Button>
-          <Button variant="outline" onClick={dismiss} className={btn}>Not now</Button>
+          <Button variant="outline" onClick={() => decline("Sure — your cart's saved for whenever you're ready. Anything else I can help with?")} className={btn}>Not now</Button>
         </div>
       </Wrap>
     );
@@ -83,7 +86,7 @@ const AssistantActionBar = () => {
         <p className="text-sm font-body mb-3">You'll need to sign in to continue.</p>
         <div className="flex gap-2">
           <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} className={btn}>Sign in</Button>
-          <Button variant="outline" onClick={dismiss} className={btn}>Not now</Button>
+          <Button variant="outline" onClick={() => decline("No worries — keep exploring scents, and sign in whenever you're ready to check out.")} className={btn}>Not now</Button>
         </div>
       </Wrap>
     );

@@ -31,16 +31,27 @@ const AddressConfirm = ({ draft }: { draft?: AssistantAddressDraft }) => {
     if (isAuthenticated && !profile) dispatch(fetchUserProfile());
   }, [isAuthenticated, profile, dispatch]);
 
+  const decline = (msg: string) => { dispatch(pushAssistantNote(msg)); dispatch(clearPendingAction()); };
+
   if (!isAuthenticated) {
     return (
       <div>
         <p className="text-sm font-body mb-3">Sign in to save your shipping address.</p>
-        <Button
-          onClick={() => { dispatch(clearPendingAction()); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }}
-          className="rounded-full text-[11px] uppercase tracking-[0.15em] h-10 font-body font-medium"
-        >
-          Sign in
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => { dispatch(clearPendingAction()); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }}
+            className="rounded-full text-[11px] uppercase tracking-[0.15em] h-10 font-body font-medium"
+          >
+            Sign in
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => decline("No worries — sign in whenever you'd like to save an address.")}
+            className="rounded-full text-[11px] uppercase tracking-[0.15em] h-10 font-body font-medium"
+          >
+            Not now
+          </Button>
+        </div>
       </div>
     );
   }
@@ -54,6 +65,8 @@ const AddressConfirm = ({ draft }: { draft?: AssistantAddressDraft }) => {
       dispatch(clearPendingAction());
     } catch {
       toast({ title: "Couldn't save address", variant: "destructive" });
+      // Keep the form mounted so they can correct + retry, but say so in-chat.
+      dispatch(pushAssistantNote("I couldn't save that address — please check the details and try again, or skip it for now."));
     } finally {
       setSaving(false);
     }
@@ -68,7 +81,7 @@ const AddressConfirm = ({ draft }: { draft?: AssistantAddressDraft }) => {
         onSubmit={handleSave}
         saving={saving}
         submitLabel="Save address"
-        onCancel={() => dispatch(clearPendingAction())}
+        onCancel={() => decline("No problem — I haven't saved that address. Tell me when you'd like to add one or keep browsing.")}
       />
     </div>
   );
