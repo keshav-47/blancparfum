@@ -99,8 +99,15 @@ const AssistantChat = () => {
       <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto overscroll-contain">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 md:py-8">
           <AssistantMessageList />
-          <AssistantProductResults />
-          <AssistantActionBar />
+          {/* While the concierge is "typing", hide the previous turn's product cards
+              and action card — otherwise they dangle below the loading dots. They
+              re-render (fresh) under the new reply once it arrives. */}
+          {status !== "loading" && (
+            <>
+              <AssistantProductResults />
+              <AssistantActionBar />
+            </>
+          )}
         </div>
       </div>
 
