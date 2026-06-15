@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AssistantChat from "@/components/home/AssistantChat";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { openChat } from "@/store/slices/assistantSlice";
+import { openChat, clearPendingAction, pushAssistantNote } from "@/store/slices/assistantSlice";
 
 /**
  * Persistent shell for all public routes. Navbar and Footer render once and
@@ -29,18 +29,26 @@ const RootLayout = () => {
   const dispatch = useAppDispatch();
   const [showTop, setShowTop] = useState(false);
   const chatOpen = useAppSelector((s) => s.assistant.open);
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
 
   // After a sign-in round-trip the Sign in button returns to "?concierge=open";
-  // re-open the chat (the conversation is still in Redux — no reload happened)
-  // and strip the flag so it doesn't re-fire on later navigations.
+  // re-open the chat (the conversation is still in Redux — no reload happened).
+  // Now that they're signed in, drop the stale "sign in" action button and greet
+  // them so they can pick the flow back up. Strip the flag so it doesn't re-fire.
   useEffect(() => {
-    if (searchParams.get("concierge") === "open") {
-      dispatch(openChat());
-      const next = new URLSearchParams(searchParams);
-      next.delete("concierge");
-      setSearchParams(next, { replace: true });
-    }
-  }, [searchParams, setSearchParams, dispatch]);
+    if (searchParams.get("concierge") !== "open") return;
+    dispatch(openChat());
+    // Wait until the sign-in has propagated before greeting + stripping the flag,
+    // so we never miss the welcome on a slow auth update (the effect re-runs when
+    // isAuthenticated flips). Once handled, drop the flag so it can't re-fire.
+    if (!isAuthenticated) return;
+    dispatch(clearPendingAction());
+    dispatch(pushAssistantNote("You're signed in — welcome to BLANC PARFUM. ✨"));
+    dispatch(pushAssistantNote("We can pick up right where we left off — shall I help you place your order, or find a scent?"));
+    const next = new URLSearchParams(searchParams);
+    next.delete("concierge");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, dispatch, isAuthenticated]);
   // Home leads with a full-bleed hero, so the floating header overlays it; every
   // other page needs top room to clear the floating header.
   const isHome = location.pathname === "/";
