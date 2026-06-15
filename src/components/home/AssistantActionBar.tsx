@@ -6,6 +6,7 @@ import { addItemToCart } from "@/store/slices/cartSlice";
 import { clearPendingAction, pushAssistantNote, closeChat } from "@/store/slices/assistantSlice";
 import { toast } from "@/hooks/use-toast";
 import AddressConfirm from "./AddressConfirm";
+import AssistantCheckout from "./AssistantCheckout";
 
 const Wrap = ({ children }: { children: ReactNode }) => (
   <div className="mt-4 rounded-2xl border border-border bg-background/80 backdrop-blur p-4 text-left">{children}</div>
@@ -87,6 +88,12 @@ const AssistantActionBar = () => {
 
   if (action.type === "add_address") {
     return <Wrap><AddressConfirm draft={action.address} /></Wrap>;
+  }
+
+  // Cart review, address selection, and placing the order all run through the
+  // in-chat checkout card (which opens the secure Razorpay modal to pay).
+  if (action.type === "view_cart" || action.type === "select_address" || action.type === "place_order") {
+    return <AssistantCheckout action={action} />;
   }
 
   return null;

@@ -9,27 +9,20 @@ import SEO from "@/components/SEO";
 import AddressForm, { emptyAddress } from "@/components/AddressForm";
 import { CartSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { removeItemFromCart, updateItemQuantity, clearCart, fetchServerCart } from "@/store/slices/cartSlice";
+import { removeItemFromCart, updateItemQuantity, fetchServerCart } from "@/store/slices/cartSlice";
 import { fetchUserProfile, addAddress } from "@/store/slices/userSlice";
 import { useToast } from "@/hooks/use-toast";
-import apiClient from "@/api/apiClient";
+import { useCheckout } from "@/hooks/useCheckout";
 import type { Address } from "@/types";
-
-interface RazorpayOrderResponse {
-  orderId: string;
-  razorpayOrderId: string;
-  amount: number;
-  currency: string;
-  keyId: string;
-}
 
 const Cart = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { placeOrder } = useCheckout();
 
   const { items, loading } = useAppSelector((s) => s.cart);
-  const { isAuthenticated, user } = useAppSelector((s) => s.auth);
+  const { isAuthenticated } = useAppSelector((s) => s.auth);
   const { profile } = useAppSelector((s) => s.user);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -42,15 +35,6 @@ const Cart = () => {
   const [showAddrForm, setShowAddrForm] = useState(false);
   const [addrSaving, setAddrSaving] = useState(false);
   const [addrForm, setAddrForm] = useState<Omit<Address, "id">>(emptyAddress);
-
-  useEffect(() => {
-    if (document.getElementById("razorpay-script")) return;
-    const script = document.createElement("script");
-    script.id = "razorpay-script";
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -74,57 +58,21 @@ const Cart = () => {
       return;
     }
     setCheckoutLoading(true);
-    try {
-      const { data } = await apiClient.post<RazorpayOrderResponse>("/orders", { addressId: selectedAddressId });
-      setCheckoutOpen(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const Razorpay = (window as any).Razorpay;
-      if (!Razorpay) {
-        toast({ title: "Payment gateway unavailable. Please try again.", variant: "destructive" });
+    await placeOrder(selectedAddressId, {
+      onOpen: () => setCheckoutOpen(false),
+      // Closing Razorpay without paying drops back to the address dialog (not a bare page).
+      onDismiss: () => { setCheckoutLoading(false); setCheckoutOpen(true); },
+      onVerifying: () => setVerifyingPayment(true),
+      onSuccess: () => {
+        toast({ title: "Order placed!", description: "Thank you for your purchase." });
+        navigate("/profile");
+      },
+      onError: (msg) => {
+        setVerifyingPayment(false);
         setCheckoutLoading(false);
-        return;
-      }
-      const rzp = new Razorpay({
-        key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
-        order_id: data.razorpayOrderId,
-        name: "BLANC PARFUM",
-        description: "Luxury Extrait de Parfum",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handler: async (response: any) => {
-          setVerifyingPayment(true);
-          try {
-            await apiClient.post(`/orders/${data.orderId}/verify`, {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
-            dispatch(clearCart());
-            toast({ title: "Order placed!", description: "Thank you for your purchase." });
-            navigate("/profile");
-          } catch {
-            setVerifyingPayment(false);
-            toast({ title: "Payment verification failed. Contact support.", variant: "destructive" });
-          }
-        },
-        modal: { ondismiss: () => setCheckoutLoading(false) },
-        prefill: { name: user?.name ?? "", email: user?.email ?? "", contact: user?.phone ?? "" },
-        config: {
-          display: {
-            blocks: { upi_block: { name: "Pay using UPI", instruments: [{ method: "upi", flows: ["collect", "qrcode"] }] } },
-            sequence: ["block.upi_block"],
-            preferences: { show_default_blocks: true },
-          },
-        },
-        theme: { color: "#B8860B" },
-      });
-      rzp.open();
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Checkout failed. Please try again.";
-      toast({ title: msg, variant: "destructive" });
-      setCheckoutLoading(false);
-    }
+        toast({ title: msg, variant: "destructive" });
+      },
+    });
   };
 
   if (verifyingPayment) {

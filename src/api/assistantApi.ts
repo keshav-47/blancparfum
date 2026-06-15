@@ -6,7 +6,15 @@ export interface AssistantMessage {
   content: string;
 }
 
-export type AssistantActionType = "none" | "add_to_cart" | "go_to_checkout" | "sign_in" | "add_address";
+export type AssistantActionType =
+  | "none"
+  | "add_to_cart"
+  | "view_cart"
+  | "sign_in"
+  | "add_address"
+  | "select_address"
+  | "place_order"
+  | "go_to_checkout";
 
 export interface AssistantAddressDraft {
   label?: string;
@@ -24,6 +32,7 @@ export interface AssistantAction {
   unitPrice?: number;
   quantity?: number;
   address?: AssistantAddressDraft;
+  addressId?: string;
 }
 
 export interface AssistantChatResponse {
