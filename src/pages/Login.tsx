@@ -37,6 +37,11 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
+  // Carry returnTo through the new-user signup detour so the concierge (or
+  // whatever sent them here) is restored after they finish their profile.
+  const completeProfilePath = returnTo
+    ? `/complete-profile?returnTo=${encodeURIComponent(returnTo)}`
+    : "/complete-profile";
   const { isAuthenticated, loading, error, user, registration } = useAppSelector((s) => s.auth);
 
   const [phone, setPhone] = useState("");
@@ -83,7 +88,7 @@ const Login = () => {
     try {
       const result = await dispatch(loginWithGoogle(response.credential)).unwrap();
       if (result.newUser) {
-        navigate("/complete-profile");
+        navigate(completeProfilePath);
       } else {
         navigateAfterLogin(navigate, result.user, returnTo);
       }
@@ -158,7 +163,7 @@ const Login = () => {
       const idToken = await credential.user.getIdToken();
       const result = await dispatch(loginWithFirebase(idToken)).unwrap();
       if (result.newUser) {
-        navigate("/complete-profile");
+        navigate(completeProfilePath);
       } else {
         navigateAfterLogin(navigate, result.user, returnTo);
       }

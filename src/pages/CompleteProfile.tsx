@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Phone, Mail, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,9 @@ const CompleteProfile = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { registration, loading } = useAppSelector((s) => s.auth);
+  const { registration, loading, isAuthenticated } = useAppSelector((s) => s.auth);
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
 
   // Pre-fill from provider data
   const [name, setName] = useState(registration?.providerName || "");
@@ -25,10 +27,12 @@ const CompleteProfile = () => {
 
   const [errors, setErrors] = useState({ name: "", email: "", phone: "" });
 
-  // If there's no registration in progress, redirect
+  // Registration is cleared the instant signup succeeds — by then we're
+  // authenticated and handleSubmit is navigating onward, so DON'T bounce to
+  // /login (that left new users stranded on the login screen until a refresh).
+  // Only a genuinely unregistered, unauthenticated visitor goes to /login.
   if (!registration) {
-    navigate("/login");
-    return null;
+    return isAuthenticated ? null : <Navigate to="/login" replace />;
   }
 
   // Determine which fields the user needs to fill
@@ -66,7 +70,7 @@ const CompleteProfile = () => {
         phone: phone.replace(/\D/g, ""),
       })).unwrap();
       toast({ title: "Welcome to Blanc!" });
-      navigate("/");
+      navigate(returnTo || "/");
     } catch (err: unknown) {
       const msg = (err as string) || "Registration failed";
       // Show inline errors for specific field issues
