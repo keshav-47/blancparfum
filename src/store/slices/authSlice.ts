@@ -55,9 +55,13 @@ const syncLocalCart = async (
     quantity: i.quantity,
   }));
 
-  if (localItems.length > 0) {
+  if (localItems.length === 0) return;
+
+  try {
     const cartRes = await apiClient.post("/cart/sync", { items: localItems });
     dispatch({ type: "cart/replaceCart", payload: cartRes.data.items });
+  } catch {
+    // Login succeeded; a stale or invalid guest cart should not show as auth failure.
   }
 };
 
