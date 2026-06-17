@@ -95,6 +95,19 @@ const applyLocalCartFallback = (
 
   const content = latestUserContent(messages);
   if (
+    !isAuthenticated &&
+    asksToCheckout(content) &&
+    response.action?.type === "sign_in"
+  ) {
+    return {
+      ...response,
+      reply: "Please sign in first, then I'll bring you back here to finish checkout securely.",
+      productIds: [],
+      action: { type: "sign_in" },
+    };
+  }
+
+  if (
     isAuthenticated &&
     asksToCheckout(content) &&
     response.action?.type !== "place_order"
