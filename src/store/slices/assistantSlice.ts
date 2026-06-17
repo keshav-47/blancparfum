@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { sendAssistantChat } from "@/api/assistantApi";
-import type { AssistantMessage, AssistantAction } from "@/api/assistantApi";
+import type { AssistantMessage, AssistantAction, AssistantChatResponse } from "@/api/assistantApi";
 import type { RootState } from "@/store";
+import type { CartItem } from "@/types";
 import { logout } from "./authSlice";
 
 interface AssistantState {
@@ -22,6 +23,67 @@ const initialState: AssistantState = {
   open: false,
 };
 
+const latestUserContent = (messages: AssistantMessage[]) => {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    if (messages[i].role === "user") return messages[i].content.toLowerCase();
+  }
+  return "";
+};
+
+const asksForCartReview = (content: string) =>
+  /\bcart\b/.test(content) &&
+  /\b(show|view|review|see|check|open|what|whats)\b/.test(content) &&
+  !/\b(place|order|checkout|pay|payment)\b/.test(content);
+
+const asksToRemoveFromCart = (content: string) =>
+  /\b(remove|delete|drop)\b/.test(content) || /\btake\s+(.+?\s+)?out\b/.test(content);
+
+const findRemovalItem = (content: string, cartItems: CartItem[]) => {
+  if (cartItems.length === 1) return cartItems[0];
+  return cartItems.find((item) => content.includes(item.name.toLowerCase()));
+};
+
+const missedLocalCart = (response: AssistantChatResponse) => {
+  const reply = response.reply.toLowerCase();
+  return (
+    response.action?.type === "sign_in" ||
+    response.action?.type === "none" ||
+    /cart is empty|sign in to view|need to sign in|you need to sign in/.test(reply)
+  );
+};
+
+const applyLocalCartFallback = (
+  response: AssistantChatResponse,
+  messages: AssistantMessage[],
+  cartItems: CartItem[],
+): AssistantChatResponse => {
+  if (!cartItems.length || !missedLocalCart(response)) return response;
+
+  const content = latestUserContent(messages);
+  if (asksForCartReview(content)) {
+    return {
+      ...response,
+      reply: "Here's what is in your cart.",
+      productIds: [],
+      action: { type: "view_cart" },
+    };
+  }
+
+  if (asksToRemoveFromCart(content)) {
+    const item = findRemovalItem(content, cartItems);
+    if (item) {
+      return {
+        ...response,
+        reply: `Ready to remove ${item.name} (${item.size}ml) from your cart?`,
+        productIds: [],
+        action: { type: "remove_from_cart", productId: item.productId, sizeMl: item.size },
+      };
+    }
+  }
+
+  return response;
+};
+
 const askConcierge = async (
   getState: () => unknown,
   rejectWithValue: (v: string) => unknown,
@@ -34,7 +96,8 @@ const askConcierge = async (
     quantity: item.quantity,
   }));
   try {
-    return await sendAssistantChat(messages, cartItems);
+    const response = await sendAssistantChat(messages, cartItems);
+    return applyLocalCartFallback(response, messages, state.cart.items);
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } })?.response?.status;
     if (status === 429) return rejectWithValue("You're chatting a bit fast — give the concierge a moment.");
