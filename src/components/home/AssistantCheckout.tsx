@@ -35,12 +35,15 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
+  const serverAuthenticated = useAppSelector((s) => s.assistant.serverAuthenticated);
   const items = useAppSelector((s) => s.cart.items);
   const profile = useAppSelector((s) => s.user.profile);
   const { placeOrder } = useCheckout();
   const reduce = useReducedMotion();
 
-  const addresses = profile?.addresses ?? [];
+  const canUseAccount = isAuthenticated || serverAuthenticated === true;
+  const [localAddresses, setLocalAddresses] = useState<Address[]>([]);
+  const addresses = profile?.addresses?.length ? profile.addresses : localAddresses;
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   const [selectedId, setSelectedId] = useState("");
@@ -51,11 +54,15 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
 
   // Pull a fresh cart + addresses so the summary the user confirms is accurate.
   useEffect(() => {
-    if (isAuthenticated) {
+    if (canUseAccount) {
       if (!profile) dispatch(fetchUserProfile());
       dispatch(fetchServerCart());
     }
-  }, [isAuthenticated, profile, dispatch]);
+  }, [canUseAccount, profile, dispatch]);
+
+  useEffect(() => {
+    if (profile?.addresses) setLocalAddresses(profile.addresses);
+  }, [profile]);
 
   // Default the selection to the agent's hint, else the default, else the first.
   useEffect(() => {
@@ -114,7 +121,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
   }
 
   // Guests can review their local cart inline; checkout still requires sign-in.
-  if (!isAuthenticated && action.type === "view_cart") {
+  if (!canUseAccount && action.type === "view_cart") {
     return (
       <Card>
         <p className="text-[11px] font-body font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-3">Your cart</p>
@@ -159,7 +166,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
   }
 
   // ── Guests must sign in first ─────────────────────────────────────────────
-  if (!isAuthenticated) {
+  if (!canUseAccount) {
     return (
       <Card>
         <p className="text-sm font-body mb-3">Sign in to place your order.</p>
@@ -296,6 +303,12 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
               setSaving(true);
               try {
                 const saved = await dispatch(addAddress(addrForm)).unwrap();
+                setLocalAddresses((prev) => [
+                  saved,
+                  ...prev.filter((addr) => addr.id !== saved.id).map((addr) =>
+                    saved.isDefault ? { ...addr, isDefault: false } : addr
+                  ),
+                ]);
                 setSelectedId(saved.id);
                 setShowForm(false);
                 setAddrForm(emptyAddress);

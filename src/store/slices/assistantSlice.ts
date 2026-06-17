@@ -9,6 +9,7 @@ interface AssistantState {
   messages: AssistantMessage[];
   lastProductIds: string[];
   pendingAction: AssistantAction | null;
+  serverAuthenticated: boolean | null;
   status: "idle" | "loading" | "error";
   error: string | null;
   open: boolean; // is the full-screen concierge chat open (global, any page)
@@ -18,6 +19,7 @@ const initialState: AssistantState = {
   messages: [],
   lastProductIds: [],
   pendingAction: null,
+  serverAuthenticated: null,
   status: "idle",
   error: null,
   open: false,
@@ -55,6 +57,17 @@ const missedLocalCart = (response: AssistantChatResponse) => {
     response.action?.type === "sign_in" ||
     response.action?.type === "none" ||
     /cart is empty|sign in to view|need to sign in|you need to sign in/.test(reply)
+  );
+};
+
+const impliesServerAuthentication = (response: AssistantChatResponse) => {
+  const reply = response.reply.toLowerCase();
+  return (
+    reply.includes("you're signed in") ||
+    reply.includes("you are signed in") ||
+    response.action?.type === "place_order" ||
+    response.action?.type === "select_address" ||
+    response.action?.type === "add_address"
   );
 };
 
@@ -193,6 +206,7 @@ const assistantSlice = createSlice({
       state.messages = [];
       state.lastProductIds = [];
       state.pendingAction = null;
+      state.serverAuthenticated = null;
       state.status = "idle";
       state.error = null;
     },
@@ -204,6 +218,9 @@ const assistantSlice = createSlice({
       state.lastProductIds = payload.productIds || [];
       const a = payload.action;
       state.pendingAction = a && a.type !== "none" ? a : null;
+      if (impliesServerAuthentication({ reply: payload.reply, productIds: payload.productIds || [], action: a || { type: "none" } })) {
+        state.serverAuthenticated = true;
+      }
     };
     const onError = (state: AssistantState, payload: unknown) => {
       state.status = "error";
@@ -232,6 +249,7 @@ const assistantSlice = createSlice({
         state.messages = [];
         state.lastProductIds = [];
         state.pendingAction = null;
+        state.serverAuthenticated = null;
         state.status = "idle";
         state.error = null;
         state.open = false;
