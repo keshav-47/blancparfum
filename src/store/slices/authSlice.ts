@@ -12,13 +12,26 @@ interface RegistrationData {
 
 interface AuthState {
   user: UserProfile | null;
-  token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  // Registration flow — set when a new user needs to complete signup
   registration: RegistrationData | null;
 }
+
+type ExistingUserLogin = {
+  newUser: false;
+  user: UserProfile;
+};
+
+type NewUserLogin = {
+  newUser: true;
+  registration: RegistrationData;
+};
+
+type LoginResult = ExistingUserLogin | NewUserLogin;
+
+localStorage.removeItem("auth_token");
+localStorage.removeItem("refresh_token");
 
 const storedUser = (() => {
   try { return JSON.parse(localStorage.getItem("auth_user") || "null"); }
@@ -27,14 +40,41 @@ const storedUser = (() => {
 
 const initialState: AuthState = {
   user: storedUser,
-  token: localStorage.getItem("auth_token"),
-  isAuthenticated: !!localStorage.getItem("auth_token"),
+  isAuthenticated: !!storedUser,
   loading: false,
   error: null,
   registration: null,
 };
 
-// ──── Google OAuth ────
+const syncLocalCart = async (
+  dispatch: (action: { type: string; payload?: unknown }) => void,
+  state: RootState
+) => {
+  const localItems = state.cart.items.map((i) => ({
+    productId: i.productId,
+    sizeMl: i.size,
+    quantity: i.quantity,
+  }));
+
+  if (localItems.length > 0) {
+    const cartRes = await apiClient.post("/cart/sync", { items: localItems });
+    dispatch({ type: "cart/replaceCart", payload: cartRes.data.items });
+  }
+};
+
+export const restoreSession = createAsyncThunk(
+  "auth/restoreSession",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await apiClient.get<UserProfile>("/user/profile");
+      localStorage.setItem("auth_user", JSON.stringify(res.data));
+      return res.data;
+    } catch {
+      localStorage.removeItem("auth_user");
+      return rejectWithValue("Session expired");
+    }
+  }
+);
 
 export const loginWithGoogle = createAsyncThunk(
   "auth/loginWithGoogle",
@@ -44,35 +84,16 @@ export const loginWithGoogle = createAsyncThunk(
       const data = res.data;
 
       if (data.newUser) {
-        // New user — don't persist token, return registration data
-        return { newUser: true, registration: data };
+        return { newUser: true, registration: data } satisfies LoginResult;
       }
 
-      // Existing user
-      const { token, refreshToken, user } = data;
-      localStorage.setItem("auth_token", token);
-      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
-
-      // Sync local cart to server
-      const state = getState() as RootState;
-      const localItems = state.cart.items.map((i) => ({
-        productId: i.productId,
-        sizeMl: i.size,
-        quantity: i.quantity,
-      }));
-      if (localItems.length > 0) {
-        const cartRes = await apiClient.post("/cart/sync", { items: localItems });
-        dispatch({ type: "cart/replaceCart", payload: cartRes.data.items });
-      }
-
-      return { newUser: false, token, user };
+      await syncLocalCart(dispatch, getState() as RootState);
+      return { newUser: false, user: data.user } satisfies LoginResult;
     } catch {
       return rejectWithValue("Google login failed");
     }
   }
 );
-
-// ──── Firebase Phone Auth ────
 
 export const loginWithFirebase = createAsyncThunk(
   "auth/loginWithFirebase",
@@ -82,55 +103,26 @@ export const loginWithFirebase = createAsyncThunk(
       const data = res.data;
 
       if (data.newUser) {
-        return { newUser: true, registration: data };
+        return { newUser: true, registration: data } satisfies LoginResult;
       }
 
-      const { token, refreshToken, user } = data;
-      localStorage.setItem("auth_token", token);
-      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
-
-      const state = getState() as RootState;
-      const localItems = state.cart.items.map((i) => ({
-        productId: i.productId,
-        sizeMl: i.size,
-        quantity: i.quantity,
-      }));
-      if (localItems.length > 0) {
-        const cartRes = await apiClient.post("/cart/sync", { items: localItems });
-        dispatch({ type: "cart/replaceCart", payload: cartRes.data.items });
-      }
-
-      return { newUser: false, token, user };
+      await syncLocalCart(dispatch, getState() as RootState);
+      return { newUser: false, user: data.user } satisfies LoginResult;
     } catch {
       return rejectWithValue("Phone login failed");
     }
   }
 );
 
-// ──── Complete Registration (creates the user) ────
-
 export const completeRegistration = createAsyncThunk(
   "auth/completeRegistration",
   async (data: { registrationToken: string; name: string; email: string; phone: string }, { dispatch, getState, rejectWithValue }) => {
     try {
       const res = await apiClient.post("/auth/register", data);
-      const { token, refreshToken, user } = res.data;
-      localStorage.setItem("auth_token", token);
-      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
+      const user = res.data.user as UserProfile;
 
-      // Sync local cart
-      const state = getState() as RootState;
-      const localItems = state.cart.items.map((i) => ({
-        productId: i.productId,
-        sizeMl: i.size,
-        quantity: i.quantity,
-      }));
-      if (localItems.length > 0) {
-        const cartRes = await apiClient.post("/cart/sync", { items: localItems });
-        dispatch({ type: "cart/replaceCart", payload: cartRes.data.items });
-      }
-
-      return { token, user };
+      await syncLocalCart(dispatch, getState() as RootState);
+      return user;
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
         || "Registration failed";
@@ -139,15 +131,12 @@ export const completeRegistration = createAsyncThunk(
   }
 );
 
-// ──── Slice ────
-
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
       state.user = null;
-      state.token = null;
       state.isAuthenticated = false;
       state.registration = null;
       localStorage.removeItem("auth_token");
@@ -169,10 +158,9 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    const handleLoginFulfilled = (state: AuthState, action: { payload: { newUser: boolean; token?: string; user?: UserProfile; registration?: RegistrationData } }) => {
+    const handleLoginFulfilled = (state: AuthState, action: { payload: LoginResult }) => {
       state.loading = false;
-      if (action.payload.newUser && action.payload.registration) {
-        // New user — store registration data, don't authenticate yet
+      if (action.payload.newUser) {
         state.registration = {
           registrationToken: action.payload.registration.registrationToken,
           providerName: action.payload.registration.providerName,
@@ -180,9 +168,7 @@ const authSlice = createSlice({
           providerPhone: action.payload.registration.providerPhone,
         };
       } else {
-        // Existing user — fully authenticated
-        state.user = action.payload.user!;
-        state.token = action.payload.token!;
+        state.user = action.payload.user;
         state.isAuthenticated = true;
         state.registration = null;
         localStorage.setItem("auth_user", JSON.stringify(action.payload.user));
@@ -190,29 +176,34 @@ const authSlice = createSlice({
     };
 
     builder
-      // Google
+      .addCase(restoreSession.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.registration = null;
+      })
+      .addCase(restoreSession.rejected, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+      })
       .addCase(loginWithGoogle.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(loginWithGoogle.fulfilled, handleLoginFulfilled)
       .addCase(loginWithGoogle.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Firebase Phone
       .addCase(loginWithFirebase.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(loginWithFirebase.fulfilled, handleLoginFulfilled)
       .addCase(loginWithFirebase.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Complete Registration
       .addCase(completeRegistration.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(completeRegistration.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.user = action.payload;
         state.isAuthenticated = true;
         state.registration = null;
-        localStorage.setItem("auth_user", JSON.stringify(action.payload.user));
+        localStorage.setItem("auth_user", JSON.stringify(action.payload));
       })
       .addCase(completeRegistration.rejected, (state, action) => {
         state.loading = false;
@@ -222,4 +213,18 @@ const authSlice = createSlice({
 });
 
 export const { logout, clearAuthError, updateAuthUser, clearRegistration } = authSlice.actions;
+
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch }) => {
+    try {
+      await apiClient.post("/auth/logout");
+    } catch {
+      // Client state still needs to be cleared if the server session is already gone.
+    } finally {
+      dispatch(logout());
+    }
+  }
+);
+
 export default authSlice.reducer;

@@ -8,6 +8,8 @@ import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { store } from "@/store";
+import { useAppDispatch } from "@/store/hooks";
+import { restoreSession } from "@/store/slices/authSlice";
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
 import Lenis from "lenis";
 import RootLayout from "@/components/layout/RootLayout";
@@ -55,6 +57,16 @@ const ScrollToTop = () => {
       window.scrollTo(0, 0);
     }
   }, [pathname]);
+  return null;
+};
+
+const AuthBootstrap = () => {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(restoreSession());
+  }, [dispatch]);
+
   return null;
 };
 
@@ -108,6 +120,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AuthBootstrap />
             <SmoothScroll />
             <ScrollToTop />
             <Routes>

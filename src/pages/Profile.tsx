@@ -15,7 +15,7 @@ import { ProfileSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { fetchUserProfile, fetchOrders, updateProfile, addAddress, updateAddress, deleteAddress } from "@/store/slices/userSlice";
 import { fetchCustomRequests } from "@/store/slices/customRequestsSlice";
-import { logout, updateAuthUser } from "@/store/slices/authSlice";
+import { logoutUser, updateAuthUser } from "@/store/slices/authSlice";
 import { useToast } from "@/hooks/use-toast";
 import type { Address } from "@/types";
 
@@ -97,7 +97,10 @@ const Profile = () => {
 
   const displayProfile = profile || authUser;
 
-  const handleLogout = () => { dispatch(logout()); navigate("/"); };
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
+    navigate("/");
+  };
 
   const openAddAddress = () => {
     setEditingAddr(null);

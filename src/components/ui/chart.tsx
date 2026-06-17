@@ -37,7 +37,7 @@ const ChartContainer = React.forwardRef<
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId();
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+  const chartId = `chart-${sanitizeCssIdentifier(id || uniqueId.replace(/:/g, ""))}`;
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -74,8 +74,9 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
+    const cssKey = sanitizeCssIdentifier(key);
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    return color && isSafeCssColorValue(color) ? `  --color-${cssKey}: ${color};` : null;
   })
   .join("\n")}
 }
@@ -298,6 +299,18 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
   }
 
   return configLabelKey in config ? config[configLabelKey] : config[key as keyof typeof config];
+}
+
+function sanitizeCssIdentifier(value: string) {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+function isSafeCssColorValue(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (normalized.includes("url") || normalized.includes("expression") || normalized.includes("@import")) {
+    return false;
+  }
+  return /^[#(),.%\w\s-]+$/.test(value);
 }
 
 export { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle };
