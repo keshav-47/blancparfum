@@ -52,12 +52,31 @@ const missedLocalCart = (response: AssistantChatResponse) => {
   );
 };
 
+const repeatedLocalAdd = (response: AssistantChatResponse, cartItems: CartItem[]) => {
+  const action = response.action;
+  if (action?.type !== "add_to_cart" || !action.productId) return undefined;
+  const size = action.sizeMl ?? 30;
+  return cartItems.find((item) => item.productId === action.productId && item.size === size);
+};
+
 const applyLocalCartFallback = (
   response: AssistantChatResponse,
   messages: AssistantMessage[],
   cartItems: CartItem[],
 ): AssistantChatResponse => {
-  if (!cartItems.length || !missedLocalCart(response)) return response;
+  if (!cartItems.length) return response;
+
+  const alreadyAdded = repeatedLocalAdd(response, cartItems);
+  if (alreadyAdded) {
+    return {
+      ...response,
+      reply: `${alreadyAdded.name} (${alreadyAdded.size}ml) is in your cart. Here's your cart when you're ready to checkout.`,
+      productIds: [],
+      action: { type: "view_cart" },
+    };
+  }
+
+  if (!missedLocalCart(response)) return response;
 
   const content = latestUserContent(messages);
   if (asksForCartReview(content)) {
