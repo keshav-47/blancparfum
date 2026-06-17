@@ -26,9 +26,15 @@ const askConcierge = async (
   getState: () => unknown,
   rejectWithValue: (v: string) => unknown,
 ) => {
-  const messages = (getState() as RootState).assistant.messages;
+  const state = getState() as RootState;
+  const messages = state.assistant.messages;
+  const cartItems = state.cart.items.map((item) => ({
+    productId: item.productId,
+    sizeMl: item.size,
+    quantity: item.quantity,
+  }));
   try {
-    return await sendAssistantChat(messages);
+    return await sendAssistantChat(messages, cartItems);
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } })?.response?.status;
     if (status === 429) return rejectWithValue("You're chatting a bit fast — give the concierge a moment.");

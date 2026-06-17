@@ -189,6 +189,7 @@ Endpoint:
 
 - `POST /assistant/chat`
 - Timeout override: 30 seconds because LLM calls can exceed the shared 10 second default.
+- Requests include the transcript plus a minimal local cart context (`productId`, `sizeMl`, `quantity`) so the backend can reason about guest carts without trusting client-supplied product names/prices.
 
 Assistant state:
 
@@ -212,9 +213,15 @@ Supported action types:
 `AssistantActionBar` executes or presents confirmed actions:
 
 - Adds/removes cart items through `cartSlice`.
+- Prevents remove confirmations from showing success when the item is not actually in the current cart.
 - Navigates to login/cart when appropriate.
 - Uses `AssistantCheckout` for view/select/place-order actions.
 - Pushes assistant notes back into the chat after local user-confirmed operations.
+
+Guest concierge cart behavior:
+
+- Guests can add to the local cart, review it inline, remove from it, or open `/cart`.
+- Guests must sign in before saving addresses, selecting saved addresses, placing orders, or paying.
 
 `RootLayout` supports `/?concierge=open` and continues the chat after sign-in so the user can resume a concierge-led purchase.
 

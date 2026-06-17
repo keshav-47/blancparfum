@@ -42,8 +42,17 @@ export interface AssistantChatResponse {
   action: AssistantAction;
 }
 
-// LLM calls take longer than the shared apiClient's 10s default → override to 30s.
-export async function sendAssistantChat(messages: AssistantMessage[]): Promise<AssistantChatResponse> {
-  const res = await apiClient.post<AssistantChatResponse>("/assistant/chat", { messages }, { timeout: 30000 });
+export interface AssistantCartContextItem {
+  productId: string;
+  sizeMl: number;
+  quantity: number;
+}
+
+// LLM calls take longer than the shared apiClient's 10s default, so override to 30s.
+export async function sendAssistantChat(
+  messages: AssistantMessage[],
+  cartItems: AssistantCartContextItem[] = []
+): Promise<AssistantChatResponse> {
+  const res = await apiClient.post<AssistantChatResponse>("/assistant/chat", { messages, cartItems }, { timeout: 30000 });
   return res.data; // apiClient unwraps { success, data }
 }

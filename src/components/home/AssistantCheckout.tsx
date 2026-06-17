@@ -113,6 +113,51 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
     );
   }
 
+  // Guests can review their local cart inline; checkout still requires sign-in.
+  if (!isAuthenticated && action.type === "view_cart") {
+    return (
+      <Card>
+        <p className="text-[11px] font-body font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-3">Your cart</p>
+        {items.length === 0 ? (
+          <>
+            <div className="flex items-center gap-2 mb-2">
+              <ShoppingBag size={16} className="text-muted-foreground" />
+              <p className="text-sm font-body font-medium">Your cart is empty</p>
+            </div>
+            <p className="text-sm font-body text-muted-foreground mb-3">Tell me what you're after and I'll find your scent.</p>
+            <Button variant="outline" onClick={() => decline("Sure — tell me a vibe and I'll pull a few scents.")} className={btn}>Keep browsing</Button>
+          </>
+        ) : (
+          <>
+            <div className="space-y-2 mb-4">
+              {items.map((i) => (
+                <div key={`${i.productId}-${i.size}`} className="flex items-center gap-3">
+                  <div className="w-10 h-12 rounded-md bg-secondary overflow-hidden shrink-0">
+                    {i.image ? <img src={i.image} alt={i.name} className="w-full h-full object-cover" /> : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-body truncate">{i.name}</p>
+                    <p className="text-[11px] font-body text-muted-foreground">{i.size}ml × {i.quantity}</p>
+                  </div>
+                  <p className="text-sm font-body font-medium whitespace-nowrap">{inr(i.price * i.quantity)}</p>
+                </div>
+              ))}
+              <div className="flex justify-between text-sm font-body font-semibold border-t border-border pt-2 mt-1">
+                <span>Total</span>
+                <span>{inr(subtotal)}</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/cart"); }} className={btn}>Open cart</Button>
+              <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} variant="outline" className={btn}>Sign in to checkout</Button>
+              <Button variant="outline" onClick={() => decline("No problem — your cart is saved here. Ask me when you're ready to checkout.")} className={btn}>Not now</Button>
+            </div>
+          </>
+        )}
+      </Card>
+    );
+  }
+
   // ── Guests must sign in first ─────────────────────────────────────────────
   if (!isAuthenticated) {
     return (

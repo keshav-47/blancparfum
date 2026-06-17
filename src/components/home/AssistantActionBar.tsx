@@ -96,6 +96,19 @@ const AssistantActionBar = () => {
     const inCart = cartItems.find((i) => i.productId === action.productId && (size === 0 || i.size === size));
     const name = product?.name ?? inCart?.name ?? "that fragrance";
     const ml = action.sizeMl ?? inCart?.size;
+    if (!inCart) {
+      return (
+        <Wrap>
+          <p className="text-sm font-body mb-3">
+            I don't see <span className="font-medium">{name}</span>{ml ? ` (${ml}ml)` : ""} in your cart right now.
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => dispatch(submitMessage("show my cart"))} className={btn}>Show cart</Button>
+            <Button variant="outline" onClick={() => decline("Okay — tell me what you'd like to add or remove next.")} className={btn}>Not now</Button>
+          </div>
+        </Wrap>
+      );
+    }
     const remove = async () => {
       setBusy(true);
       try {
