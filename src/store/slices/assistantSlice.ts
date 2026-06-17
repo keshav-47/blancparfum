@@ -59,12 +59,29 @@ const repeatedLocalAdd = (response: AssistantChatResponse, cartItems: CartItem[]
   return cartItems.find((item) => item.productId === action.productId && item.size === size);
 };
 
+const pendingLocalRemoval = (response: AssistantChatResponse, cartItems: CartItem[]) => {
+  const action = response.action;
+  if (action?.type !== "remove_from_cart" || !action.productId) return undefined;
+  const size = action.sizeMl;
+  return cartItems.find((item) => item.productId === action.productId && (size == null || item.size === size));
+};
+
 const applyLocalCartFallback = (
   response: AssistantChatResponse,
   messages: AssistantMessage[],
   cartItems: CartItem[],
 ): AssistantChatResponse => {
   if (!cartItems.length) return response;
+
+  const itemToRemove = pendingLocalRemoval(response, cartItems);
+  if (itemToRemove) {
+    return {
+      ...response,
+      reply: `Ready to remove ${itemToRemove.name} (${itemToRemove.size}ml) from your cart?`,
+      productIds: [],
+      action: { type: "remove_from_cart", productId: itemToRemove.productId, sizeMl: itemToRemove.size },
+    };
+  }
 
   const alreadyAdded = repeatedLocalAdd(response, cartItems);
   if (alreadyAdded) {
