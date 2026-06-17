@@ -38,6 +38,12 @@ const asksForCartReview = (content: string) =>
 const asksToRemoveFromCart = (content: string) =>
   /\b(remove|delete|drop)\b/.test(content) || /\btake\s+(.+?\s+)?out\b/.test(content);
 
+const asksToCheckout = (content: string) =>
+  /\bcheckout\b/.test(content) ||
+  /\bpay\b/.test(content) ||
+  /\bbuy\b/.test(content) ||
+  (/\border\b/.test(content) && /\b(place|confirm|complete|finish)\b/.test(content));
+
 const findRemovalItem = (content: string, cartItems: CartItem[]) => {
   if (cartItems.length === 1) return cartItems[0];
   return cartItems.find((item) => content.includes(item.name.toLowerCase()));
@@ -70,8 +76,23 @@ const applyLocalCartFallback = (
   response: AssistantChatResponse,
   messages: AssistantMessage[],
   cartItems: CartItem[],
+  isAuthenticated: boolean,
 ): AssistantChatResponse => {
   if (!cartItems.length) return response;
+
+  const content = latestUserContent(messages);
+  if (
+    isAuthenticated &&
+    asksToCheckout(content) &&
+    response.action?.type !== "place_order"
+  ) {
+    return {
+      ...response,
+      reply: "Review your cart and add a shipping address below to place your order securely.",
+      productIds: [],
+      action: { type: "place_order" },
+    };
+  }
 
   const itemToRemove = pendingLocalRemoval(response, cartItems);
   if (itemToRemove) {
@@ -95,7 +116,6 @@ const applyLocalCartFallback = (
 
   if (!missedLocalCart(response)) return response;
 
-  const content = latestUserContent(messages);
   if (asksForCartReview(content)) {
     return {
       ...response,
@@ -133,7 +153,7 @@ const askConcierge = async (
   }));
   try {
     const response = await sendAssistantChat(messages, cartItems);
-    return applyLocalCartFallback(response, messages, state.cart.items);
+    return applyLocalCartFallback(response, messages, state.cart.items, state.auth.isAuthenticated);
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } })?.response?.status;
     if (status === 429) return rejectWithValue("You're chatting a bit fast — give the concierge a moment.");
