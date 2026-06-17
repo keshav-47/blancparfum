@@ -214,6 +214,12 @@ const assistantSlice = createSlice({
     pushAssistantNote: (state, action: PayloadAction<string>) => {
       state.messages.push({ role: "assistant", content: action.payload });
     },
+    showCartReview: (state) => {
+      state.pendingAction = { type: "view_cart" };
+      state.lastProductIds = [];
+      state.status = "idle";
+      state.error = null;
+    },
     dismissError: (state) => { state.error = null; state.status = "idle"; },
     resetChat: (state) => {
       state.messages = [];
@@ -270,6 +276,6 @@ const assistantSlice = createSlice({
   },
 });
 
-export const { openChat, closeChat, clearPendingAction, clearProductResults, pushAssistantNote, dismissError, resetChat } =
+export const { openChat, closeChat, clearPendingAction, clearProductResults, pushAssistantNote, showCartReview, dismissError, resetChat } =
   assistantSlice.actions;
 export default assistantSlice.reducer;

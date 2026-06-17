@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import MotionCard from "./concierge/MotionCard";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItemToCart, removeItemFromCart } from "@/store/slices/cartSlice";
-import { clearPendingAction, pushAssistantNote, closeChat, continueChat, submitMessage } from "@/store/slices/assistantSlice";
+import { clearPendingAction, pushAssistantNote, closeChat, showCartReview, submitMessage } from "@/store/slices/assistantSlice";
 import { toast } from "@/hooks/use-toast";
 import AddressConfirm from "./AddressConfirm";
 import AssistantCheckout from "./AssistantCheckout";
@@ -48,10 +48,8 @@ const AssistantActionBar = () => {
         })).unwrap();
         toast({ title: `${product?.name ?? "Item"} added to cart` });
         dispatch(clearPendingAction());
-        // Record the add as a turn, then let the concierge decide the next step
-        // (e.g. continue to placing the order) instead of dead-ending at "anything else?".
-        dispatch(pushAssistantNote(`Added ${product?.name ?? "it"}${action.sizeMl ? ` (${action.sizeMl}ml)` : ""} to your cart.`));
-        dispatch(continueChat());
+        dispatch(pushAssistantNote(`Added ${product?.name ?? "it"}${action.sizeMl ? ` (${action.sizeMl}ml)` : ""} to your cart. Review it below when you're ready to checkout.`));
+        dispatch(showCartReview());
       } catch (err: unknown) {
         toast({ title: typeof err === "string" ? err : "Couldn't add to cart", variant: "destructive" });
       } finally {
@@ -115,8 +113,8 @@ const AssistantActionBar = () => {
         await dispatch(removeItemFromCart({ productId: action.productId!, size: ml ?? inCart?.size ?? 0 })).unwrap();
         toast({ title: `${name} removed from cart` });
         dispatch(clearPendingAction());
-        dispatch(pushAssistantNote(`Removed ${name}${ml ? ` (${ml}ml)` : ""} from your cart.`));
-        dispatch(continueChat());
+        dispatch(pushAssistantNote(`Removed ${name}${ml ? ` (${ml}ml)` : ""} from your cart. Here's your updated cart.`));
+        dispatch(showCartReview());
       } catch (err: unknown) {
         toast({ title: typeof err === "string" ? err : "Couldn't remove item", variant: "destructive" });
       } finally {
