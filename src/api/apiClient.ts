@@ -2,7 +2,6 @@ import axios from "axios";
 import { BASE_URL } from "@/config/api";
 
 localStorage.removeItem("auth_token");
-localStorage.removeItem("refresh_token");
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -27,6 +26,19 @@ const processQueue = (error: unknown) => {
 
 const isRefreshRequest = (url?: string) => Boolean(url?.includes("/auth/refresh"));
 const isAuthRequest = (url?: string) => Boolean(url?.includes("/auth/") && !url.includes("/auth/logout"));
+
+const refreshSession = async () => {
+  const legacyRefreshToken = localStorage.getItem("refresh_token");
+  try {
+    await axios.post(
+      `${BASE_URL}/auth/refresh`,
+      legacyRefreshToken ? { refreshToken: legacyRefreshToken } : undefined,
+      { withCredentials: true }
+    );
+  } finally {
+    localStorage.removeItem("refresh_token");
+  }
+};
 
 // Response interceptor - unwrap ApiResponse, auto-refresh cookie auth on 401.
 apiClient.interceptors.response.use(
@@ -59,7 +71,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await axios.post(`${BASE_URL}/auth/refresh`, undefined, { withCredentials: true });
+        await refreshSession();
         processQueue(null);
         return apiClient(originalRequest);
       } catch (refreshError) {

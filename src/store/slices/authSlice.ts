@@ -31,7 +31,6 @@ type NewUserLogin = {
 type LoginResult = ExistingUserLogin | NewUserLogin;
 
 localStorage.removeItem("auth_token");
-localStorage.removeItem("refresh_token");
 
 const storedUser = (() => {
   try { return JSON.parse(localStorage.getItem("auth_user") || "null"); }
@@ -68,6 +67,7 @@ export const restoreSession = createAsyncThunk(
     try {
       const res = await apiClient.get<UserProfile>("/user/profile");
       localStorage.setItem("auth_user", JSON.stringify(res.data));
+      localStorage.removeItem("refresh_token");
       return res.data;
     } catch {
       localStorage.removeItem("auth_user");

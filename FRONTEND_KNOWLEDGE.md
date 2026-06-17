@@ -87,7 +87,8 @@ Admin routes are guarded by `src/components/admin/AdminGuard.tsx` and wrapped in
 - On 401, calls `POST /auth/refresh`; the backend reads the HttpOnly refresh cookie and rotates both auth cookies.
 - Queues concurrent failed requests while refresh is in progress.
 - Clears cached `auth_user` if refresh fails.
-- Deletes legacy `auth_token` and `refresh_token` localStorage keys on startup.
+- Deletes legacy `auth_token` on startup.
+- During rollout, consumes a legacy `refresh_token` once as a fallback refresh body, then deletes it after the cookie session is established or refresh fails.
 
 Because the interceptor unwraps `ApiResponse`, thunks usually read `res.data` as the actual payload, not the wrapper.
 
