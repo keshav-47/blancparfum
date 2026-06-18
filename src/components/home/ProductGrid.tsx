@@ -92,12 +92,21 @@ const Tile = ({
           className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
         />
         {/* Name + hover affordance */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500" />
-        <div className="absolute inset-x-0 bottom-0 p-3 md:p-4 flex items-center justify-between gap-2">
-          <span className="font-display text-xs md:text-sm text-white leading-tight truncate transition-transform duration-500 group-hover:-translate-y-0.5">
-            {name}
-          </span>
-          <ArrowUpRight size={15} className="shrink-0 text-white opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_36%,rgba(0,0,0,0.24)_63%,rgba(0,0,0,0.86)_100%)] opacity-95 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 md:p-5">
+          <div className="flex items-end justify-between gap-3 border-t border-white/25 pt-2.5 md:pt-3">
+            <span className="min-w-0">
+              <span className="block font-body text-[9px] md:text-[10px] uppercase text-white/70 leading-none mb-1.5 md:mb-2">
+                Extrait de Parfum
+              </span>
+              <span className="block font-display text-[15px] sm:text-base md:text-[21px] font-semibold text-white leading-[1.04] break-words [text-shadow:0_2px_16px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.85)] transition-transform duration-500 group-hover:-translate-y-0.5">
+                {name}
+              </span>
+            </span>
+            <span className="mb-0.5 flex h-7 w-7 shrink-0 translate-y-1 items-center justify-center rounded-full border border-white/30 bg-white/12 text-white opacity-0 shadow-[0_8px_22px_-8px_rgba(0,0,0,0.75)] backdrop-blur-sm transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+              <ArrowUpRight size={14} strokeWidth={1.8} />
+            </span>
+          </div>
         </div>
       </Link>
     </motion.div>
