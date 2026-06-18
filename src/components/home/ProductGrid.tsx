@@ -96,9 +96,6 @@ const Tile = ({
         <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 md:p-5">
           <div className="flex items-end justify-between gap-3 border-t border-white/25 pt-2.5 md:pt-3">
             <span className="min-w-0">
-              <span className="block font-body text-[9px] md:text-[10px] uppercase text-white/70 leading-none mb-1.5 md:mb-2">
-                Extrait de Parfum
-              </span>
               <span className="block font-display text-[15px] sm:text-base md:text-[21px] font-semibold text-white leading-[1.04] break-words [text-shadow:0_2px_16px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.85)] transition-transform duration-500 group-hover:-translate-y-0.5">
                 {name}
               </span>
