@@ -190,17 +190,18 @@ const Shop = () => {
       </section>
 
       {/* Sticky filters + search */}
-      <nav className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-3 space-y-3">
+      <nav className="sticky top-[76px] md:top-[88px] z-40 px-3 sm:px-4 md:px-6 py-3 pointer-events-none">
+        <div className="pointer-events-auto max-w-[1600px] mx-auto rounded-[1.75rem] md:rounded-full bg-background/90 backdrop-blur-xl border border-white/60 ring-1 ring-inset ring-white/40 shadow-[0_12px_34px_-14px_rgba(0,0,0,0.28),0_4px_12px_-6px_rgba(0,0,0,0.12)] px-3 sm:px-4 md:px-5 py-2.5">
+          <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:gap-3">
           {/* Search bar */}
-          <div className="relative">
+          <div className="relative min-w-0 flex-1">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, notes, occasion..."
-              className="w-full h-10 pl-10 pr-10 rounded-full bg-secondary/60 border-0 text-sm font-body placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all"
+              className="w-full h-10 md:h-11 pl-10 pr-10 rounded-full bg-secondary/55 border border-border/40 text-sm font-body placeholder:text-muted-foreground/55 focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/25 transition-all"
             />
             {query && (
               <button
@@ -212,20 +213,21 @@ const Shop = () => {
             )}
           </div>
           {/* Filter pills */}
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide md:flex-none">
             {filters.map((f) => (
               <button
                 key={f.key}
                 onClick={() => handleFilter(f.key)}
-                className={`text-[11px] font-body font-medium uppercase tracking-[0.15em] px-4 sm:px-5 py-2 rounded-full whitespace-nowrap flex-shrink-0 transition-all duration-300 ${
+                className={`h-10 px-4 sm:px-5 rounded-full text-[10px] sm:text-[11px] font-body font-medium uppercase tracking-[0.15em] whitespace-nowrap flex-shrink-0 transition-all duration-300 ${
                   category === f.key
                     ? "bg-foreground text-background"
-                    : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                    : "bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}
               >
                 {f.label}
               </button>
             ))}
+          </div>
           </div>
         </div>
       </nav>
