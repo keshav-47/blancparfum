@@ -207,22 +207,22 @@ const Login = () => {
         </div>
       )}
 
-      <div className="min-h-[80vh] flex items-center justify-center px-4 pt-20">
+      <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 pt-20 pb-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md space-y-8"
+          className="w-full max-w-[420px] rounded-2xl border border-border/70 bg-background/95 px-5 py-7 shadow-[0_18px_60px_rgba(0,0,0,0.08)] sm:px-8 sm:py-8 space-y-6"
         >
           {/* Header */}
-          <div className="text-center space-y-3">
-            <img src={logo} alt="BLANC" className="h-16 mx-auto" />
-            <p className="text-sm font-body text-muted-foreground tracking-wide">
+          <div className="text-center space-y-2">
+            <img src={logo} alt="BLANC" className="h-14 mx-auto" />
+            <p className="text-[13px] font-body text-muted-foreground tracking-wide">
               Sign in to your account
             </p>
           </div>
 
           {/* Google Sign-In */}
-          <div className="flex justify-center">
+          <div className="flex justify-center rounded-xl bg-secondary/30 py-2">
             <div ref={googleBtnRef} />
           </div>
 
@@ -240,17 +240,17 @@ const Login = () => {
                 Phone Number
               </label>
               <div className="flex gap-2">
-                <span className="flex items-center px-3 border border-border rounded-md text-sm text-muted-foreground bg-muted">
+                <span className="flex h-12 items-center px-3 border border-border rounded-lg text-sm text-muted-foreground bg-secondary/60 font-body">
                   +91
                 </span>
                 <Input
                   type="tel"
-                  placeholder="9876543210"
+                  placeholder="Enter 10-digit number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                   maxLength={10}
                   disabled={otpSent}
-                  className="font-body"
+                  className="font-body h-12 rounded-lg placeholder:text-muted-foreground/40"
                 />
               </div>
             </div>
@@ -259,7 +259,7 @@ const Login = () => {
               <Button
                 onClick={handleSendOtp}
                 disabled={phone.length < 10 || sending || isLoading}
-                className="w-full font-body uppercase tracking-widest text-xs"
+                className="w-full h-11 rounded-full font-body uppercase tracking-widest text-xs"
               >
                 <Phone size={14} />
                 {sending ? "Sending..." : "Send OTP"}
@@ -285,7 +285,7 @@ const Login = () => {
                 <Button
                   onClick={handleVerifyOtp}
                   disabled={otp.length < 6 || isLoading}
-                  className="w-full font-body uppercase tracking-widest text-xs"
+                  className="w-full h-11 rounded-full font-body uppercase tracking-widest text-xs"
                 >
                   {isLoading ? "Verifying..." : "Verify & Sign In"}
                 </Button>

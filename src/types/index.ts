@@ -56,6 +56,7 @@ export interface Order {
   id: string;
   date: string;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  fulfillmentType?: "delivery" | "in_store";
   items: OrderItem[];
   total: number;
   customerName?: string;

@@ -156,7 +156,8 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/cart"); }} className={btn}>Open cart</Button>
-              <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} variant="outline" className={btn}>Sign in to checkout</Button>
+              <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate("/cart?checkout=in-store"); }} variant="outline" className={btn}>In-store checkout</Button>
+              <Button onClick={() => { dismiss(); dispatch(closeChat()); navigate(`/login?returnTo=${encodeURIComponent("/?concierge=open")}`); }} variant="outline" className={btn}>Sign in for delivery</Button>
               <Button variant="outline" onClick={() => decline("No problem — your cart is saved here. Ask me when you're ready to checkout.")} className={btn}>Not now</Button>
             </div>
           </>
@@ -220,7 +221,7 @@ const AssistantCheckout = ({ action }: { action: AssistantAction }) => {
       return;
     }
     setPhase("paying");
-    placeOrder(selectedId, {
+    placeOrder({ mode: "delivery", addressId: selectedId }, {
       // Closing Razorpay without paying: snap the button back AND acknowledge in-chat
       // (the card stays, so they can try again) — not a silent revert.
       onDismiss: () => {

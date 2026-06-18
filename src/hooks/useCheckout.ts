@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import apiClient from "@/api/apiClient";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearCart } from "@/store/slices/cartSlice";
+import type { CartItem } from "@/types";
 
 interface RazorpayOrderResponse {
   orderId: string;
@@ -23,6 +24,16 @@ export interface CheckoutCallbacks {
   /** Anything went wrong (order creation, gateway, or verification). */
   onError?: (message: string) => void;
 }
+
+export type CheckoutPayload =
+  | { mode: "delivery"; addressId: string }
+  | {
+      mode: "in_store";
+      customerName: string;
+      customerPhone: string;
+      customerEmail?: string;
+      items: CartItem[];
+    };
 
 const RAZORPAY_SCRIPT_ID = "razorpay-script";
 
@@ -52,9 +63,20 @@ export function useCheckout() {
   }, []);
 
   const placeOrder = useCallback(
-    async (addressId: string, cb: CheckoutCallbacks = {}) => {
+    async (payload: CheckoutPayload, cb: CheckoutCallbacks = {}) => {
       try {
-        const { data } = await apiClient.post<RazorpayOrderResponse>("/orders", { addressId });
+        const { data } = payload.mode === "delivery"
+          ? await apiClient.post<RazorpayOrderResponse>("/orders", { addressId: payload.addressId })
+          : await apiClient.post<RazorpayOrderResponse>("/orders/in-store", {
+              customerName: payload.customerName,
+              customerPhone: payload.customerPhone,
+              customerEmail: payload.customerEmail || null,
+              items: payload.items.map((item) => ({
+                productId: item.productId,
+                sizeMl: item.size,
+                quantity: item.quantity,
+              })),
+            });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const Razorpay = (window as any).Razorpay;
@@ -74,7 +96,10 @@ export function useCheckout() {
           handler: async (response: any) => {
             cb.onVerifying?.();
             try {
-              await apiClient.post(`/orders/${data.orderId}/verify`, {
+              const verifyUrl = payload.mode === "delivery"
+                ? `/orders/${data.orderId}/verify`
+                : `/orders/in-store/${data.orderId}/verify`;
+              await apiClient.post(verifyUrl, {
                 razorpayOrderId: response.razorpay_order_id,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpaySignature: response.razorpay_signature,
@@ -86,7 +111,11 @@ export function useCheckout() {
             }
           },
           modal: { ondismiss: () => cb.onDismiss?.() },
-          prefill: { name: user?.name ?? "", email: user?.email ?? "", contact: user?.phone ?? "" },
+          prefill: {
+            name: payload.mode === "in_store" ? payload.customerName : user?.name ?? "",
+            email: payload.mode === "in_store" ? payload.customerEmail ?? "" : user?.email ?? "",
+            contact: payload.mode === "in_store" ? payload.customerPhone : user?.phone ?? "",
+          },
           config: {
             display: {
               blocks: { upi_block: { name: "Pay using UPI", instruments: [{ method: "upi", flows: ["collect", "qrcode"] }] } },
