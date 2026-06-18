@@ -52,9 +52,13 @@ const RootLayout = () => {
     next.delete("concierge");
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, dispatch, isAuthenticated]);
-  // Home leads with a full-bleed hero, so the floating header overlays it; every
-  // other page needs top room to clear the floating header.
-  const isHome = location.pathname === "/";
+  // Image-led hero pages start at the top so the floating header overlays the
+  // hero image. Content-led pages keep top room to clear the header.
+  const hasFullBleedHero =
+    location.pathname === "/" ||
+    location.pathname === "/shop" ||
+    location.pathname === "/about" ||
+    location.pathname.startsWith("/collection/");
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 500);
@@ -70,7 +74,7 @@ const RootLayout = () => {
   return (
     <div className="min-h-screen flex flex-col overflow-x-clip">
       <Navbar />
-      <main className={`flex-1 ${isHome ? "" : "pt-24"}`}>
+      <main className={`flex-1 ${hasFullBleedHero ? "" : "pt-24"}`}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}

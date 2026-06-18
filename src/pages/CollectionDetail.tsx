@@ -45,7 +45,7 @@ const CollectionDetail = () => {
   if (!collection) {
     return (
       <Layout>
-        <div className="min-h-[60vh] flex flex-col items-center justify-center px-6">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 pt-24">
           <h2 className="font-display text-3xl mb-4">Collection not found</h2>
           <Link to="/" className="text-accent hover:underline font-body text-sm">Return home</Link>
         </div>
